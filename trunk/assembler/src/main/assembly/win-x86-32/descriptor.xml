@@ -1,0 +1,49 @@
+<assembly>
+    <id>binary-win-x68-32</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <excludes>
+                <exclude>assembler*.jar</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>    
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>conf</outputDirectory>
+            <includes>
+                <include>*.conf</include>
+                <include>*.xml</include>
+                <include>*.properties</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/assembly/win-x86-32/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>          
+        </fileSet>
+        <fileSet>
+            <directory>src/main/assembly/win-x86-32/script</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>  
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/assembly/win-x86-32/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes> 
+        </fileSet>
+
+    </fileSets>
+</assembly>
