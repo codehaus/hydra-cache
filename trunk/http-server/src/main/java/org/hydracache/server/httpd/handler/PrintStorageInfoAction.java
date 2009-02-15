@@ -43,14 +43,15 @@ public class PrintStorageInfoAction implements HttpGetAction {
             IOException {
         Collection<Data> allData = internalDataBank.getAll();
         StringBuffer content = new StringBuffer();
-        
+
         for (Data data : allData) {
             content.append("keyHash:").append(data.getKeyHash()).append(", ");
             content.append("version:").append(data.getVersion()).append(", ");
-            content.append("size:").append(data.getContent().length);
+            content.append("size:").append(
+                    data.getContent() == null ? 0 : data.getContent().length);
             content.append(SystemUtils.LINE_SEPARATOR);
         }
-        
+
         StringEntity body = new StringEntity(content.toString());
 
         body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
