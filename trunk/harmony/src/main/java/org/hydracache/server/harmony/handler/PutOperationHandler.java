@@ -20,8 +20,8 @@ import org.apache.log4j.Logger;
 import org.hydracache.protocol.control.message.ControlMessage;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
-import org.hydracache.server.data.storage.DataBank;
 import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
  * Class designed to handle {@link PutOperation} requests
@@ -32,13 +32,13 @@ import org.hydracache.server.harmony.core.Space;
 public class PutOperationHandler implements ControlMessageHandler {
     private static Logger log = Logger.getLogger(PutOperationHandler.class);
 
-    private DataBank dataBank;
+    private HarmonyDataBank harmonyDataBank;
 
     private Space space;
 
-    public PutOperationHandler(Space space, DataBank dataBank) {
+    public PutOperationHandler(Space space, HarmonyDataBank harmonyDataBank) {
         super();
-        this.dataBank = dataBank;
+        this.harmonyDataBank = harmonyDataBank;
         this.space = space;
     }
 
@@ -60,7 +60,7 @@ public class PutOperationHandler implements ControlMessageHandler {
             return;
         }
 
-        dataBank.put(putOperation.getData());
+        harmonyDataBank.putLocally(putOperation.getData());
 
         PutOperationResponse response = new PutOperationResponse(space
                 .getLocalNode().getId(), putOperation.getId());

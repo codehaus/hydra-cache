@@ -91,11 +91,15 @@ public class HarmonyDataBank implements DataBank {
 
             ensureReliablePut(helps);
 
-            localDataBank.put(data);
+            putLocally(data);
         } catch (IOException ex) {
             throw new DataStorageException(
                     "Failed to perform a reliable put operation", ex);
         }
+    }
+
+    public void putLocally(Data data) throws DataStorageException {
+        localDataBank.put(data);
     }
 
     private void ensureReliablePut(Collection<ResponseMessage> helps)

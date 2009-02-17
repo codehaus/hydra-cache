@@ -52,7 +52,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <!-- Http Get Method Handlers -->
     <bean id="httpGetMethodHandler"
         class="org.hydracache.server.httpd.handler.HttpGetMethodHandler">
-        <constructor-arg ref="hopDataBank" />
+        <constructor-arg ref="harmonyDataBank" />
         <constructor-arg ref="protocolEncoder" />
         
         <property name="printRegistryAction" ref="printRegistryAction" />
@@ -62,7 +62,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <!-- Http Put Method Handlers -->
     <bean id="httpPutMethodHandler"
         class="org.hydracache.server.httpd.handler.HttpPutMethodHandler">
-        <constructor-arg ref="hopDataBank" />
+        <constructor-arg ref="harmonyDataBank" />
         <constructor-arg ref="protocolDecoder" />
     </bean>
 

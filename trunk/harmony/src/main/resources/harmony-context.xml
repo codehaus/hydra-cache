@@ -47,7 +47,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <util:property-path id="localNode" path="space.localNode"/>
 
     <!-- HOP Space aware data bank decorator -->
-    <bean id="hopDataBank"
+    <bean id="harmonyDataBank"
         class="org.hydracache.server.harmony.storage.HarmonyDataBank">
         <constructor-arg ref="internalDataBank" />
         <constructor-arg ref="conflictResolver" />
@@ -67,7 +67,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         class="org.hydracache.server.harmony.jgroups.MultiplexMessageReceiver">
         <constructor-arg ref="space" />
         <constructor-arg ref="membershipRegistry" />
-        <constructor-arg ref="hopDataBank" />
+        <constructor-arg ref="harmonyDataBank" />
         <constructor-arg value="${hop.substanceSize}" />
     </bean>
     

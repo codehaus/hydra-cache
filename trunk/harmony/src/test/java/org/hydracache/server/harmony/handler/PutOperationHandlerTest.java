@@ -19,10 +19,10 @@ import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.server.Identity;
 import org.hydracache.server.data.storage.Data;
-import org.hydracache.server.data.storage.DataBank;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.core.SubstanceSet;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;
@@ -62,8 +62,8 @@ public class PutOperationHandlerTest {
         return space;
     }
 
-    public static DataBank mockDataBankToPut(Mockery context) throws Exception {
-        final DataBank dataBank = context.mock(DataBank.class);
+    public static HarmonyDataBank mockDataBankToPut(Mockery context) throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
         {
             addPutExp(context, dataBank);
         }
@@ -82,7 +82,7 @@ public class PutOperationHandlerTest {
             }
         });
 
-        DataBank doNothingDatabank = context.mock(DataBank.class);
+        HarmonyDataBank doNothingDatabank = context.mock(HarmonyDataBank.class);
 
         ControlMessageHandler handler = new PutOperationHandler(space,
                 doNothingDatabank);
@@ -134,11 +134,11 @@ public class PutOperationHandlerTest {
         });
     }
 
-    private static void addPutExp(Mockery context, final DataBank dataBank)
+    private static void addPutExp(Mockery context, final HarmonyDataBank dataBank)
             throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).put(with(any(Data.class)));
+                one(dataBank).putLocally(with(any(Data.class)));
             }
         });
     }
