@@ -42,6 +42,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="multiplexRecevier" ref="multiplexMessageReceiver" />
         <property name="membershipRegistry" ref="membershipRegistry" />
     </bean>
+    
+    <!-- Local Node -->
+    <util:property-path id="localNode" path="space.localNode"/>
 
     <!-- HOP Space aware data bank decorator -->
     <bean id="hopDataBank"
@@ -56,7 +59,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <!-- Space membership registry -->
     <bean id="membershipRegistry"
         class="org.hydracache.server.harmony.jgroups.JgroupsMembershipRegistry">
-        <constructor-arg ref="space" />    
+        <constructor-arg ref="localNode" />    
     </bean>
 
     <!-- Multiplex message receiver -->
