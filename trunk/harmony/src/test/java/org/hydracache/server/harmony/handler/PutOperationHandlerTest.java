@@ -118,7 +118,7 @@ public class PutOperationHandlerTest {
             throws Exception {
         context.checking(new Expectations() {
             {
-                one(space).getLocalNode();
+                atLeast(1).of(space).getLocalNode();
                 will(returnValue(new JGroupsNode(new Identity(TEST_PORT),
                         new IpAddress())));
             }

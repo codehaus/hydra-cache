@@ -50,6 +50,8 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
     private static Logger log = Logger
             .getLogger(MultiplexMessageReceiver.class);
 
+    private Space space;
+
     private final JgroupsMembershipListener membershipListener;
 
     private final RequestRegistry requestRegistry = new RequestRegistry();
@@ -65,6 +67,7 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
     public MultiplexMessageReceiver(Space space,
             JgroupsMembershipRegistry membershipRegistry, DataBank dataBank,
             int expectedResponses) {
+        this.space = space;
         this.membershipListener = new JgroupsMembershipListener(
                 membershipRegistry);
         this.expectedResponses = expectedResponses;
@@ -93,7 +96,10 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
         handleControlMessage(controlMessage);
     }
 
-    private void handleControlMessage(ControlMessage controlMessage) {
+    void handleControlMessage(ControlMessage controlMessage) {
+        if (fromLocalNode(controlMessage))
+            return;
+
         try {
             if (controlMessage instanceof ResponseMessage) {
                 responseHandler.handle(controlMessage);
@@ -115,6 +121,10 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
         } catch (Exception ex) {
             log.error("Failed to handle message: " + controlMessage, ex);
         }
+    }
+
+    private boolean fromLocalNode(ControlMessage controlMessage) {
+        return space.getLocalNode().getId().equals(controlMessage.getSource());
     }
 
     /**

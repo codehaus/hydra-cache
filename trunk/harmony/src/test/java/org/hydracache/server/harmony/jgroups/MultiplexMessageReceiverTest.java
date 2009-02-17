@@ -21,13 +21,18 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
+import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
+import org.hydracache.server.harmony.core.Node;
+import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.handler.PutOperationHandlerTest;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.Message;
+import org.jgroups.stack.IpAddress;
+import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Test;
@@ -44,7 +49,12 @@ public class MultiplexMessageReceiverTest {
         }
     };
 
+    private static final Identity NEIGHBOR_SOURCE_ID = new Identity(8081);
+
     private static final int JOIN_WAIT = 200;
+
+    private final Node localNode = new JGroupsNode(new Identity(8080),
+            new IpAddress());
 
     private final JgroupsMembershipRegistry membershipRegistry = context
             .mock(JgroupsMembershipRegistry.class);
@@ -60,7 +70,7 @@ public class MultiplexMessageReceiverTest {
                 membershipRegistry, PutOperationHandlerTest
                         .mockDataBankToPut(context), expectedNumOfResps);
 
-        final PutOperation request = new PutOperation(new Identity(8080),
+        final PutOperation request = new PutOperation(NEIGHBOR_SOURCE_ID,
                 TestDataGenerator.createRandomData());
 
         Future<Collection<ResponseMessage>> responseFuture = receiver
@@ -95,9 +105,31 @@ public class MultiplexMessageReceiverTest {
         receiver.receive(null);
     }
 
+    @Test
+    public void messageFromMyselfShouldBeIgnored() {
+
+        final Space space = context.mock(Space.class);
+
+        context.checking(new Expectations() {
+            {
+                one(space).getLocalNode();
+                will(returnValue(localNode));
+            }
+        });
+
+        final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
+                space, null, null, 1);
+
+        HeartBeat message = new HeartBeat(localNode);
+
+        receiver.handleControlMessage(message);
+
+        context.assertIsSatisfied();
+    }
+
     public static void receiveResponse(final MultiplexMessageReceiver receiver,
             final PutOperation request) throws Exception {
-        ResponseMessage response = new PutOperationResponse(new Identity(8080),
+        ResponseMessage response = new PutOperationResponse(NEIGHBOR_SOURCE_ID,
                 request.getId());
         Message responseMsg = new Message();
         responseMsg.setObject(response);
