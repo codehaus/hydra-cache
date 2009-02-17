@@ -76,7 +76,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
         if (printRegistryAction.getName().equals(requestContext)) {
             printRegistryAction.execute(response);
-        } if (printStorageInfoAction.getName().equals(requestContext)) {
+        } else if (printStorageInfoAction.getName().equals(requestContext)) {
             printStorageInfoAction.execute(response);
         } else {
             handleGetData(request, response);
