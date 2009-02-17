@@ -55,7 +55,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <!-- Space membership registry -->
     <bean id="membershipRegistry"
-        class="org.hydracache.server.harmony.jgroups.JgroupsMembershipRegistry" />
+        class="org.hydracache.server.harmony.jgroups.JgroupsMembershipRegistry">
+        <constructor-arg ref="space" />    
+    </bean>
 
     <!-- Multiplex message receiver -->
     <bean id="multiplexMessageReceiver"

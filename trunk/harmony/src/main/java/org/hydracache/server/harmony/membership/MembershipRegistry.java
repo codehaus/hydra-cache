@@ -8,6 +8,10 @@ import org.hydracache.server.harmony.core.NodeSet;
 public class MembershipRegistry {
     protected ConcurrentSkipListSet<Node> registry = new ConcurrentSkipListSet<Node>();
 
+    public MembershipRegistry(Node self) {
+        registry.add(self);
+    }
+
     public NodeSet listAllMembers() {
         return new NodeSet(registry.clone());
     }
@@ -17,7 +21,7 @@ public class MembershipRegistry {
     }
 
     public void deregister(Node node) {
-        registry.remove(node);        
+        registry.remove(node);
     }
 
     public boolean contains(Node node) {

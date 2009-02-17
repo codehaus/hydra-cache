@@ -19,19 +19,18 @@ public class MembershipRegistryTest {
 
     @Test
     public void ensureInitialNodeSetIsNotEmpty() {
-        MembershipRegistry registry = new MembershipRegistry();
+        MembershipRegistry registry = new MembershipRegistry(nodeA);
 
         NodeSet nodes = registry.listAllMembers();
 
         assertNotNull("Node set is null", nodes);
-        assertEquals("Initial node set is not empty", 0, nodes.size());
+        assertEquals("Initial node set is not empty", 1, nodes.size());
     }
 
     @Test
     public void ensureNodeCanBeRegistered() {
-        MembershipRegistry registry = new MembershipRegistry();
+        MembershipRegistry registry = new MembershipRegistry(nodeA);
 
-        registry.register(nodeA);
         registry.register(nodeA2);
         registry.register(nodeB);
 
@@ -42,9 +41,8 @@ public class MembershipRegistryTest {
 
     @Test
     public void ensureDuplicationCanNotBeRegistered() {
-        MembershipRegistry registry = new MembershipRegistry();
+        MembershipRegistry registry = new MembershipRegistry(nodeA);
 
-        registry.register(nodeA);
         registry.register(nodeA);
         registry.register(nodeA2);
 
@@ -53,9 +51,8 @@ public class MembershipRegistryTest {
 
     @Test
     public void ensureNodeCanBeDeregistered() {
-        MembershipRegistry registry = new MembershipRegistry();
+        MembershipRegistry registry = new MembershipRegistry(nodeA);
 
-        registry.register(nodeA);
         registry.deregister(nodeA);
         
         NodeSet nodes = registry.listAllMembers();
@@ -65,9 +62,8 @@ public class MembershipRegistryTest {
     
     @Test
     public void ensureNodeCanBeDeregisteredMulitpleTimes() {
-        MembershipRegistry registry = new MembershipRegistry();
+        MembershipRegistry registry = new MembershipRegistry(nodeA);
 
-        registry.register(nodeA);
         registry.deregister(nodeA);
         registry.deregister(nodeA);
         

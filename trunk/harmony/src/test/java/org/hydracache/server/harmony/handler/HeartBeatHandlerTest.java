@@ -1,5 +1,6 @@
 package org.hydracache.server.harmony.handler;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.hydracache.protocol.control.message.HeartBeat;
@@ -9,16 +10,16 @@ import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.jgroups.JgroupsMembershipRegistry;
 import org.jgroups.stack.IpAddress;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class HeartBeatHandlerTest {
-
-    private Node source = new JGroupsNode(new Identity(8080), new IpAddress(
+    private Node self = new JGroupsNode(new Identity(8080), new IpAddress(
+            7000));
+    private Node source = new JGroupsNode(new Identity(8081), new IpAddress(
             7000));
 
     @Test
     public void ensureHeartBeatTriggerMemberRegistration() throws Exception {
-        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry();
+        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry(self);
 
         HeartBeat heartBeat = new HeartBeat(source);
 
@@ -31,7 +32,7 @@ public class HeartBeatHandlerTest {
     }
 
     public void ensureNoDuplicatedRegistration() throws Exception {
-        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry();
+        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry(self);
 
         HeartBeat heartBeat = new HeartBeat(source);
 

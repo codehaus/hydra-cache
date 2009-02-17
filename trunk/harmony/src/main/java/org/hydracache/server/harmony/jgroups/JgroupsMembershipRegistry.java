@@ -12,6 +12,10 @@ public class JgroupsMembershipRegistry extends MembershipRegistry {
     private static Logger log = Logger
             .getLogger(JgroupsMembershipRegistry.class);
 
+    public JgroupsMembershipRegistry(Node self) {
+        super(self);
+    }
+
     public void deregisterByJgroupAddress(Address address) {
         Validate.notNull(address, "Address to be deregistered can not be null");
 

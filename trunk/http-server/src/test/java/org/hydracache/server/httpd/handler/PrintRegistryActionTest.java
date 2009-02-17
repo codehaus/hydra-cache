@@ -13,11 +13,13 @@ import org.junit.Test;
 public class PrintRegistryActionTest {
     private Mockery context = new Mockery();
 
+    private JGroupsNode self = new JGroupsNode(new Identity(8080),
+            new IpAddress(7000));
+
     @Test
     public void ensureCorrectRegistryPrint() throws Exception {
-        MembershipRegistry membershipRegistry = new MembershipRegistry();
-        membershipRegistry.register(new JGroupsNode(new Identity(8080),
-                new IpAddress(7000)));
+        MembershipRegistry membershipRegistry = new MembershipRegistry(self);
+        
         membershipRegistry.register(new JGroupsNode(new Identity(8081),
                 new IpAddress(7001)));
 

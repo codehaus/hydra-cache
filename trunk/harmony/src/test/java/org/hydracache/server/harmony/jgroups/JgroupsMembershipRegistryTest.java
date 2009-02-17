@@ -13,9 +13,8 @@ public class JgroupsMembershipRegistryTest {
 
     @Test
     public void ensureMemberCanBeDeregisteredByJgroupAddress() {
-        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry();
+        JgroupsMembershipRegistry registry = new JgroupsMembershipRegistry(nodeA);
 
-        registry.register(nodeA);
         registry.deregisterByJgroupAddress(nodeA.getJgroupsAddress());
 
         NodeSet nodes = registry.listAllMembers();
