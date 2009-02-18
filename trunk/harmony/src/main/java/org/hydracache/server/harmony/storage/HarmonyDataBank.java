@@ -59,8 +59,7 @@ public class HarmonyDataBank implements DataBank {
      */
     @Override
     public Data get(Long keyHash) {
-        // TODO Auto-generated method stub
-        return null;
+        return localDataBank.get(keyHash);
     }
 
     /*
@@ -70,8 +69,7 @@ public class HarmonyDataBank implements DataBank {
      */
     @Override
     public Collection<Data> getAll() {
-        // TODO Auto-generated method stub
-        return null;
+        return localDataBank.getAll();
     }
 
     /*
@@ -98,10 +96,6 @@ public class HarmonyDataBank implements DataBank {
         }
     }
 
-    public void putLocally(Data data) throws DataStorageException {
-        localDataBank.put(data);
-    }
-
     private void ensureReliablePut(Collection<ResponseMessage> helps)
             throws ReliableDataStorageException {
         if (notEnoughPuts(helps)) {
@@ -114,6 +108,10 @@ public class HarmonyDataBank implements DataBank {
 
     private boolean notEnoughPuts(Collection<ResponseMessage> helps) {
         return helps == null || helps.size() < expectedWrites;
+    }
+
+    public void putLocally(Data data) throws DataStorageException {
+        localDataBank.put(data);
     }
 
 }
