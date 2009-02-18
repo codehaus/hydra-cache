@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -77,8 +76,7 @@ public class HttpHydraCacheClient implements HydraCacheClient {
     public HttpHydraCacheClient(NodePartition<Identity> nodePartition) {
         this.nodePartition = nodePartition;
         this.hashFunction = new NativeHashFunction();
-        this.httpClient = new HttpClient(
-                new MultiThreadedHttpConnectionManager());
+        this.httpClient = new HttpClient();
 
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory();
         versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
@@ -119,14 +117,19 @@ public class HttpHydraCacheClient implements HydraCacheClient {
         Data data = null;
         try {
             GetMethod getMethod = new GetMethod(uri);
-            validateResponseCode(httpClient.executeMethod(getMethod));
+            
+            int responseCode = httpClient.executeMethod(getMethod);
+            validateResponseCode(responseCode);
+            
             DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(getMethod
                             .getResponseBodyAsStream()));
             data = dataMessage.getData();
+            
         } catch (IOException ioe) {
             logger.error("Cannot retrieve data.", ioe);
         }
+        
         return data;
     }
 
@@ -144,28 +147,17 @@ public class HttpHydraCacheClient implements HydraCacheClient {
         try {
             PutMethod putMethod = new PutMethod(uri);
             Buffer buffer = Buffer.allocate();
-            protocolEncoder.encode(constructProtocolMessage(data), buffer.asDataOutpuStream());
+            protocolEncoder.encode(new BlobDataMessage(data), buffer
+                    .asDataOutpuStream());
 
-            RequestEntity requestEntity = new InputStreamRequestEntity(
-                    buffer.asDataInputStream());
+            RequestEntity requestEntity = new InputStreamRequestEntity(buffer
+                    .asDataInputStream());
             putMethod.setRequestEntity(requestEntity);
 
             validateResponseCode(httpClient.executeMethod(putMethod));
         } catch (IOException ioe) {
             logger.error("Cannot write to connection.", ioe);
         }
-    }
-
-    /**
-     * @param data
-     * @return
-     */
-    private DataMessage constructProtocolMessage(Data data) {
-        BlobDataMessage dataMessage = new BlobDataMessage();
-        dataMessage.setBlob(data.getContent());
-        dataMessage.setKeyHash(data.getKeyHash());
-        dataMessage.setVersion(data.getVersion());
-        return dataMessage;
     }
 
     /**
@@ -176,7 +168,7 @@ public class HttpHydraCacheClient implements HydraCacheClient {
      */
     private void validateResponseCode(int rc) throws IOException {
         if (rc != HttpStatus.SC_OK && rc != HttpStatus.SC_CREATED)
-            throw new IOException("HTTP Response: " + rc);
+            throw new IOException("Error HTTP response received: " + rc);
     }
 
     /**
