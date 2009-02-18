@@ -11,7 +11,7 @@
     <UNICAST timeout="300,600,1200,2400,4800" />
     <pbcast.STABLE desired_avg_gossip="20000" />
     <FRAG frag_size="8192" />
-    <pbcast.GMS join_timeout="5000" join_retry_timeout="2000"
+    <pbcast.GMS join_timeout="5000"
         shun="true" print_local_addr="true" />
     <pbcast.STATE_TRANSFER />
 </Config>
