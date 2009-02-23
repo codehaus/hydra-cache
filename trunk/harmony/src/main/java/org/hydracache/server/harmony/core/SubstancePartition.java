@@ -32,7 +32,7 @@ public class SubstancePartition extends ConsistentHashNodePartition<Identity> {
 
     public SubstancePartition(HashFunction hashFunction,
             Collection<Identity> ids) {
-        super(hashFunction, ids);
+        super(hashFunction, ids, 0);
     }
 
     /**

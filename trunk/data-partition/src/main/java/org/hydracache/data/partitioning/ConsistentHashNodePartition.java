@@ -41,16 +41,28 @@ import org.hydracache.data.hashing.HashFunction;
  */
 public class ConsistentHashNodePartition<T> implements NodePartition<T> {
 
+    private static final int REPLICA_INTERVAL_MULTIPLIER = 13;
+
+    private static final int DEFAULT_NUMBER_OF_REPLICAS = 1000;
+
     protected final HashFunction hashFunction;
-    
+
     private final SortedMap<Long, T> circle = new TreeMap<Long, T>();
 
+    private int numberOfReplicas;
+
     public ConsistentHashNodePartition(HashFunction hashFunction,
-            Collection<T> nodes) {
+            Collection<T> nodes, int numberOfReplicas) {
         this.hashFunction = hashFunction;
+        this.numberOfReplicas = numberOfReplicas;
         for (T node : nodes) {
             add(node);
         }
+    }
+
+    public ConsistentHashNodePartition(HashFunction hashFunction,
+            Collection<T> nodes) {
+        this(hashFunction, nodes, DEFAULT_NUMBER_OF_REPLICAS);
     }
 
     /*
@@ -59,7 +71,15 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#add(java.lang.Object)
      */
     public void add(T node) {
-        circle.put(hashFunction.hash(node), node);
+        if(numberOfReplicas == 0){
+            circle.put(hashFunction.hash(node), node);
+            return;
+        }
+        
+        for (int i = 0; i < numberOfReplicas; i++) {
+            circle.put(hashFunction.hash(node) * i
+                    * REPLICA_INTERVAL_MULTIPLIER, node);
+        }
     }
 
     /*
@@ -91,7 +111,15 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#remove(java.lang.Object)
      */
     public void remove(T node) {
-        circle.remove(hashFunction.hash(node));
+        if(numberOfReplicas == 0){
+            circle.remove(hashFunction.hash(node));
+            return;
+        }
+        
+        for (int i = 0; i < numberOfReplicas; i++) {
+            circle.remove(hashFunction.hash(node) * i
+                    * REPLICA_INTERVAL_MULTIPLIER);
+        }
     }
 
 }

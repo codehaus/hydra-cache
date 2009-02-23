@@ -84,6 +84,26 @@ public class PartitionAwarePutAndGetTest {
                 + "]ms to perform a put and get pair");
     }
 
+    @Test
+    public void testRepetitivePutAndGet() throws Exception {
+        StopWatch stopwatch = new StopWatch();
+
+        stopwatch.start();
+
+        int numberOfRepetition = 100;
+
+        for (int i = 0; i < numberOfRepetition; i++) {
+            assertPutAndGet();
+        }
+
+        stopwatch.stop();
+
+        assertDataIntegrity();
+
+        log.info("Took [" + stopwatch.getTime() + "]ms to perform ["
+                + numberOfRepetition + "] put and get pair");
+    }
+
     private void assertPutAndGet() {
         String randomKey = createRandomKey();
 
@@ -96,21 +116,19 @@ public class PartitionAwarePutAndGetTest {
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }
 
+    private String createRandomKey() {
+        String randomKey = RandomStringUtils.randomAlphanumeric(10);
+        return randomKey;
+    }
+
     private Data createRandomDataSample(String randomKey) {
         Data data = new Data();
 
         data.setKeyHash((long) randomKey.hashCode());
-        data
-                .setVersion(versionFactory.create(partition.get(data
-                        .getKeyHash())));
+        data.setVersion(versionFactory.create(partition.get(randomKey)));
         data.setContent(RandomStringUtils.randomAlphanumeric(200).getBytes());
 
         return data;
-    }
-
-    private String createRandomKey() {
-        String randomKey = RandomStringUtils.randomAlphanumeric(10);
-        return randomKey;
     }
 
     private void assertDataIntegrity() {
@@ -123,5 +141,5 @@ public class PartitionAwarePutAndGetTest {
                     localData, remoteData);
         }
     }
-    
+
 }

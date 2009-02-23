@@ -15,9 +15,14 @@
  */
 package org.hydracache.data.partitioning;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.NativeHashFunction;
 import org.junit.Assert;
@@ -27,11 +32,11 @@ import org.junit.Test;
 /**
  * Test basic functionality of consistent hashing.
  * 
- * @author Tan Quach
+ * @author Tan Quach, Nick Zhu
  * @since 1.0
  */
 public class ConsistentHashNodePartitionTest {
-    
+
     private List<ServerNode> serverNodes;
     private HashFunction hashFunction;
 
@@ -40,25 +45,25 @@ public class ConsistentHashNodePartitionTest {
         hashFunction = new NativeHashFunction();
         serverNodes = new LinkedList<ServerNode>();
     }
-    
+
     @Test
     public void shouldReturnNullIfNoServerNodes() throws Exception {
-        ConsistentHashNodePartition<ServerNode> circle = 
-            new ConsistentHashNodePartition<ServerNode>(hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, serverNodes);
         ServerNode serverNode = circle.get(new Integer(4));
         Assert.assertNull(serverNode);
     }
-    
+
     @Test
     public void shouldReturnServerNode() {
         final ServerNode A = new ServerNode(1);
         serverNodes.add(A);
-        ConsistentHashNodePartition<ServerNode> circle = 
-            new ConsistentHashNodePartition<ServerNode>(hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, serverNodes);
 
         Assert.assertEquals(A, circle.get(new Integer(1)));
     }
-    
+
     @Test
     public void shouldAlwaysReturnSameNode() {
         final ServerNode A = new ServerNode(1);
@@ -70,17 +75,17 @@ public class ConsistentHashNodePartitionTest {
         serverNodes.add(B);
         serverNodes.add(C);
 
-        ConsistentHashNodePartition<ServerNode> circle = 
-            new ConsistentHashNodePartition<ServerNode>(hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, serverNodes);
 
         // First we verify that the node we get is closest to server node B.
         Integer data1 = new Integer(10);
         Assert.assertEquals(10, hashFunction.hash(10));
         Assert.assertEquals(data1.intValue(), hashFunction.hash(data1));
 
-        Assert.assertEquals(B, circle.get(data1)); // should get B
-        Assert.assertEquals(B, circle.get(data1)); // and again
-        Assert.assertEquals(B, circle.get(data1)); // ... and one more time.
+        Assert.assertEquals(A, circle.get(data1)); // should get B
+        Assert.assertEquals(A, circle.get(data1)); // and again
+        Assert.assertEquals(A, circle.get(data1)); // ... and one more time.
     }
 
     @Test
@@ -88,26 +93,88 @@ public class ConsistentHashNodePartitionTest {
         final ServerNode A = new ServerNode(1);
         final ServerNode B = new ServerNode(10);
         final ServerNode C = new ServerNode(50);
-        
+
         // Create a circle of 2 replicas
         serverNodes.add(A);
         serverNodes.add(B);
         serverNodes.add(C);
 
-        ConsistentHashNodePartition<ServerNode> circle = 
-            new ConsistentHashNodePartition<ServerNode>(hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, serverNodes);
 
         // First we verify that the node we get is closest to server node B.
         Integer data1 = new Integer(10);
         Assert.assertEquals(10, hashFunction.hash(10));
         Assert.assertEquals(data1.intValue(), hashFunction.hash(data1));
 
-        Assert.assertEquals(B, circle.get(data1)); // should get B
-        Assert.assertEquals(B, circle.get(data1)); // and again
-        circle.remove(B);
-        Assert.assertEquals(C, circle.get(data1)); // ... and now to the nearest neighbour.
+        Assert.assertEquals(A, circle.get(data1)); // should get B
+        Assert.assertEquals(A, circle.get(data1)); // and again
+        circle.remove(A);
+        Assert.assertEquals(C, circle.get(data1)); // ... and now to the nearest
+        // neighbour.
     }
-    
+
+    @Test
+    public void ensureUniformDistribution() {
+        int sampleSize = 10000;
+
+        final ServerNode A = new ServerNode(1);
+        final ServerNode B = new ServerNode(2);
+        final ServerNode C = new ServerNode(3);
+
+        ConsistentHashNodePartition<ServerNode> circle = givenCloselyPlacedNodesWithLargeReplicas(
+                A, B, C);
+
+        HashMap<ServerNode, Integer> counterMap = countSelectionOfEachNodeInSampleSpace(
+                sampleSize, A, B, C, circle);
+
+        assertUniformedDistribution(sampleSize, A, B, C, counterMap);
+    }
+
+    private ConsistentHashNodePartition<ServerNode> givenCloselyPlacedNodesWithLargeReplicas(
+            final ServerNode A, final ServerNode B, final ServerNode C) {
+        // Create a circle of 3 closely placed nodes
+        serverNodes.add(A);
+        serverNodes.add(B);
+        serverNodes.add(C);
+
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, serverNodes, 10000);
+        return circle;
+    }
+
+    private HashMap<ServerNode, Integer> countSelectionOfEachNodeInSampleSpace(
+            int sampleSize, final ServerNode A, final ServerNode B,
+            final ServerNode C, ConsistentHashNodePartition<ServerNode> circle) {
+        HashMap<ServerNode, Integer> counterMap = new HashMap<ServerNode, Integer>();
+        counterMap.put(A, 0);
+        counterMap.put(B, 0);
+        counterMap.put(C, 0);
+
+        for (int i = 0; i < sampleSize; i++) {
+            int randomKey = RandomUtils.nextInt(100000);
+            ServerNode node = circle.get(randomKey);
+            int counter = counterMap.get(node);
+            counter++;
+            counterMap.put(node, counter);
+        }
+        return counterMap;
+    }
+
+    private void assertUniformedDistribution(int sampleSize,
+            final ServerNode A, final ServerNode B, final ServerNode C,
+            HashMap<ServerNode, Integer> counterMap) {
+        int maxCounter = NumberUtils.max(counterMap.get(A), counterMap.get(B),
+                counterMap.get(C));
+        int minCounter = NumberUtils.min(counterMap.get(A), counterMap.get(B),
+                counterMap.get(C));
+
+        int counterDifference = maxCounter - minCounter;
+
+        assertTrue("Distribution difference is greater than 5%",
+                counterDifference < (sampleSize * 0.05));
+    }
+
     private final class ServerNode {
         private int loc;
 
