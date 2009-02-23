@@ -1,8 +1,5 @@
 package org.hydracache.server.httpd.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
@@ -16,20 +13,6 @@ import org.junit.Test;
 
 public class PrintStorageInfoActionTest {
     private Mockery context = new Mockery();
-
-    @Test
-    public void ensurePrintDataSetCanHandleNulls() throws Exception {
-        DataBank dataBank = new EhcacheDataBank(new ArbitraryResolver());
-        
-        PrintStorageInfoAction handler = new PrintStorageInfoAction(dataBank);
-
-        List<Data> dataSet = new ArrayList<Data>();
-        
-        dataSet.add(null);
-        dataSet.add(new Data(RandomUtils.nextLong()));
-        
-        handler.printDataSet(dataSet);
-    }
 
     @Test
     public void ensureCorrectStoragePrint() throws Exception {

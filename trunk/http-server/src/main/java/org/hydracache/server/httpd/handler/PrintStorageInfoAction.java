@@ -5,7 +5,6 @@ import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONT
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
@@ -43,32 +42,15 @@ public class PrintStorageInfoAction implements HttpGetAction {
             IOException {
         Collection<Data> allData = internalDataBank.getAll();
 
-        StringBuffer content = printDataSet(allData);
+        StringBuffer content = new StringBuffer();
+
+        content.append("totalNumberOfCache : " + allData.size());
 
         StringEntity body = new StringEntity(content.toString());
 
         body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
 
         response.setEntity(body);
-    }
-
-    StringBuffer printDataSet(Collection<Data> allData) {
-        StringBuffer content = new StringBuffer();
-
-        for (Data data : allData) {
-            if (data != null) {
-                content.append("keyHash:").append(data.getKeyHash()).append(
-                        ", ");
-                content.append("version:").append(data.getVersion()).append(
-                        ", ");
-                content.append("size:").append(
-                        data.getContent() == null ? 0
-                                : data.getContent().length);
-                content.append(SystemUtils.LINE_SEPARATOR);
-            }
-        }
-        
-        return content;
     }
 
 }
