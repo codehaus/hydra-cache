@@ -70,6 +70,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             log.warn("Empty request[" + request + "] received and ignored");
             return;
         }
+        
+        if (hashKeyDoesNotExist(request))
+            return;
 
         HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
 

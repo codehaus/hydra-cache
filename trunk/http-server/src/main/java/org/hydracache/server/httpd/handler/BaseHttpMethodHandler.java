@@ -45,8 +45,8 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
     protected Long extractDataKeyHash(final String requestUri) {
         String requestContext = extractRequestContext(requestUri);
 
-        Validate.isTrue(NumberUtils.isNumber(requestContext),
-                "Data key hash is not a number");
+        Validate.isTrue(NumberUtils.isNumber(requestContext), "Data key hash["
+                + requestContext + "] is not a number");
 
         return Long.valueOf(requestContext);
     }
@@ -71,6 +71,10 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         String requestContext = StringUtils.substringAfterLast(cleanUri, SLASH);
 
         return requestContext;
+    }
+
+    protected boolean hashKeyDoesNotExist(HttpRequest request) {
+        return !NumberUtils.isNumber(extractRequestContext(request));
     }
 
 }

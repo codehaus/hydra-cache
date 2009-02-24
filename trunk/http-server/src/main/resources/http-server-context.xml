@@ -48,6 +48,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="printStorageInfoAction" class="org.hydracache.server.httpd.handler.PrintStorageInfoAction">
         <constructor-arg ref="internalDataBank" />
     </bean>
+    
+     <bean id="storageDumpAction" class="org.hydracache.server.httpd.handler.DumpAction">
+        <constructor-arg ref="internalDataBank" />
+    </bean>
 
     <!-- Http Get Method Handlers -->
     <bean id="httpGetMethodHandler"
@@ -57,6 +61,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         
         <property name="printRegistryAction" ref="printRegistryAction" />
         <property name="printStorageInfoAction" ref="printStorageInfoAction" />
+        <property name="storageDumpAction" ref="storageDumpAction" />
     </bean>
 
     <!-- Http Put Method Handlers -->

@@ -45,7 +45,7 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
     /**
      * Constructor
      */
-    public MethodBasedRequestDispatcher(HttpGetMethodHandler httpGetMethodHandler,
+    public MethodBasedRequestDispatcher(BaseHttpMethodHandler httpGetMethodHandler,
             HttpPutMethodHandler httpPutMethodHandler,
             UnsupportedHttpMethodHandler unsupportedHttpMethodHandler) {
         disallowAllMethods(unsupportedHttpMethodHandler);

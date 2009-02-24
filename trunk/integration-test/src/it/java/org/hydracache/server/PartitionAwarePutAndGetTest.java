@@ -137,7 +137,7 @@ public class PartitionAwarePutAndGetTest {
             Data remoteData = client.get(key);
 
             assertEquals(
-                    "Remote and local copy of the same data is not identical",
+                    "Remote and local copy of the same data are not identical",
                     localData, remoteData);
         }
     }

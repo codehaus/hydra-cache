@@ -45,6 +45,8 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
     private HttpGetAction printStorageInfoAction;
 
+    private HttpGetAction storageDumpAction;
+
     /**
      * Constructor
      */
@@ -60,6 +62,10 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
     public void setPrintStorageInfoAction(HttpGetAction printStorageInfoAction) {
         this.printStorageInfoAction = printStorageInfoAction;
+    }
+
+    public void setStorageDumpAction(HttpGetAction storageDumpAction) {
+        this.storageDumpAction = storageDumpAction;
     }
 
     /*
@@ -78,6 +84,8 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
             printRegistryAction.execute(response);
         } else if (printStorageInfoAction.getName().equals(requestContext)) {
             printStorageInfoAction.execute(response);
+        } else if (storageDumpAction.getName().equals(requestContext)) {
+            storageDumpAction.execute(response);
         } else {
             handleGetData(request, response);
         }
@@ -85,6 +93,9 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
     void handleGetData(HttpRequest request, HttpResponse response)
             throws IOException {
+        if (hashKeyDoesNotExist(request))
+            return;
+
         Long dataKey = extractDataKeyHash(request);
 
         Data data = dataBank.get(dataKey);
