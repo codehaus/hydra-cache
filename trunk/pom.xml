@@ -290,7 +290,7 @@
 
     <scm>
         <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
-        <developerConnection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</developerConnection>
+        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/trunk</developerConnection>
     </scm>
 
     <developers>
