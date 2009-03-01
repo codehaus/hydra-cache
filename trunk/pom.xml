@@ -5,7 +5,7 @@
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <name>Hydra Project Parent</name>
-    <version>0.3</version>
+    <version>0.3-SNAPSHOT</version>
 
     <modules>
         <module>assembler</module>
@@ -289,8 +289,8 @@
     </reporting>
 
     <scm>
-        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/tags/hydracache-0.3</connection>
-        <developerConnection>scm:svn:http://svn.codehaus.org/hydra-cache/tags/hydracache-0.3</developerConnection>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
+        <developerConnection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</developerConnection>
     </scm>
 
     <developers>
