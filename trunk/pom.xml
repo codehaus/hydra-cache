@@ -289,8 +289,8 @@
     </reporting>
 
     <scm>
-        <connection>scm:svn:https://hydrac.svn.sourceforge.net/svnroot/hydrac/hydra-server/tags/0.2</connection>
-        <developerConnection>scm:svn:https://hydrac.svn.sourceforge.net/svnroot/hydrac/hydra-server/tags/0.2</developerConnection>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
+        <developerConnection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</developerConnection>
     </scm>
 
     <developers>
