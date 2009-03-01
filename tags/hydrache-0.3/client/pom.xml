@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.hydracache.server</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.3</version>
+    </parent>
+    <artifactId>client</artifactId>
+    <name>Hydra Cache Java Client</name>
+    <url>http://www.hydracache.org/hcjc</url>
+    <dependencies>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+		    <artifactId>data-partition</artifactId>
+		    <version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+		    <artifactId>harmony</artifactId>
+		    <version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+		    <artifactId>common</artifactId>
+		    <version>${pom.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+		    <artifactId>protocol</artifactId>
+		    <version>${pom.version}</version>
+		</dependency>
+
+        <!-- HTTP COMPONENTS DEPENDENCIE -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+		
+        <!-- COMMON DEPENDENCIES -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-legacy</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

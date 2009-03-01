@@ -1,0 +1,30 @@
+
+    <!--
+        Ehcache (http://ehcache.sourceforge.net) is used as one of the
+        implementation as in memory Data Bank for Hydra Distributed
+        Cache. This is the standard Ehcache configuration used by this
+        implementation.
+    -->
+
+<ehcache>
+    <diskStore path="java.io.tmpdir" />
+
+    <!--
+        Hydra Cache does not rely on this configuration but it always a
+        good idea to specify one
+    -->
+    <defaultCache maxElementsInMemory="10000" eternal="false"
+        timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true"
+        diskSpoolBufferSizeMB="30" maxElementsOnDisk="10000000"
+        diskPersistent="false" diskExpiryThreadIntervalSeconds="120"
+        memoryStoreEvictionPolicy="LRU" />
+
+    <!--
+        Hydra Cache in-memory data bank cache configuration
+    -->
+    <cache name="hydra" maxElementsInMemory="100000"
+        maxElementsOnDisk="100000" eternal="false" overflowToDisk="true"
+        diskSpoolBufferSizeMB="20" timeToIdleSeconds="300"
+        timeToLiveSeconds="600" memoryStoreEvictionPolicy="LRU" />
+
+</ehcache>
