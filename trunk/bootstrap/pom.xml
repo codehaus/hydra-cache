@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.hydracache.server</groupId>
         <artifactId>parent</artifactId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.3</version>
     </parent>
     <artifactId>bootstrap</artifactId>
     <name>Hydra Server Bootstrap</name>
