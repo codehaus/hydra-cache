@@ -19,7 +19,7 @@ import org.hydracache.server.Identity;
 import org.hydracache.server.data.storage.Data;
 
 /**
- * Hydra internal control message that describes help request for a HOP put
+ * Hydra internal control message that describes help request for a HOP PUT
  * operation
  * 
  * @author nzhu

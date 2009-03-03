@@ -218,10 +218,10 @@ public class JGroupsSpace implements Space {
      * 
      * @see
      * org.hydracache.server.harmony.core.Space#broadcast(org.hydracache.protocol
-     * .control.message.PutOperationResponse)
+     * .control.message.ResponseMessage)
      */
     @Override
-    public void broadcast(PutOperationResponse response) throws IOException {
+    public void broadcast(ResponseMessage response) throws IOException {
         Message message = new Message();
 
         message.setObject(response);

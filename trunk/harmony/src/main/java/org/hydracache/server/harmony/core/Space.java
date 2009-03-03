@@ -18,7 +18,6 @@ package org.hydracache.server.harmony.core;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.RequestMessage;
 import org.hydracache.protocol.control.message.ResponseMessage;
 
@@ -70,7 +69,7 @@ public interface Space {
      * @param response
      *            response message
      */
-    void broadcast(PutOperationResponse response) throws IOException;
+    void broadcast(ResponseMessage response) throws IOException;
 
     /**
      * Terminate participation with this space

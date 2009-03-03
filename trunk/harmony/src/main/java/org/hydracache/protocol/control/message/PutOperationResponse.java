@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.hydracache.server.Identity;
 
 /**
- * Hydra internal control message that describes help response for a HOP put
+ * Hydra internal control message that describes help response for a HOP PUT
  * operation
  * 
  * @author nzhu
