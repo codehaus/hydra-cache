@@ -24,17 +24,17 @@ import org.hydracache.server.data.versioning.Versioned;
 /**
  * @author David Dossot (david@dossot.net)
  */
-final class DefaultResolutionResult implements ResolutionResult {
+public final class DefaultResolutionResult implements ResolutionResult {
 
-    static final Collection<Versioned> EMPTY_VERSIONED_COLLECTION = Collections
+    static final Collection<? extends Versioned> EMPTY_VERSIONED_COLLECTION = Collections
             .emptyList();
 
     private final boolean stillHasConflict;
-    private final Collection<Versioned> alive;
-    private final Collection<Versioned> expired;
+    private final Collection<? extends Versioned> alive;
+    private final Collection<? extends Versioned> expired;
 
-    public DefaultResolutionResult(final Collection<Versioned> alive,
-            final Collection<Versioned> expired) {
+    public DefaultResolutionResult(final Collection<? extends Versioned> alive,
+            final Collection<? extends Versioned> expired) {
 
         Validate.notEmpty(alive, "alive can not be empty");
         Validate.notNull(expired, "expired can not be null");
@@ -48,11 +48,11 @@ final class DefaultResolutionResult implements ResolutionResult {
         return stillHasConflict;
     }
 
-    public Collection<Versioned> getExpired() {
+    public Collection<? extends Versioned> getExpired() {
         return expired;
     }
 
-    public Collection<Versioned> getAlive() {
+    public Collection<? extends Versioned> getAlive() {
         return alive;
     }
 }

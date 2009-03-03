@@ -28,6 +28,6 @@ public interface ConflictResolver {
      * <b>The collection passed to this method must not be altered afterwards is
      * it can be a backdoor to the <code>ResolutionResult</code> object!</b>
      */
-    ResolutionResult resolve(Collection<Versioned> conflict);
+    ResolutionResult resolve(Collection<? extends Versioned> conflict);
 
 }

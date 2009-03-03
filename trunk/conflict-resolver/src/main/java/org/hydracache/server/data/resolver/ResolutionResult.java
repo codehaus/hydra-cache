@@ -34,12 +34,12 @@ public interface ResolutionResult {
      *         superseded by the because they are replaced with more recent
      *         versions.
      */
-    public abstract Collection<Versioned> getExpired();
+    public abstract Collection<? extends Versioned> getExpired();
 
     /**
      * @return a collection of alive <code>Versioned</code> objects after the
      *         resolution has been done.
      */
-    public abstract Collection<Versioned> getAlive();
+    public abstract Collection<? extends Versioned> getAlive();
 
 }

@@ -31,7 +31,7 @@ import org.hydracache.server.data.versioning.Versioned;
  */
 public final class SequentialResolver implements ConflictResolver {
 
-    private final Collection<ConflictResolver> resolvers;
+    private final Collection<? extends ConflictResolver> resolvers;
 
     public SequentialResolver(final Collection<ConflictResolver> resolvers) {
         Validate
@@ -40,8 +40,8 @@ public final class SequentialResolver implements ConflictResolver {
         this.resolvers = Collections.unmodifiableCollection(resolvers);
     }
 
-    public ResolutionResult resolve(final Collection<Versioned> conflict) {
-        for (final Iterator<ConflictResolver> i = resolvers.iterator(); i
+    public ResolutionResult resolve(final Collection<? extends Versioned> conflict) {
+        for (final Iterator<? extends ConflictResolver> i = resolvers.iterator(); i
                 .hasNext();) {
 
             final ConflictResolver resolver = i.next();

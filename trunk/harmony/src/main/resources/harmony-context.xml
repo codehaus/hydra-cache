@@ -68,6 +68,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="space" />
         <constructor-arg ref="membershipRegistry" />
         <constructor-arg ref="harmonyDataBank" />
+        <constructor-arg ref="conflictResolver"/>
         <constructor-arg value="${hop.substanceSize}" />
     </bean>
     

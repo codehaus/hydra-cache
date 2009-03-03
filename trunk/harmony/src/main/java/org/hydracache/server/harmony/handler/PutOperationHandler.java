@@ -15,11 +15,18 @@
  */
 package org.hydracache.server.harmony.handler;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hydracache.protocol.control.message.ControlMessage;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
+import org.hydracache.server.data.resolver.ConflictResolver;
+import org.hydracache.server.data.resolver.ResolutionResult;
+import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -34,12 +41,16 @@ public class PutOperationHandler implements ControlMessageHandler {
 
     private HarmonyDataBank harmonyDataBank;
 
+    private ConflictResolver conflictResolver;
+
     private Space space;
 
-    public PutOperationHandler(Space space, HarmonyDataBank harmonyDataBank) {
+    public PutOperationHandler(Space space, HarmonyDataBank harmonyDataBank,
+            ConflictResolver conflictResolver) {
         super();
         this.harmonyDataBank = harmonyDataBank;
         this.space = space;
+        this.conflictResolver = conflictResolver;
     }
 
     /*
@@ -60,12 +71,13 @@ public class PutOperationHandler implements ControlMessageHandler {
             return;
         }
 
-        harmonyDataBank.putLocally(putOperation.getData());
+        Data dataToPut = putOperation.getData();
+        
+        Data currentData = consolidateWithLocalData(dataToPut);
 
-        PutOperationResponse response = new PutOperationResponse(space
-                .getLocalNode().getId(), putOperation.getId());
+        harmonyDataBank.putLocally(currentData);
 
-        space.broadcast(response);
+        broadcastPutResponse(putOperation);
 
         log.debug("Response message has been sent: " + message);
     }
@@ -74,4 +86,40 @@ public class PutOperationHandler implements ControlMessageHandler {
         return !space.findSubstancesForLocalNode().isNeighbor(
                 putOperation.getSource());
     }
+
+    private Data consolidateWithLocalData(Data dataToPut) {
+        Data existingData = harmonyDataBank.getLocally(dataToPut.getKeyHash());
+        Data result = dataToPut;
+        
+        if (existingData != null) {
+            Collection<Data> liveData = performConsolidation(dataToPut,
+                    existingData);
+
+            result = liveData.iterator().next();
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Collection<Data> performConsolidation(Data dataToPut,
+            Data existingData) {
+        ResolutionResult result = conflictResolver.resolve(Arrays.asList(
+                dataToPut, existingData));
+
+        Validate.isTrue(!result.stillHasConflict(),
+                "Unexpected version conflict encountered");
+
+        Collection<Data> liveData = (Collection<Data>) result.getAlive();
+        return liveData;
+    }
+
+    private void broadcastPutResponse(PutOperation putOperation)
+            throws IOException {
+        PutOperationResponse response = new PutOperationResponse(space
+                .getLocalNode().getId(), putOperation.getId());
+
+        space.broadcast(response);
+    }
+
 }

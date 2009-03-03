@@ -26,6 +26,7 @@ import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
+import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.handler.PutOperationHandlerTest;
@@ -68,7 +69,9 @@ public class MultiplexMessageReceiverTest {
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
                 PutOperationHandlerTest.mockSpaceToRespond(context),
                 membershipRegistry, PutOperationHandlerTest
-                        .mockDataBankToPut(context), expectedNumOfResps);
+                        .mockDataBankToGetAndPut(context, TestDataGenerator
+                                .createRandomData()), new ArbitraryResolver(),
+                expectedNumOfResps);
 
         final PutOperation request = new PutOperation(NEIGHBOR_SOURCE_ID,
                 TestDataGenerator.createRandomData());
@@ -92,7 +95,7 @@ public class MultiplexMessageReceiverTest {
     @Test(expected = IllegalArgumentException.class)
     public void nullRequestShouldBeRejected() {
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
-                null, null, null, 1);
+                null, null, null, new ArbitraryResolver(), 1);
 
         receiver.receiveFor(null);
     }
@@ -100,7 +103,7 @@ public class MultiplexMessageReceiverTest {
     @Test(expected = IllegalArgumentException.class)
     public void nullResponseShouldBeRejected() {
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
-                null, null, null, 1);
+                null, null, null, new ArbitraryResolver(), 1);
 
         receiver.receive(null);
     }
@@ -118,7 +121,7 @@ public class MultiplexMessageReceiverTest {
         });
 
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
-                space, null, null, 1);
+                space, null, null, new ArbitraryResolver(), 1);
 
         HeartBeat message = new HeartBeat(localNode);
 

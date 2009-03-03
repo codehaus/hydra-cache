@@ -31,7 +31,7 @@ import org.hydracache.server.data.versioning.Versioned;
  */
 public final class SyntacticReconciliationResolver implements ConflictResolver {
 
-    public ResolutionResult resolve(final Collection<Versioned> conflict) {
+    public ResolutionResult resolve(final Collection<? extends Versioned> conflict) {
         Validate.notEmpty(conflict,
                 "conflict must be a non-null not-empty collection");
 
@@ -49,7 +49,7 @@ public final class SyntacticReconciliationResolver implements ConflictResolver {
     }
 
     private static void sortAliveFromExpired(
-            final Collection<Versioned> conflict, final List<Versioned> alive,
+            final Collection<? extends Versioned> conflict, final List<Versioned> alive,
             final List<Versioned> expired) {
 
         final List<Versioned> sortedConflict = new ArrayList<Versioned>(

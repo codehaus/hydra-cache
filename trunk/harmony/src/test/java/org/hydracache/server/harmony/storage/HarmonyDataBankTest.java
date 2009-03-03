@@ -52,6 +52,20 @@ public class HarmonyDataBankTest {
     public void setup() throws Exception {
         defaultSource = new Identity(8080);
     }
+    
+    @Test
+    public void ensurePassThroughLocalPutAndGet() throws Exception{
+        final Data data = TestDataGenerator.createRandomData();
+        
+        DataBank localDataBank = new EhcacheDataBank(null);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                null, null);
+        
+        dataBank.putLocally(data);
+        
+        assertEquals("Data is incorrect after local put and get operations", data, dataBank.getLocally(data.getKeyHash()));
+    }
 
     @Test
     public void putShouldBroadcastToSpace() throws Exception {

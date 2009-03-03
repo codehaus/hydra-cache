@@ -32,7 +32,7 @@ import org.hydracache.server.data.versioning.Versioned;
  */
 public final class ArbitraryResolver implements ConflictResolver {
 
-    public ResolutionResult resolve(final Collection<Versioned> conflict) {
+    public ResolutionResult resolve(final Collection<? extends Versioned> conflict) {
         Validate.notEmpty(conflict,
                 "conflict must be a non-null not-empty collection");
 

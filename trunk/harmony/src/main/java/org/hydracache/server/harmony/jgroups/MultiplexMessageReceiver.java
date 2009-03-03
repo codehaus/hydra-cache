@@ -25,6 +25,7 @@ import org.hydracache.protocol.control.message.ControlMessage;
 import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.ResponseMessage;
+import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.handler.ControlMessageHandler;
 import org.hydracache.server.harmony.handler.HeartBeatHandler;
@@ -65,13 +66,15 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
     private final HeartBeatHandler heartBeatHandler;
 
     public MultiplexMessageReceiver(Space space,
-            JgroupsMembershipRegistry membershipRegistry, HarmonyDataBank dataBank,
+            JgroupsMembershipRegistry membershipRegistry,
+            HarmonyDataBank dataBank, ConflictResolver conflictResolver,
             int expectedResponses) {
         this.space = space;
         this.membershipListener = new JgroupsMembershipListener(
                 membershipRegistry);
         this.expectedResponses = expectedResponses;
-        this.putOperationHandler = new PutOperationHandler(space, dataBank);
+        this.putOperationHandler = new PutOperationHandler(space, dataBank,
+                conflictResolver);
         this.responseHandler = new ResponseHandler(requestRegistry);
         this.heartBeatHandler = new HeartBeatHandler(membershipRegistry);
     }

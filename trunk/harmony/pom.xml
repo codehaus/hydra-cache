@@ -13,6 +13,10 @@
         <!-- INTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>${groupId}</groupId>
+            <artifactId>conflict-resolver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${groupId}</groupId>
             <artifactId>data-storage</artifactId>
         </dependency>
         <dependency>

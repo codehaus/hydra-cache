@@ -114,4 +114,8 @@ public class HarmonyDataBank implements DataBank {
         localDataBank.put(data);
     }
 
+    public Data getLocally(Long keyHash) {
+        return localDataBank.get(keyHash);
+    }
+
 }
