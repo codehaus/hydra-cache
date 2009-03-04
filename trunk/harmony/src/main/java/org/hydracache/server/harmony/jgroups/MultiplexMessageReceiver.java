@@ -22,12 +22,14 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hydracache.concurrent.SimpleResultFuture;
 import org.hydracache.protocol.control.message.ControlMessage;
+import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.handler.ControlMessageHandler;
+import org.hydracache.server.harmony.handler.GetOperationHandler;
 import org.hydracache.server.harmony.handler.HeartBeatHandler;
 import org.hydracache.server.harmony.handler.PutOperationHandler;
 import org.hydracache.server.harmony.handler.ResponseHandler;
@@ -61,20 +63,24 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
 
     private final ControlMessageHandler putOperationHandler;
 
+    private final ControlMessageHandler getOperationHandler;
+
     private final ControlMessageHandler responseHandler;
 
     private final HeartBeatHandler heartBeatHandler;
 
     public MultiplexMessageReceiver(Space space,
             JgroupsMembershipRegistry membershipRegistry,
-            HarmonyDataBank dataBank, ConflictResolver conflictResolver,
+            HarmonyDataBank harmonyDataBank, ConflictResolver conflictResolver,
             int expectedResponses) {
         this.space = space;
         this.membershipListener = new JgroupsMembershipListener(
                 membershipRegistry);
         this.expectedResponses = expectedResponses;
-        this.putOperationHandler = new PutOperationHandler(space, dataBank,
-                conflictResolver);
+        this.putOperationHandler = new PutOperationHandler(space,
+                harmonyDataBank, conflictResolver);
+        this.getOperationHandler = new GetOperationHandler(space,
+                harmonyDataBank);
         this.responseHandler = new ResponseHandler(requestRegistry);
         this.heartBeatHandler = new HeartBeatHandler(membershipRegistry);
     }
@@ -106,6 +112,11 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
         try {
             if (controlMessage instanceof ResponseMessage) {
                 responseHandler.handle(controlMessage);
+                return;
+            }
+            
+            if (controlMessage instanceof GetOperation) {
+                getOperationHandler.handle(controlMessage);
                 return;
             }
 
