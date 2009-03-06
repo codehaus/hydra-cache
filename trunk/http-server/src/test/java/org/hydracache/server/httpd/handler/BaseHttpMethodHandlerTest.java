@@ -23,9 +23,10 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
-import org.hydracache.server.data.storage.DataBank;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.httpd.HttpConstants;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Test;
 
 /**
@@ -34,7 +35,11 @@ import org.junit.Test;
  */
 public class BaseHttpMethodHandlerTest {
 
-    private Mockery context = new Mockery();
+    private Mockery context = new Mockery() {
+        {
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }
+    };
 
     @Test
     public void ensureCorrectDataKeyExtraction() {
@@ -79,7 +84,7 @@ public class BaseHttpMethodHandlerTest {
     }
 
     private BaseHttpMethodHandler createHandler() {
-        DataBank dataBank = context.mock(DataBank.class);
+        HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
         BaseHttpMethodHandler handler = new StubHandler(dataBank);
 
@@ -94,7 +99,7 @@ public class BaseHttpMethodHandlerTest {
 
     private class StubHandler extends BaseHttpMethodHandler {
 
-        public StubHandler(DataBank dataBank) {
+        public StubHandler(HarmonyDataBank dataBank) {
             super(dataBank);
         }
 

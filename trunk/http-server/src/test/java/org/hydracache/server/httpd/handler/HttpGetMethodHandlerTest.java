@@ -28,10 +28,11 @@ import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
-import org.hydracache.server.data.storage.DataBank;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,7 +42,11 @@ import org.junit.Test;
  */
 public class HttpGetMethodHandlerTest {
 
-    private final Mockery context = new Mockery();
+    private Mockery context = new Mockery() {
+        {
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }
+    };
 
     private IncrementVersionFactory versionFactoryMarshaller;
 
@@ -92,7 +97,7 @@ public class HttpGetMethodHandlerTest {
     private HttpGetMethodHandler createHandler(
             final Marshaller<Version> versionMarshaller) {
 
-        final DataBank dataBank = context.mock(DataBank.class);
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
         final HttpGetMethodHandler handler = new HttpGetMethodHandler(dataBank,
                 new DefaultProtocolEncoder(new MessageMarshallerFactory(

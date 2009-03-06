@@ -22,7 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.hydracache.server.data.storage.DataBank;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
  * Abstract base class for method based request handler
@@ -32,9 +32,9 @@ import org.hydracache.server.data.storage.DataBank;
  */
 public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
-    protected DataBank dataBank;
+    protected HarmonyDataBank dataBank;
 
-    public BaseHttpMethodHandler(DataBank dataBank) {
+    public BaseHttpMethodHandler(HarmonyDataBank dataBank) {
         this.dataBank = dataBank;
     }
 

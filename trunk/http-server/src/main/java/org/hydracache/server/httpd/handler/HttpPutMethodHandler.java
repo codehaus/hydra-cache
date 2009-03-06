@@ -32,7 +32,7 @@ import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
-import org.hydracache.server.data.storage.DataBank;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
  * Put http method request handler
@@ -48,7 +48,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     /**
      * Constructor
      */
-    public HttpPutMethodHandler(DataBank dataBank,
+    public HttpPutMethodHandler(HarmonyDataBank dataBank,
             ProtocolDecoder<DataMessage> decoder) {
         super(dataBank);
         this.decoder = decoder;
@@ -91,7 +91,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     int createStatusCode(Long dataKey) throws IOException {
         int returnStatusCode = HttpStatus.SC_OK;
 
-        if (dataBank.get(dataKey) == null)
+        if (dataBank.getLocally(dataKey) == null)
             returnStatusCode = HttpStatus.SC_CREATED;
         
         return returnStatusCode;

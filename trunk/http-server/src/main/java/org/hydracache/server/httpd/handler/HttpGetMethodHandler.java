@@ -29,7 +29,7 @@ import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
-import org.hydracache.server.data.storage.DataBank;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
  * Get http method handler
@@ -50,7 +50,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     /**
      * Constructor
      */
-    public HttpGetMethodHandler(DataBank dataBank,
+    public HttpGetMethodHandler(HarmonyDataBank dataBank,
             ProtocolEncoder<DataMessage> messageEncoder) {
         super(dataBank);
         this.messageEncoder = messageEncoder;

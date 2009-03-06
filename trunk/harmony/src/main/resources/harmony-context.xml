@@ -54,6 +54,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="space" />
         
         <property name="expectedWrites" value="${hop.W}" />
+        <property name="expectedReads" value="${hop.R}" />
     </bean>
 
     <!-- Space membership registry -->

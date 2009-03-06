@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import net.sf.ehcache.CacheManager;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -37,14 +35,13 @@ import org.hydracache.protocol.data.message.BlobDataMessage;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
-import org.hydracache.server.data.resolver.SyntacticReconciliationResolver;
 import org.hydracache.server.data.storage.Data;
-import org.hydracache.server.data.storage.DataBank;
-import org.hydracache.server.data.storage.EhcacheDataBank;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +50,11 @@ import org.junit.Test;
  * 
  */
 public class HttpPutMethodHandlerTest {
-    private final Mockery context = new Mockery();
+    private Mockery context = new Mockery() {
+        {
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }
+    };
 
     private final HttpResponse response = context.mock(HttpResponse.class);
 
@@ -73,8 +74,14 @@ public class HttpPutMethodHandlerTest {
 
     @Test
     public void shouldReturnStatus201ForCreation() throws Exception {
-        final DataBank dataBank = new EhcacheDataBank(new SyntacticReconciliationResolver(),
-                CacheManager.create());
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class, "emptyDataBank");
+
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                will(returnValue(null));
+            }
+        });
         
         handler.dataBank = dataBank;
         
@@ -86,16 +93,18 @@ public class HttpPutMethodHandlerTest {
     
     @Test
     public void shouldReturnStatus200ForUpdate() throws Exception {
-        final DataBank dataBank = new EhcacheDataBank(new SyntacticReconciliationResolver(),
-                CacheManager.create());
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class, "nonEmptyDataBank");
+
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                will(returnValue(new Data()));
+            }
+        });
         
         handler.dataBank = dataBank;
         
-        long dataKey = 1000L;
-        
-        dataBank.put(new Data(dataKey));
-        
-        int statusCode = handler.createStatusCode(dataKey);
+        int statusCode = handler.createStatusCode(1000L);
 
         assertEquals("Status for update is incorrect", HttpStatus.SC_OK,
                 statusCode);
@@ -189,7 +198,7 @@ public class HttpPutMethodHandlerTest {
 
     private HttpPutMethodHandler createHandler(
             final Marshaller<Version> versionMarshaller) {
-        final DataBank dataBank = context.mock(DataBank.class);
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(dataBank,
                 new DefaultProtocolDecoder(new MessageMarshallerFactory(
