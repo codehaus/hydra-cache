@@ -1,5 +1,5 @@
 <assembly>
-    <id>binary-independent-${version}</id>
+    <id>binary-independent</id>
     <formats>
         <format>zip</format>
     </formats>
