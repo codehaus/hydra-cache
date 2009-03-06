@@ -37,7 +37,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="serverId" />
         <constructor-arg ref="channel" />
         <constructor-arg ref="hashFunction" />
-        <constructor-arg value="${hop.substanceSize}" />
+        <constructor-arg value="${hop.S}" />
 
         <property name="multiplexRecevier" ref="multiplexMessageReceiver" />
         <property name="membershipRegistry" ref="membershipRegistry" />
@@ -70,7 +70,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="membershipRegistry" />
         <constructor-arg ref="harmonyDataBank" />
         <constructor-arg ref="conflictResolver"/>
-        <constructor-arg value="${hop.substanceSize}" />
+        <constructor-arg value="${hop.S}" />
     </bean>
     
     <bean id="healthMonitor" class="org.hydracache.server.harmony.core.HealthMonitor">
