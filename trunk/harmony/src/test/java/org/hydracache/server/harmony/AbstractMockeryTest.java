@@ -1,5 +1,13 @@
 package org.hydracache.server.harmony;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.UUID;
+
+import org.hydracache.protocol.control.message.GetOperation;
+import org.hydracache.protocol.control.message.GetOperationResponse;
+import org.hydracache.protocol.control.message.PutOperation;
+import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.data.storage.Data;
@@ -92,6 +100,64 @@ public class AbstractMockeryTest {
             {
                 one(dataBank).getLocally(with(any(Long.class)));
                 will(returnValue(null));
+            }
+        });
+    }
+
+    protected static void addFailedReliablePutExp(final Mockery context,
+            final Data data, final Space space) throws Exception {
+        context.checking(new Expectations() {
+            {
+                // only one help was provided
+                Collection<PutOperationResponse> putOperationResponses = Arrays
+                        .asList(new PutOperationResponse(sourceId, UUID
+                                .randomUUID()));
+
+                one(space).broadcast(with(any(PutOperation.class)));
+                will(returnValue(putOperationResponses));
+            }
+        });
+    }
+
+    protected static void addSuccessReliablePutExp(final Mockery context,
+            final Data data, final Space space) throws Exception {
+        context.checking(new Expectations() {
+            {
+                Collection<PutOperationResponse> putOperationResponses = Arrays
+                        .asList(new PutOperationResponse(sourceId, UUID
+                                .randomUUID()), new PutOperationResponse(
+                                sourceId, UUID.randomUUID()));
+
+                one(space).broadcast(with(any(PutOperation.class)));
+                will(returnValue(putOperationResponses));
+            }
+        });
+    }
+
+    protected static void addFailedReliableGetExp(final Mockery context,
+            final Data data, final Space space) throws Exception {
+        context.checking(new Expectations() {
+            {
+                Collection<GetOperationResponse> putOperationResponses = Arrays
+                        .asList();
+
+                one(space).broadcast(with(any(GetOperation.class)));
+                will(returnValue(putOperationResponses));
+            }
+        });
+    }
+
+    protected static void addSuccessReliableGetExp(final Mockery context,
+            final Data data, final Space space) throws Exception {
+        context.checking(new Expectations() {
+            {
+                Collection<GetOperationResponse> putOperationResponses = Arrays
+                        .asList(new GetOperationResponse(sourceId, UUID
+                                .randomUUID(), data), new GetOperationResponse(
+                                sourceId, UUID.randomUUID(), data));
+
+                one(space).broadcast(with(any(GetOperation.class)));
+                will(returnValue(putOperationResponses));
             }
         });
     }

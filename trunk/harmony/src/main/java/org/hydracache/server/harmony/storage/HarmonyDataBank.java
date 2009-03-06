@@ -84,6 +84,8 @@ public class HarmonyDataBank implements DataBank {
         ensureReliableGet(responses);
 
         Data latestData = getLatestData(keyHash, responses);
+        
+        putLocally(latestData);
 
         return latestData;
     }

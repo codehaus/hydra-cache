@@ -17,43 +17,24 @@ package org.hydracache.server.harmony.storage;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.UUID;
-
-import org.hydracache.protocol.control.message.GetOperation;
-import org.hydracache.protocol.control.message.GetOperationResponse;
-import org.hydracache.protocol.control.message.PutOperation;
-import org.hydracache.protocol.control.message.PutOperationResponse;
-import org.hydracache.server.Identity;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
 import org.hydracache.server.data.storage.EhcacheDataBank;
+import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Space;
-import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.test.TestDataGenerator;
-import org.jgroups.stack.IpAddress;
-import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * @author nzhu
  * 
  */
-public class HarmonyDataBankTest {
-
-    private static Identity defaultSource;
+public class HarmonyDataBankTest extends AbstractMockeryTest {
 
     private Mockery context = new Mockery();
-
-    @Before
-    public void setup() throws Exception {
-        defaultSource = new Identity(8080);
-    }
 
     @Test
     public void ensurePassThroughLocalPutAndGet() throws Exception {
@@ -70,15 +51,15 @@ public class HarmonyDataBankTest {
                 data, dataBank.getLocally(data.getKeyHash()));
     }
 
-    @Test(expected=ReliableDataStorageException.class)
+    @Test(expected = ReliableDataStorageException.class)
     public void ensureNotReliableGetIsDetected() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
 
         Space space = context.mock(Space.class);
 
         {
-            addGetLocalNodeExp(space);
-            addFailedReliableGetExp(data, space);
+            addGetLocalNodeExp(context, space);
+            addFailedReliableGetExp(context, data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();
@@ -91,19 +72,6 @@ public class HarmonyDataBankTest {
         dataBank.get(1000L);
     }
 
-    private void addFailedReliableGetExp(final Data data, final Space space)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                Collection<GetOperationResponse> putOperationResponses = Arrays
-                        .asList();
-
-                one(space).broadcast(with(any(GetOperation.class)));
-                will(returnValue(putOperationResponses));
-            }
-        });
-    }
-
     @Test
     public void getShouldBroadcastToSpace() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
@@ -111,8 +79,8 @@ public class HarmonyDataBankTest {
         Space space = context.mock(Space.class);
 
         {
-            addGetLocalNodeExp(space);
-            addSuccessReliableGetExp(data, space);
+            addGetLocalNodeExp(context, space);
+            addSuccessReliableGetExp(context, data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();
@@ -122,26 +90,15 @@ public class HarmonyDataBankTest {
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
                 conflictResolver, space);
 
-        Data receivedData = dataBank.get(1000L);
+        Data receivedData = dataBank.get(testHashKey);
 
         assertEquals("Data returned by GET is incorrect", data, receivedData);
 
         context.assertIsSatisfied();
-    }
 
-    private void addSuccessReliableGetExp(final Data data, final Space space)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                Collection<GetOperationResponse> putOperationResponses = Arrays
-                        .asList(new GetOperationResponse(defaultSource, UUID
-                                .randomUUID(), data), new GetOperationResponse(
-                                defaultSource, UUID.randomUUID(), data));
-
-                one(space).broadcast(with(any(GetOperation.class)));
-                will(returnValue(putOperationResponses));
-            }
-        });
+        assertEquals(
+                "Data bank should have updated its local cache after a reliable GET",
+                receivedData, dataBank.getLocally(receivedData.getKeyHash()));
     }
 
     @Test
@@ -151,8 +108,8 @@ public class HarmonyDataBankTest {
         Space space = context.mock(Space.class);
 
         {
-            addGetLocalNodeExp(space);
-            addSuccessReliablePutExp(data, space);
+            addGetLocalNodeExp(context, space);
+            addSuccessReliablePutExp(context, data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();
@@ -177,8 +134,8 @@ public class HarmonyDataBankTest {
         Space space = context.mock(Space.class);
 
         {
-            addGetLocalNodeExp(space);
-            addFailedRequestHelpExp(data, space);
+            addGetLocalNodeExp(context, space);
+            addFailedReliablePutExp(context, data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();
@@ -189,46 +146,6 @@ public class HarmonyDataBankTest {
                 conflictResolver, space);
 
         dataBank.put(data);
-    }
-
-    private void addGetLocalNodeExp(final Space space) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(space).getLocalNode();
-                will(returnValue(new JGroupsNode(new Identity(8080),
-                        new IpAddress())));
-            }
-        });
-    }
-
-    private void addSuccessReliablePutExp(final Data data, final Space space)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                Collection<PutOperationResponse> putOperationResponses = Arrays
-                        .asList(new PutOperationResponse(defaultSource, UUID
-                                .randomUUID()), new PutOperationResponse(
-                                defaultSource, UUID.randomUUID()));
-
-                one(space).broadcast(with(any(PutOperation.class)));
-                will(returnValue(putOperationResponses));
-            }
-        });
-    }
-
-    private void addFailedRequestHelpExp(final Data data, final Space space)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                // only one help was provided
-                Collection<PutOperationResponse> putOperationResponses = Arrays
-                        .asList(new PutOperationResponse(defaultSource, UUID
-                                .randomUUID()));
-
-                one(space).broadcast(with(any(PutOperation.class)));
-                will(returnValue(putOperationResponses));
-            }
-        });
     }
 
 }
