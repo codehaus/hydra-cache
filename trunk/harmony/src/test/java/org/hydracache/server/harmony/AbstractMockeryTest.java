@@ -1,4 +1,4 @@
-package org.hydracache.server.harmony.handler;
+package org.hydracache.server.harmony;
 
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
