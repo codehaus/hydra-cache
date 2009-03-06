@@ -100,7 +100,7 @@ public class EhcacheDataBankTest {
     }
 
     @Test
-    public void testGetNonexistantData() {
+    public void testGetNonexistantData() throws Exception {
         final DataBank dataBank = createDataBank();
 
         final Data data = dataBank.get(NON_EXISTANT_KEY_HASH);

@@ -21,7 +21,7 @@ package org.hydracache.server.data.storage;
  * @author nzhu
  * 
  */
-public class DataConflictException extends DataStorageException {
+public class DataConflictException extends DataAccessException {
 
     private static final long serialVersionUID = 1L;
 

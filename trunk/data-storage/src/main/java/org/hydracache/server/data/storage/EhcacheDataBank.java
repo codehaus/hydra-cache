@@ -15,6 +15,7 @@
  */
 package org.hydracache.server.data.storage;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,7 +143,7 @@ public class EhcacheDataBank implements DataBank {
      * org.hydracache.server.data.storage.DataBank#put(org.hydracache.server
      * .data.storage.Data)
      */
-    public void put(final Data newData) throws DataStorageException {
+    public void put(final Data newData) throws IOException {
         Validate.notNull(newData, "Data object can not be null");
 
         Data dataToStore = newData;

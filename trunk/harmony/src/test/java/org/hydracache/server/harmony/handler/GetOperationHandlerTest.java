@@ -52,7 +52,7 @@ public class GetOperationHandlerTest {
         context.assertIsSatisfied();
     }
 
-    private void addLocalGetExp(final HarmonyDataBank dataBank) {
+    private void addLocalGetExp(final HarmonyDataBank dataBank) throws Exception {
         context.checking(new Expectations() {
             {
                 one(dataBank).getLocally(with(testHashKey));

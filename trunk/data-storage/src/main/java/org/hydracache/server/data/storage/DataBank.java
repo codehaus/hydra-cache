@@ -15,6 +15,7 @@
  */
 package org.hydracache.server.data.storage;
 
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -31,7 +32,7 @@ public interface DataBank {
      * @param data
      *            data
      */
-    void put(Data data) throws DataStorageException;
+    void put(Data data) throws IOException;
 
     /**
      * Retrieve data using the given key hash
@@ -40,7 +41,7 @@ public interface DataBank {
      *            key
      * @return data instance
      */
-    Data get(Long keyHash);
+    Data get(Long keyHash) throws IOException;
 
     Collection<Data> getAll();
 

@@ -72,7 +72,7 @@ public class HttpPutMethodHandlerTest {
     }
 
     @Test
-    public void shouldReturnStatus201ForCreation() {
+    public void shouldReturnStatus201ForCreation() throws Exception {
         final DataBank dataBank = new EhcacheDataBank(new SyntacticReconciliationResolver(),
                 CacheManager.create());
         

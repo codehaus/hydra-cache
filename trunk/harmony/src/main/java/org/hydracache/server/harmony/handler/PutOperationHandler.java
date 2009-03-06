@@ -87,7 +87,7 @@ public class PutOperationHandler implements ControlMessageHandler {
                 putOperation.getSource());
     }
 
-    private Data consolidateWithLocalData(Data dataToPut) {
+    private Data consolidateWithLocalData(Data dataToPut) throws IOException {
         Data existingData = harmonyDataBank.getLocally(dataToPut.getKeyHash());
         Data result = dataToPut;
         

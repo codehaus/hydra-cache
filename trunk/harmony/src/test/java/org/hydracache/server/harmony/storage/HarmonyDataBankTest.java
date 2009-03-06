@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
+import org.hydracache.protocol.control.message.GetOperation;
+import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.server.Identity;
@@ -52,19 +54,94 @@ public class HarmonyDataBankTest {
     public void setup() throws Exception {
         defaultSource = new Identity(8080);
     }
-    
+
     @Test
-    public void ensurePassThroughLocalPutAndGet() throws Exception{
+    public void ensurePassThroughLocalPutAndGet() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         DataBank localDataBank = new EhcacheDataBank(null);
 
-        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
-                null, null);
-        
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank, null,
+                null);
+
         dataBank.putLocally(data);
-        
-        assertEquals("Data is incorrect after local put and get operations", data, dataBank.getLocally(data.getKeyHash()));
+
+        assertEquals("Data is incorrect after local put and get operations",
+                data, dataBank.getLocally(data.getKeyHash()));
+    }
+
+    @Test(expected=ReliableDataStorageException.class)
+    public void ensureNotReliableGetIsDetected() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(space);
+            addFailedReliableGetExp(data, space);
+        }
+
+        ConflictResolver conflictResolver = new ArbitraryResolver();
+
+        DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.get(1000L);
+    }
+
+    private void addFailedReliableGetExp(final Data data, final Space space)
+            throws Exception {
+        context.checking(new Expectations() {
+            {
+                Collection<GetOperationResponse> putOperationResponses = Arrays
+                        .asList();
+
+                one(space).broadcast(with(any(GetOperation.class)));
+                will(returnValue(putOperationResponses));
+            }
+        });
+    }
+
+    @Test
+    public void getShouldBroadcastToSpace() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(space);
+            addSuccessReliableGetExp(data, space);
+        }
+
+        ConflictResolver conflictResolver = new ArbitraryResolver();
+
+        DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        Data receivedData = dataBank.get(1000L);
+
+        assertEquals("Data returned by GET is incorrect", data, receivedData);
+
+        context.assertIsSatisfied();
+    }
+
+    private void addSuccessReliableGetExp(final Data data, final Space space)
+            throws Exception {
+        context.checking(new Expectations() {
+            {
+                Collection<GetOperationResponse> putOperationResponses = Arrays
+                        .asList(new GetOperationResponse(defaultSource, UUID
+                                .randomUUID(), data), new GetOperationResponse(
+                                defaultSource, UUID.randomUUID(), data));
+
+                one(space).broadcast(with(any(GetOperation.class)));
+                will(returnValue(putOperationResponses));
+            }
+        });
     }
 
     @Test
@@ -75,7 +152,7 @@ public class HarmonyDataBankTest {
 
         {
             addGetLocalNodeExp(space);
-            addSuccessRequestHelpExp(data, space);
+            addSuccessReliablePutExp(data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();
@@ -124,13 +201,14 @@ public class HarmonyDataBankTest {
         });
     }
 
-    private void addSuccessRequestHelpExp(final Data data, final Space space)
+    private void addSuccessReliablePutExp(final Data data, final Space space)
             throws Exception {
         context.checking(new Expectations() {
             {
                 Collection<PutOperationResponse> putOperationResponses = Arrays
-                        .asList(new PutOperationResponse(defaultSource, UUID.randomUUID()),
-                                new PutOperationResponse(defaultSource, UUID.randomUUID()));
+                        .asList(new PutOperationResponse(defaultSource, UUID
+                                .randomUUID()), new PutOperationResponse(
+                                defaultSource, UUID.randomUUID()));
 
                 one(space).broadcast(with(any(PutOperation.class)));
                 will(returnValue(putOperationResponses));
@@ -144,7 +222,8 @@ public class HarmonyDataBankTest {
             {
                 // only one help was provided
                 Collection<PutOperationResponse> putOperationResponses = Arrays
-                        .asList(new PutOperationResponse(defaultSource, UUID.randomUUID()));
+                        .asList(new PutOperationResponse(defaultSource, UUID
+                                .randomUUID()));
 
                 one(space).broadcast(with(any(PutOperation.class)));
                 will(returnValue(putOperationResponses));

@@ -15,7 +15,7 @@
  */
 package org.hydracache.server.harmony.storage;
 
-import org.hydracache.server.data.storage.DataStorageException;
+import java.io.IOException;
 
 /**
  * Data storage exception thrown when reliable storage can not be achieved
@@ -23,7 +23,7 @@ import org.hydracache.server.data.storage.DataStorageException;
  * @author nzhu
  * 
  */
-public class ReliableDataStorageException extends DataStorageException {
+public class ReliableDataStorageException extends IOException {
 
     private static final long serialVersionUID = 1L;
 

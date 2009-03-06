@@ -33,7 +33,6 @@ import org.hydracache.protocol.data.message.BlobDataMessage;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
-import org.hydracache.server.data.storage.DataStorageException;
 
 /**
  * Put http method request handler
@@ -89,7 +88,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         response.setStatusCode(statusCode);
     }
 
-    int createStatusCode(Long dataKey) {
+    int createStatusCode(Long dataKey) throws IOException {
         int returnStatusCode = HttpStatus.SC_OK;
 
         if (dataBank.get(dataKey) == null)
@@ -102,7 +101,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         try {
             dataBank.put(new Data(dataMessage.getKeyHash(), dataMessage
                     .getVersion(), dataMessage.getBlob()));
-        } catch (DataStorageException ex) {
+        } catch (IOException ex) {
             log.error("Failed to put:", ex);
             response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
         }
