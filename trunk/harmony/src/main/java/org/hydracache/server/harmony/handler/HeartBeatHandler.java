@@ -22,4 +22,8 @@ public class HeartBeatHandler implements ControlMessageHandler {
         membershipRegistry.register(heartBeat.getSourceNode());
     }
 
+    protected boolean messageIsNotFromOurNeighbor(ControlMessage message) {
+        return false;
+    }
+
 }

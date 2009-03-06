@@ -19,26 +19,20 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.hydracache.protocol.control.message.PutOperation;
-import org.hydracache.protocol.control.message.PutOperationResponse;
-import org.hydracache.server.Identity;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.DefaultResolutionResult;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.core.SubstanceSet;
-import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
-import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Test;
 
-public class PutOperationHandlerTest {
-    private static final int TEST_PORT = 8080;
-
+public class PutOperationHandlerTest extends AbstractMockeryTest {
     private Mockery context = new Mockery() {
         {
             setImposteriser(ClassImposteriser.INSTANCE);
@@ -50,22 +44,21 @@ public class PutOperationHandlerTest {
         Data testData = TestDataGenerator.createRandomData();
 
         ControlMessageHandler handler = new PutOperationHandler(
-                mockSpaceToRespond(context), mockDataBankToPutBrandNewData(context,
-                        testData), new ArbitraryResolver());
+                mockSpaceToRespond(context), mockDataBankToPutBrandNewData(
+                        context, testData), new ArbitraryResolver());
 
-        PutOperation putOperation = new PutOperation(new Identity(TEST_PORT),
-                testData);
+        PutOperation putOperation = new PutOperation(sourceId, testData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
     }
 
-    public static HarmonyDataBank mockDataBankToPutBrandNewData(
+    private static HarmonyDataBank mockDataBankToPutBrandNewData(
             Mockery context, Data testData) throws Exception {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
         {
-            addPutExp(context, dataBank);
-            addGetNothingExp(context, dataBank);
+            addLocalPutExp(context, dataBank);
+            addLocalGetNothingExp(context, dataBank);
         }
         return dataBank;
     }
@@ -93,8 +86,7 @@ public class PutOperationHandlerTest {
                 mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
                         testData), resolverWithConflictResult);
 
-        PutOperation putOperation = new PutOperation(new Identity(TEST_PORT),
-                testData);
+        PutOperation putOperation = new PutOperation(sourceId, testData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -109,31 +101,10 @@ public class PutOperationHandlerTest {
                 mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
                         testData), new ArbitraryResolver());
 
-        PutOperation putOperation = new PutOperation(new Identity(TEST_PORT),
-                testData);
+        PutOperation putOperation = new PutOperation(sourceId, testData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
-    }
-
-    public static Space mockSpaceToRespond(Mockery context) throws Exception {
-        final Space space = context.mock(Space.class);
-        {
-            addGetPositiveSubstanceSetExp(context, space);
-            addGetLocalNodeExp(context, space);
-            addBroadcastPutResponseExp(context, space);
-        }
-        return space;
-    }
-
-    public static HarmonyDataBank mockDataBankToGetAndPut(Mockery context,
-            Data testData) throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
-        {
-            addPutExp(context, dataBank);
-            addGetExp(context, dataBank, testData);
-        }
-        return dataBank;
     }
 
     @Test
@@ -153,80 +124,29 @@ public class PutOperationHandlerTest {
         ControlMessageHandler handler = new PutOperationHandler(space,
                 doNothingDatabank, new ArbitraryResolver());
 
-        handler.handle(new PutOperation(new Identity(TEST_PORT),
-                TestDataGenerator.createRandomData()));
+        handler.handle(new PutOperation(sourceId, TestDataGenerator
+                .createRandomData()));
 
         context.assertIsSatisfied();
     }
 
-    private static void addGetPositiveSubstanceSetExp(final Mockery context,
-            final Space space) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(space).findSubstancesForLocalNode();
-
-                final SubstanceSet substanceSet = context
-                        .mock(SubstanceSet.class);
-
-                context.checking(new Expectations() {
-                    {
-                        one(substanceSet).isNeighbor(with(any(Identity.class)));
-                        will(returnValue(true));
-                    }
-                });
-
-                will(returnValue(substanceSet));
-            }
-        });
+    private static Space mockSpaceToRespond(Mockery context) throws Exception {
+        final Space space = context.mock(Space.class);
+        {
+            addGetPositiveSubstanceSetExp(context, space);
+            addGetLocalNodeExp(context, space);
+            addBroadcastResponseExp(context, space);
+        }
+        return space;
     }
 
-    private static void addGetLocalNodeExp(Mockery context, final Space space)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(space).getLocalNode();
-                will(returnValue(new JGroupsNode(new Identity(TEST_PORT),
-                        new IpAddress())));
-            }
-        });
-    }
-
-    private static void addBroadcastPutResponseExp(Mockery context,
-            final Space space) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(space).broadcast(with(any(PutOperationResponse.class)));
-            }
-        });
-    }
-
-    private static void addPutExp(Mockery context,
-            final HarmonyDataBank dataBank) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(dataBank).putLocally(with(any(Data.class)));
-            }
-        });
-    }
-
-    private static void addGetExp(Mockery context,
-            final HarmonyDataBank dataBank, final Data testData)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                will(returnValue(testData));
-            }
-        });
-    }
-
-    private static void addGetNothingExp(Mockery context,
-            final HarmonyDataBank dataBank) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                will(returnValue(null));
-            }
-        });
+    private static HarmonyDataBank mockDataBankToGetAndPut(Mockery context,
+            Data testData) throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
+        {
+            addLocalPutExp(context, dataBank);
+            addLocalGetExp(context, dataBank, testData);
+        }
+        return dataBank;
     }
 }

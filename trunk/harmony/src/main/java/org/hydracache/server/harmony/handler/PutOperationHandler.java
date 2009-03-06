@@ -36,20 +36,17 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  * @author nzhu
  * 
  */
-public class PutOperationHandler implements ControlMessageHandler {
+public class PutOperationHandler extends AbstractControlMessageHandler {
     private static Logger log = Logger.getLogger(PutOperationHandler.class);
 
     private HarmonyDataBank harmonyDataBank;
 
     private ConflictResolver conflictResolver;
 
-    private Space space;
-
     public PutOperationHandler(Space space, HarmonyDataBank harmonyDataBank,
             ConflictResolver conflictResolver) {
-        super();
+        super(space);
         this.harmonyDataBank = harmonyDataBank;
-        this.space = space;
         this.conflictResolver = conflictResolver;
     }
 
@@ -57,10 +54,11 @@ public class PutOperationHandler implements ControlMessageHandler {
      * (non-Javadoc)
      * 
      * @see
-     * org.hydracache.server.harmony.handler.ControlMessageHandler#handle(org
-     * .hydracache.protocol.control.message.ControlMessage)
+     * org.hydracache.server.harmony.handler.AbstractControlMessageHandler#doHandle
+     * (org.hydracache.protocol.control.message.ControlMessage)
      */
-    public void handle(ControlMessage message) throws Exception {
+    @Override
+    protected void doHandle(ControlMessage message) throws Exception {
         Validate.isTrue(message instanceof PutOperation, "Unsupported message["
                 + message + "] received");
 
@@ -72,7 +70,7 @@ public class PutOperationHandler implements ControlMessageHandler {
         }
 
         Data dataToPut = putOperation.getData();
-        
+
         Data currentData = consolidateWithLocalData(dataToPut);
 
         harmonyDataBank.putLocally(currentData);
@@ -82,15 +80,10 @@ public class PutOperationHandler implements ControlMessageHandler {
         log.debug("Response message has been sent: " + message);
     }
 
-    private boolean messageIsNotFromOurNeighbor(PutOperation putOperation) {
-        return !space.findSubstancesForLocalNode().isNeighbor(
-                putOperation.getSource());
-    }
-
     private Data consolidateWithLocalData(Data dataToPut) throws IOException {
         Data existingData = harmonyDataBank.getLocally(dataToPut.getKeyHash());
         Data result = dataToPut;
-        
+
         if (existingData != null) {
             Collection<Data> liveData = performConsolidation(dataToPut,
                     existingData);

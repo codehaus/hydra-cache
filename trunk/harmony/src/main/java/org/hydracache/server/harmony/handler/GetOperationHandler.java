@@ -7,26 +7,34 @@ import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
-public class GetOperationHandler implements ControlMessageHandler {
-
-    private Space space;
+public class GetOperationHandler extends AbstractControlMessageHandler {
 
     private HarmonyDataBank harmonyDataBank;
 
     public GetOperationHandler(Space space, HarmonyDataBank harmonyDataBank) {
-        this.space = space;
+        super(space);
         this.harmonyDataBank = harmonyDataBank;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hydracache.server.harmony.handler.AbstractControlMessageHandler#doHandle
+     * (org.hydracache.protocol.control.message.ControlMessage)
+     */
     @Override
-    public void handle(ControlMessage message) throws Exception {
+    protected void doHandle(ControlMessage message) throws Exception {
         GetOperation getRequest = (GetOperation) message;
-        
-        Data currentData= harmonyDataBank.getLocally(getRequest.getHashKey());
-        
-        GetOperationResponse  response = new GetOperationResponse(space.getLocalNode().getId(), getRequest.getId(), currentData);
-        
-        space.broadcast(response);
+
+        Data currentData = harmonyDataBank.getLocally(getRequest.getHashKey());
+
+        if (currentData != null) {
+            GetOperationResponse response = new GetOperationResponse(space
+                    .getLocalNode().getId(), getRequest.getId(), currentData);
+
+            space.broadcast(response);
+        }
     }
 
 }

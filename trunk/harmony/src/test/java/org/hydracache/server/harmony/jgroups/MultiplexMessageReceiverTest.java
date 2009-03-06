@@ -27,9 +27,11 @@ import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
+import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.Space;
-import org.hydracache.server.harmony.handler.PutOperationHandlerTest;
+import org.hydracache.server.harmony.handler.AbstractMockeryTest;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.Message;
 import org.jgroups.stack.IpAddress;
@@ -42,7 +44,7 @@ import org.junit.Test;
  * @author nzhu
  * 
  */
-public class MultiplexMessageReceiverTest {
+public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
 
     private Mockery context = new Mockery() {
         {
@@ -67,10 +69,9 @@ public class MultiplexMessageReceiverTest {
         int expectedNumOfResps = 3;
 
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
-                PutOperationHandlerTest.mockSpaceToRespond(context),
-                membershipRegistry, PutOperationHandlerTest
-                        .mockDataBankToGetAndPut(context, TestDataGenerator
-                                .createRandomData()), new ArbitraryResolver(),
+                mockSpaceToRespond(context), membershipRegistry,
+                mockDataBankToGetAndPut(context, TestDataGenerator
+                        .createRandomData()), new ArbitraryResolver(),
                 expectedNumOfResps);
 
         final PutOperation request = new PutOperation(NEIGHBOR_SOURCE_ID,
@@ -130,14 +131,35 @@ public class MultiplexMessageReceiverTest {
         context.assertIsSatisfied();
     }
 
-    public static void receiveResponse(final MultiplexMessageReceiver receiver,
+    private static void receiveResponse(final MultiplexMessageReceiver receiver,
             final PutOperation request) throws Exception {
         ResponseMessage response = new PutOperationResponse(NEIGHBOR_SOURCE_ID,
                 request.getId());
         Message responseMsg = new Message();
+
         responseMsg.setObject(response);
 
         receiver.receive(responseMsg);
+    }
+
+    private static Space mockSpaceToRespond(Mockery context) throws Exception {
+        final Space space = context.mock(Space.class);
+        {
+            addGetPositiveSubstanceSetExp(context, space);
+            addGetLocalNodeExp(context, space);
+            addBroadcastResponseExp(context, space);
+        }
+        return space;
+    }
+
+    private static HarmonyDataBank mockDataBankToGetAndPut(Mockery context,
+            Data testData) throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
+        {
+            addLocalPutExp(context, dataBank);
+            addLocalGetExp(context, dataBank, testData);
+        }
+        return dataBank;
     }
 
 }

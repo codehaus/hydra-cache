@@ -27,7 +27,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.RequestMessage;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
@@ -186,13 +185,7 @@ public class JGroupsSpace implements Space {
             List<ResponseMessage> results = new ArrayList<ResponseMessage>();
 
             for (ResponseMessage responseMessage : responseMessages) {
-                if (!(responseMessage instanceof PutOperationResponse)) {
-                    log.warn("Unexpected response message received: "
-                            + responseMessage);
-                    continue;
-                }
-
-                results.add((PutOperationResponse) responseMessage);
+                results.add(responseMessage);
             }
 
             return results;

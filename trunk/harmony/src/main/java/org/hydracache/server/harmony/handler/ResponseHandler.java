@@ -46,4 +46,8 @@ public class ResponseHandler implements ControlMessageHandler {
         log.debug("Successfully processed response message: " + message);
     }
 
+    protected boolean messageIsNotFromOurNeighbor(ControlMessage message) {
+        return false;
+    }
+
 }
