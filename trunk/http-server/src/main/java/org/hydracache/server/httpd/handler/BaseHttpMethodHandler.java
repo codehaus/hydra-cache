@@ -73,7 +73,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return requestString;
     }
 
-    protected boolean hashKeyIsBlank(HttpRequest request) {
+    protected boolean keyIsBlank(HttpRequest request) {
         return StringUtils.isBlank(extractRequestString(request));
     }
 
