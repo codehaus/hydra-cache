@@ -61,7 +61,7 @@ public class SubstancePartitionTest {
                 serverIds);
 
         assertEquals("Node A id should be returned", nodeA.getId(), partition
-                .get(nodeA.getId()));
+                .get(nodeA.getId().toString()));
 
         assertEquals("Node B id should be returned", nodeB.getId(), partition
                 .next(nodeA.getId()));

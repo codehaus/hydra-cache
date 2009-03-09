@@ -41,7 +41,8 @@ import org.hydracache.data.hashing.HashFunction;
  */
 public class ConsistentHashNodePartition<T> implements NodePartition<T> {
 
-    private static final int REPLICA_INTERVAL_MULTIPLIER = 13;
+    // a large enough prime number
+    private static final int REPLICA_INTERVAL_MULTIPLIER = 333667;
 
     private static final int DEFAULT_NUMBER_OF_REPLICAS = 1000;
 
@@ -71,23 +72,22 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#add(java.lang.Object)
      */
     public void add(T node) {
-        if(numberOfReplicas == 0){
+        if (numberOfReplicas == 0) {
             circle.put(hashFunction.hash(node), node);
             return;
         }
-        
-        for (int i = 0; i < numberOfReplicas; i++) {
-            circle.put(hashFunction.hash(node) * i
-                    * REPLICA_INTERVAL_MULTIPLIER, node);
+
+        for (int i = 1; i <= numberOfReplicas; i++) {
+            circle.put(replicatedNodeHash(node, i), node);
         }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.data.partitioning.NodeCircle#get(java.lang.Object)
+     * @see org.hydracache.data.partitioning.NodePartition#get(java.lang.String)
      */
-    public T get(Object key) {
+    public T get(String key) {
         if (circle.isEmpty()) {
             return null;
         }
@@ -111,15 +111,19 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#remove(java.lang.Object)
      */
     public void remove(T node) {
-        if(numberOfReplicas == 0){
+        if (numberOfReplicas == 0) {
             circle.remove(hashFunction.hash(node));
             return;
         }
-        
-        for (int i = 0; i < numberOfReplicas; i++) {
-            circle.remove(hashFunction.hash(node) * i
-                    * REPLICA_INTERVAL_MULTIPLIER);
+
+        for (int i = 1; i <= numberOfReplicas; i++) {
+            circle.remove(replicatedNodeHash(node, i));
         }
+    }
+
+    private long replicatedNodeHash(T node, int i) {
+        return hashFunction.hash(node)
+                * (i * REPLICA_INTERVAL_MULTIPLIER);
     }
 
 }

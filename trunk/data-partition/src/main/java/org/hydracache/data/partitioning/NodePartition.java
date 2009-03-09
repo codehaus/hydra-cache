@@ -76,5 +76,5 @@ public interface NodePartition<T> {
      *         goes down, the method should return the node's nearest neighbour
      *         going in a "clockwise" direction.
      */
-    public T get(Object key);
+    public T get(String key);
 }
