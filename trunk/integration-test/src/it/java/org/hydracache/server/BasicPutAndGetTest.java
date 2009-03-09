@@ -23,7 +23,7 @@ import java.util.Arrays;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.http.HttpHydraCacheClient;
+import org.hydracache.client.http.PartitionAwareHydraCacheClient;
 import org.hydracache.data.hashing.NativeHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -47,7 +47,7 @@ public class BasicPutAndGetTest {
 
     private Identity serverId;
 
-    private HttpHydraCacheClient client;
+    private PartitionAwareHydraCacheClient client;
 
     @Before
     public void setup() throws Exception {
@@ -58,7 +58,7 @@ public class BasicPutAndGetTest {
         NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
                 new NativeHashFunction(), Arrays.asList(serverId));
 
-        client = new HttpHydraCacheClient(partition);
+        client = new PartitionAwareHydraCacheClient(partition);
     }
 
     @Test

@@ -26,8 +26,6 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.log4j.Logger;
 import org.hydracache.client.HydraCacheClient;
-import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.NativeHashFunction;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
@@ -49,16 +47,14 @@ import org.hydracache.server.harmony.core.Substance;
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
-public class HttpHydraCacheClient implements HydraCacheClient {
+public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
     private static final String PROTOCOL = "http://";
 
     private static final Logger logger = Logger
-            .getLogger(HttpHydraCacheClient.class);
+            .getLogger(PartitionAwareHydraCacheClient.class);
 
     private final NodePartition<Identity> nodePartition;
-
-    private HashFunction hashFunction;
 
     private HttpClient httpClient;
 
@@ -73,9 +69,8 @@ public class HttpHydraCacheClient implements HydraCacheClient {
      * @param connection
      *            The connection to the {@link Substance}.
      */
-    public HttpHydraCacheClient(NodePartition<Identity> nodePartition) {
+    public PartitionAwareHydraCacheClient(NodePartition<Identity> nodePartition) {
         this.nodePartition = nodePartition;
-        this.hashFunction = new NativeHashFunction();
         this.httpClient = new HttpClient();
 
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory();
@@ -96,51 +91,43 @@ public class HttpHydraCacheClient implements HydraCacheClient {
         this.httpClient = httpClient;
     }
 
-    /**
-     * @param hashFunction
-     *            the hashFunction to set
-     */
-    public void setHashFunction(HashFunction hashFunction) {
-        this.hashFunction = hashFunction;
-    }
-
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.connector.HydraCacheClient#get(java.lang.String)
+     * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
      */
     @Override
-    public Data get(Object key) {
+    public Data get(String key) {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
         Data data = null;
         try {
             GetMethod getMethod = new GetMethod(uri);
-            
+
             int responseCode = httpClient.executeMethod(getMethod);
             validateResponseCode(responseCode);
-            
+
             DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(getMethod
                             .getResponseBodyAsStream()));
             data = dataMessage.getData();
-            
+
         } catch (IOException ioe) {
             logger.error("Cannot retrieve data.", ioe);
         }
-        
+
         return data;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.connector.HydraCacheClient#put(java.lang.String,
+     * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
      * org.hydracache.server.data.storage.Data)
      */
     @Override
-    public void put(Object key, Data data) {
+    public void put(String key, Data data) {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
@@ -171,16 +158,10 @@ public class HttpHydraCacheClient implements HydraCacheClient {
             throw new IOException("Error HTTP response received: " + rc);
     }
 
-    /**
-     * @param key
-     * @param identity
-     * @return
-     */
-    private String constructUri(Object key, Identity identity) {
+    String constructUri(String key, Identity identity) {
         StringBuffer uri = new StringBuffer();
         uri.append(PROTOCOL).append(identity.getAddress().getHostName())
-                .append(":").append(identity.getPort()).append("/").append(
-                        hashFunction.hash(key));
+                .append(":").append(identity.getPort()).append("/").append(key);
         return uri.toString();
     }
 

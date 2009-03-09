@@ -16,6 +16,7 @@
 package org.hydracache.client.http;
 
 import java.util.Collections;
+import static org.junit.Assert.*;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -31,9 +32,9 @@ import org.junit.Test;
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
-public class HttpHydraCacheClientTest {
+public class PartitionAwareHydraCacheClientTest {
 
-    private HttpHydraCacheClient client;
+    private PartitionAwareHydraCacheClient client;
 
     private Identity defaultIdentity;
 
@@ -44,7 +45,7 @@ public class HttpHydraCacheClientTest {
         List<Identity> ids = Collections.singletonList(defaultIdentity);
         SubstancePartition partition = new SubstancePartition(
                 new NativeHashFunction(), ids);
-        client = new HttpHydraCacheClient(partition);
+        client = new PartitionAwareHydraCacheClient(partition);
     }
 
     @Test
@@ -54,6 +55,18 @@ public class HttpHydraCacheClientTest {
         client.setHttpClient(httpClient);
 
         Data data = client.get(key);
+        
         Assert.assertNull(data);
+    }
+
+    @Test
+    public void ensureUrlConstructionCorrectness() {
+        String key = "session893475";
+        Identity localhostId = new Identity(8080);
+
+        String url = client.constructUri(key, localhostId);
+
+        assertEquals("URL construction is incorrect", "http://"
+                + localhostId.getAddress().getHostName() + ":8080/" + key, url);
     }
 }

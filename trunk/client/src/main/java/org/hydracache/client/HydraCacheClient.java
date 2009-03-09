@@ -37,7 +37,7 @@ public interface HydraCacheClient {
      * @throws OperationTimeoutException
      *             if we cannot locate the data in sufficient time.
      */
-    public Data get(Object key) throws IOException;
+    public Data get(String key) throws IOException;
 
     /**
      * Add data to the cache with the given key.
@@ -48,6 +48,6 @@ public interface HydraCacheClient {
      *            The data
      * @return A Future to return true once the operation has completed
      */
-    public void put(Object key, Data data);
+    public void put(String key, Data data);
 
 }

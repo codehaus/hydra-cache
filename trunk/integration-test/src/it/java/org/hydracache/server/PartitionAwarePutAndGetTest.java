@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.http.HttpHydraCacheClient;
+import org.hydracache.client.http.PartitionAwareHydraCacheClient;
 import org.hydracache.data.hashing.NativeHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -46,7 +46,7 @@ public class PartitionAwarePutAndGetTest {
 
     private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
 
-    private HttpHydraCacheClient client;
+    private PartitionAwareHydraCacheClient client;
 
     private NodePartition<Identity> partition;
 
@@ -63,7 +63,7 @@ public class PartitionAwarePutAndGetTest {
                         new Identity(InetAddress.getByName(SERVER_NAME), 8082),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8083)));
 
-        client = new HttpHydraCacheClient(partition);
+        client = new PartitionAwareHydraCacheClient(partition);
 
         localDataStorage = new HashMap<String, Data>();
     }
