@@ -29,7 +29,6 @@ import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.ProtocolException;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.BlobDataMessage;
-import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
@@ -46,10 +45,7 @@ public class ProtocolCodecTest {
 
     private static final int INVALID_PROTOCOL_VERSION = 9;
 
-    private static final int TEST_KEY_HASH = 3249;
-
-    private final IncrementVersionFactory versionFactory =
-            new IncrementVersionFactory();
+    private final IncrementVersionFactory versionFactory = new IncrementVersionFactory();
 
     private Identity testNodeId;
 
@@ -61,25 +57,26 @@ public class ProtocolCodecTest {
 
     @Test
     public void testMsgCanBeEncodeAndDecodeProperly() throws Exception {
-        final ProtocolEncoder<DataMessage> encoder = buildEncoder();
+        final ProtocolEncoder<BlobDataMessage> encoder = buildEncoder();
 
         final Buffer buffer = Buffer.allocate();
 
         final BlobDataMessage msg = new BlobDataMessage();
 
-        msg.setKeyHash(TEST_KEY_HASH);
         msg.setVersion(versionFactory.create(testNodeId));
         msg.setBlob(TEST_DATA);
 
         encoder.encode(msg, buffer.asDataOutpuStream());
 
-        assertEquals("Ecoding generated invalid length of data", 32,
-                buffer.toByteArray().length);
+        int expectedBinaryLength = 24;
 
-        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
+        assertEquals("Ecoding generated invalid length of data",
+                expectedBinaryLength, buffer.toByteArray().length);
 
-        final BlobDataMessage newMsg =
-                (BlobDataMessage) decoder.decode(buffer.asDataInputStream());
+        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
+
+        final BlobDataMessage newMsg = (BlobDataMessage) decoder.decode(buffer
+                .asDataInputStream());
 
         assertEquals("Decode result is incorrect", msg, newMsg);
     }
@@ -94,10 +91,10 @@ public class ProtocolCodecTest {
 
         out.writeByte(INVALID_PROTOCOL_VERSION);
 
-        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
 
-        decoder.decode(new DataInputStream(new ByteArrayInputStream(
-                buffer.toByteArray())));
+        decoder.decode(new DataInputStream(new ByteArrayInputStream(buffer
+                .toByteArray())));
     }
 
     @Test(expected = ProtocolException.class)
@@ -108,10 +105,10 @@ public class ProtocolCodecTest {
 
         out.writeShort((short) 2);
 
-        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
 
-        decoder.decode(new DataInputStream(new ByteArrayInputStream(
-                buffer.toByteArray())));
+        decoder.decode(new DataInputStream(new ByteArrayInputStream(buffer
+                .toByteArray())));
     }
 
     @Test
@@ -123,11 +120,11 @@ public class ProtocolCodecTest {
         buffer.asDataOutpuStream().writeShort(
                 ProtocolConstants.HEADER_LENGTH + headerInjectionLenght);
 
-        buffer.asDataOutpuStream().writeByte(ProtocolConstants.PROTOCOL_VERSION);
+        buffer.asDataOutpuStream()
+                .writeByte(ProtocolConstants.PROTOCOL_VERSION);
 
         final BlobDataMessage msg = new BlobDataMessage();
 
-        msg.setKeyHash(TEST_KEY_HASH);
         msg.setVersion(versionFactory.create(testNodeId));
         msg.setBlob(TEST_DATA);
 
@@ -135,31 +132,29 @@ public class ProtocolCodecTest {
 
         buffer.asDataOutpuStream().write(new byte[headerInjectionLenght]);
 
-        buffer.asDataOutpuStream().writeLong(msg.getKeyHash());
-        versionFactory.writeObject(msg.getVersion(), buffer.asDataOutpuStream());
+        versionFactory
+                .writeObject(msg.getVersion(), buffer.asDataOutpuStream());
         buffer.asDataOutpuStream().write(msg.getBlob());
 
-        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
 
-        final BlobDataMessage newMsg =
-                (BlobDataMessage) decoder.decode(buffer.asDataInputStream());
+        final BlobDataMessage newMsg = (BlobDataMessage) decoder.decode(buffer
+                .asDataInputStream());
 
         assertEquals("Decode result is incorrect", msg, newMsg);
     }
 
-    private ProtocolEncoder<DataMessage> buildEncoder() {
+    private ProtocolEncoder<BlobDataMessage> buildEncoder() {
 
-        final ProtocolEncoder<DataMessage> encoder =
-                new DefaultProtocolEncoder(new MessageMarshallerFactory(
-                        versionFactory));
+        final ProtocolEncoder<BlobDataMessage> encoder = new DefaultProtocolEncoder(
+                new MessageMarshallerFactory(versionFactory));
 
         return encoder;
     }
 
-    private ProtocolDecoder<DataMessage> buildDecoder() {
-        final ProtocolDecoder<DataMessage> decoder =
-                new DefaultProtocolDecoder(new MessageMarshallerFactory(
-                        versionFactory));
+    private ProtocolDecoder<BlobDataMessage> buildDecoder() {
+        final ProtocolDecoder<BlobDataMessage> decoder = new DefaultProtocolDecoder(
+                new MessageMarshallerFactory(versionFactory));
         return decoder;
     }
 

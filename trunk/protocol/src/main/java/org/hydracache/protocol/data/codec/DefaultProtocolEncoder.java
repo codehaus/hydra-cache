@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.data.message.BlobDataMessage;
 
 /**
  * Default protocol encoder implementation
@@ -31,7 +31,7 @@ import org.hydracache.protocol.data.message.DataMessage;
  * @author nzhu
  * 
  */
-public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
+public class DefaultProtocolEncoder implements ProtocolEncoder<BlobDataMessage> {
     private MessageMarshallerFactory marshallerFactory;
 
     /**
@@ -49,8 +49,7 @@ public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
      * .protocol.data.message.ProtocolMessage, java.io.DataOutput)
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public void encode(DataMessage msg, DataOutputStream out)
+    public void encode(BlobDataMessage msg, DataOutputStream out)
             throws IOException {
         out.writeShort(HEADER_LENGTH);
 
@@ -58,7 +57,7 @@ public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
 
         out.writeShort(msg.getMessageType());
 
-        Marshaller<DataMessage> marshaller = (Marshaller<DataMessage>) marshallerFactory
+        Marshaller<BlobDataMessage> marshaller = marshallerFactory
                 .createMarshallerFor(msg.getMessageType());
 
         marshaller.writeObject(msg, out);

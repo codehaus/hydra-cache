@@ -17,7 +17,7 @@ package org.hydracache.protocol.data.marshaller;
 
 import org.apache.commons.lang.Validate;
 import org.hydracache.io.Marshaller;
-import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.data.message.BlobDataMessage;
 import org.hydracache.server.data.versioning.Version;
 
 /**
@@ -43,12 +43,12 @@ public class MessageMarshallerFactory {
      * 
      * @return marshaller instance
      */
-    public Marshaller<? extends DataMessage> createMarshallerFor(
+    public Marshaller<BlobDataMessage> createMarshallerFor(
             int messageType) {
-        Marshaller<? extends DataMessage> marshaller = null;
+        Marshaller<BlobDataMessage> marshaller = null;
 
         switch (messageType) {
-        case DataMessage.BLOB_DATA_MESSAGE_TYPE:
+        case BlobDataMessage.BLOB_DATA_MESSAGE_TYPE:
             marshaller = new DataMessageMarshaller(versionMarshaller);
             break;
         }

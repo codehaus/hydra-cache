@@ -17,7 +17,6 @@ package org.hydracache.server.httpd.handler;
 
 import java.io.IOException;
 
-import org.apache.commons.lang.Validate;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -31,7 +30,6 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
-import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -44,13 +42,13 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
 public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     private static Logger log = Logger.getLogger(HttpPutMethodHandler.class);
 
-    private ProtocolDecoder<DataMessage> decoder;
+    private ProtocolDecoder<BlobDataMessage> decoder;
 
     /**
      * Constructor
      */
-    public HttpPutMethodHandler(HarmonyDataBank dataBank, HashFunction hashFunction, 
-            ProtocolDecoder<DataMessage> decoder) {
+    public HttpPutMethodHandler(HarmonyDataBank dataBank,
+            HashFunction hashFunction, ProtocolDecoder<BlobDataMessage> decoder) {
         super(dataBank, hashFunction);
         this.decoder = decoder;
     }
@@ -70,7 +68,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             log.warn("Empty request[" + request + "] received and ignored");
             return;
         }
-        
+
         if (keyIsBlank(request))
             return;
 
@@ -80,11 +78,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
         Long dataKey = extractDataKeyHash(request);
 
-        verifyKeyHashConsistency(dataMessage, dataKey);
-
         int statusCode = createStatusCode(dataKey);
 
-        doPut(response, dataMessage);
+        doPut(response, dataKey, dataMessage);
 
         response.setStatusCode(statusCode);
     }
@@ -94,23 +90,19 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
         if (dataBank.getLocally(dataKey) == null)
             returnStatusCode = HttpStatus.SC_CREATED;
-        
+
         return returnStatusCode;
     }
 
-    private void doPut(HttpResponse response, BlobDataMessage dataMessage) {
+    private void doPut(HttpResponse response, Long dataKey,
+            BlobDataMessage dataMessage) {
         try {
-            dataBank.put(new Data(dataMessage.getKeyHash(), dataMessage
-                    .getVersion(), dataMessage.getBlob()));
+            dataBank.put(new Data(dataKey, dataMessage.getVersion(),
+                    dataMessage.getBlob()));
         } catch (IOException ex) {
             log.error("Failed to put:", ex);
             response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
         }
-    }
-
-    void verifyKeyHashConsistency(BlobDataMessage dataMessage, Long dataKey) {
-        Validate.isTrue(dataKey.equals(dataMessage.getKeyHash()),
-                "Data key hash does not match the hash specified in the URL");
     }
 
     BlobDataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
@@ -121,17 +113,10 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
                     + entityContent.length);
         }
 
-        DataMessage dataMessage = decoder.decode(Buffer.wrap(entityContent)
+        BlobDataMessage dataMessage = decoder.decode(Buffer.wrap(entityContent)
                 .asDataInputStream());
 
-        verifyMessageType(dataMessage);
-
-        return (BlobDataMessage) dataMessage;
-    }
-
-    void verifyMessageType(DataMessage dataMessage) {
-        Validate.isTrue(dataMessage instanceof BlobDataMessage,
-                "Unsupported protocol message[" + dataMessage + "] received");
+        return dataMessage;
     }
 
     private boolean isEmpty(HttpRequest request) {

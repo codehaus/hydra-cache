@@ -27,15 +27,18 @@ import org.hydracache.server.data.versioning.Version;
  * @author nzhu
  * 
  */
-public class BlobDataMessage implements DataMessage {
+public class BlobDataMessage {
 
-    private Data data;
+    public static final short BLOB_DATA_MESSAGE_TYPE = 100;
+
+    private Version version;
+
+    private byte[] blob;
 
     /**
      * Default constructor
      */
     public BlobDataMessage() {
-        this(new Data());
     }
 
     /**
@@ -45,50 +48,26 @@ public class BlobDataMessage implements DataMessage {
      *            data to be wrapped
      */
     public BlobDataMessage(Data data) {
-        super();
-        this.data = data;
-    }
-
-    public long getKeyHash() {
-        return data.getKeyHash();
-    }
-
-    public void setKeyHash(long keyHash) {
-        data.setKeyHash(keyHash);
+        this.version = data.getVersion();
+        this.blob = data.getContent();
     }
 
     public Version getVersion() {
-        return data.getVersion();
+        return version;
     }
 
     public void setVersion(Version version) {
-        data.setVersion(version);
+        this.version = version;
     }
 
     public byte[] getBlob() {
-        return data.getContent();
+        return blob.clone();
     }
 
     public void setBlob(byte[] blob) {
-        data.setContent(blob);
+        this.blob = blob.clone();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hydracache.protocol.data.message.DataMessage#getData()
-     */
-    public Data getData() {
-        return data;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hydracache.protocol.data.message.ProtocolMessage#getMessageType()
-     */
-    @Override
     public short getMessageType() {
         return BLOB_DATA_MESSAGE_TYPE;
     }

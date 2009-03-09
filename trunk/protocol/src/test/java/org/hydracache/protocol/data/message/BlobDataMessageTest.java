@@ -30,17 +30,15 @@ import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
 import org.junit.Test;
 
-public class DataMessageTest {
+public class BlobDataMessageTest {
 
-    private static final int EXPECTED_BYTES = 33;
+    private static final int EXPECTED_BYTES = 25;
 
     @Test
     public void testMessageCanBeWriteToAndReadFromByteBuffer() throws Exception {
         final BlobDataMessage msg = new BlobDataMessage();
 
-        assertTrue(DataMessage.BLOB_DATA_MESSAGE_TYPE == msg.getMessageType());
-
-        msg.setKeyHash(39048);
+        assertTrue(BlobDataMessage.BLOB_DATA_MESSAGE_TYPE == msg.getMessageType());
 
         final IncrementVersionFactory versionFactoryMarshaller =
                 new IncrementVersionFactory();
@@ -64,12 +62,12 @@ public class DataMessageTest {
         assertEquals("Payload length is incorrect", EXPECTED_BYTES,
                 buffer.toByteArray().length);
 
-        final DataMessage newMsg =
+        final BlobDataMessage newMsg =
                 marshaller.readObject(new DataInputStream(
                         new ByteArrayInputStream(buffer.toByteArray())));
 
-        assertEquals("Data is deserialized incorrectly", msg.getData(),
-                newMsg.getData());
+        assertEquals("Data is deserialized incorrectly", msg,
+                newMsg);
     }
 
 }

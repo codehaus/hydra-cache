@@ -18,8 +18,6 @@ package org.hydracache.protocol.data.codec;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.hydracache.protocol.data.message.DataMessage;
-
 /**
  * Protocol decoder interface
  * 

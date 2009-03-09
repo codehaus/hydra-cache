@@ -34,7 +34,6 @@ import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.BlobDataMessage;
-import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -124,21 +123,6 @@ public class HttpPutMethodHandlerTest {
         handler.handle(null, response, httpContext);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testProtocolMessageTypeVerification() {
-        handler.verifyMessageType(context.mock(DataMessage.class));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testHashKeyConsistencyVerification()
-            throws UnknownHostException {
-
-        final BlobDataMessage dataMessage = createExpectedDataMsg();
-
-        handler.verifyKeyHashConsistency(dataMessage,
-                dataMessage.getKeyHash() + 1);
-    }
-
     @Test
     public void testDecodeBlobDataMessage() throws IOException {
         final BlobDataMessage expectedMessage = createExpectedDataMsg();
@@ -195,7 +179,6 @@ public class HttpPutMethodHandlerTest {
         final BlobDataMessage expectedMessage = new BlobDataMessage();
 
         expectedMessage.setBlob(new byte[250]);
-        expectedMessage.setKeyHash(1000);
         expectedMessage.setVersion(versionFactoryMarshaller
                 .create(new Identity(1)));
 

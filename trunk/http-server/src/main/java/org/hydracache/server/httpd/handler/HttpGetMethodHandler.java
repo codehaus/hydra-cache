@@ -28,7 +28,6 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
-import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -40,7 +39,7 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  */
 public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
-    private ProtocolEncoder<DataMessage> messageEncoder;
+    private ProtocolEncoder<BlobDataMessage> messageEncoder;
 
     private HttpGetAction printRegistryAction;
 
@@ -52,7 +51,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
      * Constructor
      */
     public HttpGetMethodHandler(HarmonyDataBank dataBank, HashFunction hashFunction,
-            ProtocolEncoder<DataMessage> messageEncoder) {
+            ProtocolEncoder<BlobDataMessage> messageEncoder) {
         super(dataBank, hashFunction);
         this.messageEncoder = messageEncoder;
     }
@@ -117,7 +116,6 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
         if (data != null) {
             msg.setVersion(data.getVersion());
-            msg.setKeyHash(data.getKeyHash());
             msg.setBlob(data.getContent());
 
             messageEncoder.encode(msg, buffer.asDataOutpuStream());

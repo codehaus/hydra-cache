@@ -34,7 +34,6 @@ import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.BlobDataMessage;
-import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -58,9 +57,9 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
     private HttpClient httpClient;
 
-    private ProtocolEncoder<DataMessage> protocolEncoder;
+    private ProtocolEncoder<BlobDataMessage> protocolEncoder;
 
-    private ProtocolDecoder<DataMessage> protocolDecoder;
+    private ProtocolDecoder<BlobDataMessage> protocolDecoder;
 
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
@@ -108,10 +107,11 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
             int responseCode = httpClient.executeMethod(getMethod);
             validateResponseCode(responseCode);
 
-            DataMessage dataMessage = protocolDecoder
+            BlobDataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(getMethod
                             .getResponseBodyAsStream()));
-            data = dataMessage.getData();
+            // FIXME: remove hash code dependency here
+            data = new Data(new Long(key.hashCode()), dataMessage.getVersion(), dataMessage.getBlob());
 
         } catch (IOException ioe) {
             logger.error("Cannot retrieve data.", ioe);
