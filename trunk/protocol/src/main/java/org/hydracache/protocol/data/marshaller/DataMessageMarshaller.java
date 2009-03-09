@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.commons.lang.Validate;
 import org.hydracache.io.IoUtils;
 import org.hydracache.io.Marshaller;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.Version;
 
 /**
@@ -31,7 +31,7 @@ import org.hydracache.server.data.versioning.Version;
  * @author nzhu
  * 
  */
-public class DataMessageMarshaller implements Marshaller<BlobDataMessage> {
+public class DataMessageMarshaller implements Marshaller<DataMessage> {
 
     private Marshaller<Version> versionMarshaller;
 
@@ -48,9 +48,9 @@ public class DataMessageMarshaller implements Marshaller<BlobDataMessage> {
      * @see org.hydracache.io.Marshaller#readObject(java.io.DataInputStream)
      */
     @Override
-    public BlobDataMessage readObject(DataInputStream dataIn)
+    public DataMessage readObject(DataInputStream dataIn)
             throws IOException {
-        BlobDataMessage msg = new BlobDataMessage();
+        DataMessage msg = new DataMessage();
 
         msg.setVersion(versionMarshaller.readObject(dataIn));
 
@@ -68,7 +68,7 @@ public class DataMessageMarshaller implements Marshaller<BlobDataMessage> {
      * java.io.DataOutputStream)
      */
     @Override
-    public void writeObject(BlobDataMessage msg, DataOutputStream dataOut)
+    public void writeObject(DataMessage msg, DataOutputStream dataOut)
             throws IOException {
         Validate.notNull(msg.getBlob(), "Data message is empty");
 

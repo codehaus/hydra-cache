@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.ProtocolException;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 
 /**
  * Hydra protocol decoder
@@ -32,7 +32,7 @@ import org.hydracache.protocol.data.message.BlobDataMessage;
  * @author nzhu
  * 
  */
-public class DefaultProtocolDecoder implements ProtocolDecoder<BlobDataMessage> {
+public class DefaultProtocolDecoder implements ProtocolDecoder<DataMessage> {
     private MessageMarshallerFactory marshallerFactory;
 
     /**
@@ -49,10 +49,10 @@ public class DefaultProtocolDecoder implements ProtocolDecoder<BlobDataMessage> 
      * DataInputStream)
      */
     @Override
-    public BlobDataMessage decode(DataInputStream input) throws IOException {
+    public DataMessage decode(DataInputStream input) throws IOException {
         short messageType = decodeHeader(input);
 
-        Marshaller<? extends BlobDataMessage> marshaller = marshallerFactory
+        Marshaller<? extends DataMessage> marshaller = marshallerFactory
                 .createMarshallerFor(messageType);
 
         return marshaller.readObject(input);

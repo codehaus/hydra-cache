@@ -33,7 +33,7 @@ import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -57,9 +57,9 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
     private HttpClient httpClient;
 
-    private ProtocolEncoder<BlobDataMessage> protocolEncoder;
+    private ProtocolEncoder<DataMessage> protocolEncoder;
 
-    private ProtocolDecoder<BlobDataMessage> protocolDecoder;
+    private ProtocolDecoder<DataMessage> protocolDecoder;
 
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
@@ -107,7 +107,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
             int responseCode = httpClient.executeMethod(getMethod);
             validateResponseCode(responseCode);
 
-            BlobDataMessage dataMessage = protocolDecoder
+            DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(getMethod
                             .getResponseBodyAsStream()));
             // FIXME: remove hash code dependency here
@@ -134,7 +134,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         try {
             PutMethod putMethod = new PutMethod(uri);
             Buffer buffer = Buffer.allocate();
-            protocolEncoder.encode(new BlobDataMessage(data), buffer
+            protocolEncoder.encode(new DataMessage(data), buffer
                     .asDataOutpuStream());
 
             RequestEntity requestEntity = new InputStreamRequestEntity(buffer

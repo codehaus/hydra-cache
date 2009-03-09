@@ -36,9 +36,9 @@ public class BlobDataMessageTest {
 
     @Test
     public void testMessageCanBeWriteToAndReadFromByteBuffer() throws Exception {
-        final BlobDataMessage msg = new BlobDataMessage();
+        final DataMessage msg = new DataMessage();
 
-        assertTrue(BlobDataMessage.BLOB_DATA_MESSAGE_TYPE == msg.getMessageType());
+        assertTrue(DataMessage.BLOB_DATA_MESSAGE_TYPE == msg.getMessageType());
 
         final IncrementVersionFactory versionFactoryMarshaller =
                 new IncrementVersionFactory();
@@ -62,7 +62,7 @@ public class BlobDataMessageTest {
         assertEquals("Payload length is incorrect", EXPECTED_BYTES,
                 buffer.toByteArray().length);
 
-        final BlobDataMessage newMsg =
+        final DataMessage newMsg =
                 marshaller.readObject(new DataInputStream(
                         new ByteArrayInputStream(buffer.toByteArray())));
 

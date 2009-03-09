@@ -28,7 +28,7 @@ import java.net.UnknownHostException;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.ProtocolException;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
@@ -57,11 +57,11 @@ public class ProtocolCodecTest {
 
     @Test
     public void testMsgCanBeEncodeAndDecodeProperly() throws Exception {
-        final ProtocolEncoder<BlobDataMessage> encoder = buildEncoder();
+        final ProtocolEncoder<DataMessage> encoder = buildEncoder();
 
         final Buffer buffer = Buffer.allocate();
 
-        final BlobDataMessage msg = new BlobDataMessage();
+        final DataMessage msg = new DataMessage();
 
         msg.setVersion(versionFactory.create(testNodeId));
         msg.setBlob(TEST_DATA);
@@ -73,9 +73,9 @@ public class ProtocolCodecTest {
         assertEquals("Ecoding generated invalid length of data",
                 expectedBinaryLength, buffer.toByteArray().length);
 
-        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
 
-        final BlobDataMessage newMsg = (BlobDataMessage) decoder.decode(buffer
+        final DataMessage newMsg = (DataMessage) decoder.decode(buffer
                 .asDataInputStream());
 
         assertEquals("Decode result is incorrect", msg, newMsg);
@@ -91,7 +91,7 @@ public class ProtocolCodecTest {
 
         out.writeByte(INVALID_PROTOCOL_VERSION);
 
-        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
 
         decoder.decode(new DataInputStream(new ByteArrayInputStream(buffer
                 .toByteArray())));
@@ -105,7 +105,7 @@ public class ProtocolCodecTest {
 
         out.writeShort((short) 2);
 
-        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
 
         decoder.decode(new DataInputStream(new ByteArrayInputStream(buffer
                 .toByteArray())));
@@ -123,7 +123,7 @@ public class ProtocolCodecTest {
         buffer.asDataOutpuStream()
                 .writeByte(ProtocolConstants.PROTOCOL_VERSION);
 
-        final BlobDataMessage msg = new BlobDataMessage();
+        final DataMessage msg = new DataMessage();
 
         msg.setVersion(versionFactory.create(testNodeId));
         msg.setBlob(TEST_DATA);
@@ -136,24 +136,24 @@ public class ProtocolCodecTest {
                 .writeObject(msg.getVersion(), buffer.asDataOutpuStream());
         buffer.asDataOutpuStream().write(msg.getBlob());
 
-        final ProtocolDecoder<BlobDataMessage> decoder = buildDecoder();
+        final ProtocolDecoder<DataMessage> decoder = buildDecoder();
 
-        final BlobDataMessage newMsg = (BlobDataMessage) decoder.decode(buffer
+        final DataMessage newMsg = (DataMessage) decoder.decode(buffer
                 .asDataInputStream());
 
         assertEquals("Decode result is incorrect", msg, newMsg);
     }
 
-    private ProtocolEncoder<BlobDataMessage> buildEncoder() {
+    private ProtocolEncoder<DataMessage> buildEncoder() {
 
-        final ProtocolEncoder<BlobDataMessage> encoder = new DefaultProtocolEncoder(
+        final ProtocolEncoder<DataMessage> encoder = new DefaultProtocolEncoder(
                 new MessageMarshallerFactory(versionFactory));
 
         return encoder;
     }
 
-    private ProtocolDecoder<BlobDataMessage> buildDecoder() {
-        final ProtocolDecoder<BlobDataMessage> decoder = new DefaultProtocolDecoder(
+    private ProtocolDecoder<DataMessage> buildDecoder() {
+        final ProtocolDecoder<DataMessage> decoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionFactory));
         return decoder;
     }

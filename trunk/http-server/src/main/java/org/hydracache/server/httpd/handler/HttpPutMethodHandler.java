@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -42,13 +42,13 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
 public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     private static Logger log = Logger.getLogger(HttpPutMethodHandler.class);
 
-    private ProtocolDecoder<BlobDataMessage> decoder;
+    private ProtocolDecoder<DataMessage> decoder;
 
     /**
      * Constructor
      */
     public HttpPutMethodHandler(HarmonyDataBank dataBank,
-            HashFunction hashFunction, ProtocolDecoder<BlobDataMessage> decoder) {
+            HashFunction hashFunction, ProtocolDecoder<DataMessage> decoder) {
         super(dataBank, hashFunction);
         this.decoder = decoder;
     }
@@ -74,7 +74,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
         HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
 
-        BlobDataMessage dataMessage = decodeProtocolMessage(entity);
+        DataMessage dataMessage = decodeProtocolMessage(entity);
 
         Long dataKey = extractDataKeyHash(request);
 
@@ -95,7 +95,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     }
 
     private void doPut(HttpResponse response, Long dataKey,
-            BlobDataMessage dataMessage) {
+            DataMessage dataMessage) {
         try {
             dataBank.put(new Data(dataKey, dataMessage.getVersion(),
                     dataMessage.getBlob()));
@@ -105,7 +105,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    BlobDataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
+    DataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
         byte[] entityContent = EntityUtils.toByteArray(entity);
 
         if (log.isDebugEnabled()) {
@@ -113,7 +113,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
                     + entityContent.length);
         }
 
-        BlobDataMessage dataMessage = decoder.decode(Buffer.wrap(entityContent)
+        DataMessage dataMessage = decoder.decode(Buffer.wrap(entityContent)
                 .asDataInputStream());
 
         return dataMessage;

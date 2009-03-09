@@ -27,7 +27,7 @@ import org.hydracache.server.data.versioning.Version;
  * @author nzhu
  * 
  */
-public class BlobDataMessage {
+public class DataMessage {
 
     public static final short BLOB_DATA_MESSAGE_TYPE = 100;
 
@@ -38,7 +38,7 @@ public class BlobDataMessage {
     /**
      * Default constructor
      */
-    public BlobDataMessage() {
+    public DataMessage() {
     }
 
     /**
@@ -47,7 +47,7 @@ public class BlobDataMessage {
      * @param data
      *            data to be wrapped
      */
-    public BlobDataMessage(Data data) {
+    public DataMessage(Data data) {
         this.version = data.getVersion();
         this.blob = data.getContent();
     }

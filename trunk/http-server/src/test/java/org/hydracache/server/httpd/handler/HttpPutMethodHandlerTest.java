@@ -33,7 +33,7 @@ import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.BlobDataMessage;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -125,7 +125,7 @@ public class HttpPutMethodHandlerTest {
 
     @Test
     public void testDecodeBlobDataMessage() throws IOException {
-        final BlobDataMessage expectedMessage = createExpectedDataMsg();
+        final DataMessage expectedMessage = createExpectedDataMsg();
 
         final Buffer buffer = encodeMessageToBuffer(expectedMessage);
 
@@ -137,7 +137,7 @@ public class HttpPutMethodHandlerTest {
             addGetContentLengthExpectation(buffer, entity);
         }
 
-        final BlobDataMessage decodedMessage = handler
+        final DataMessage decodedMessage = handler
                 .decodeProtocolMessage(entity);
 
         assertEquals("Decoded message is incorrect", expectedMessage,
@@ -164,7 +164,7 @@ public class HttpPutMethodHandlerTest {
         });
     }
 
-    private Buffer encodeMessageToBuffer(final BlobDataMessage expectedMessage)
+    private Buffer encodeMessageToBuffer(final DataMessage expectedMessage)
             throws IOException {
         final Buffer buffer = Buffer.allocate();
 
@@ -175,8 +175,8 @@ public class HttpPutMethodHandlerTest {
         return buffer;
     }
 
-    private BlobDataMessage createExpectedDataMsg() throws UnknownHostException {
-        final BlobDataMessage expectedMessage = new BlobDataMessage();
+    private DataMessage createExpectedDataMsg() throws UnknownHostException {
+        final DataMessage expectedMessage = new DataMessage();
 
         expectedMessage.setBlob(new byte[250]);
         expectedMessage.setVersion(versionFactoryMarshaller
