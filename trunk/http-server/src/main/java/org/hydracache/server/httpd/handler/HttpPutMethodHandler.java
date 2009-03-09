@@ -71,7 +71,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             return;
         }
         
-        if (hashKeyDoesNotExist(request))
+        if (hashKeyIsBlank(request))
             return;
 
         HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();

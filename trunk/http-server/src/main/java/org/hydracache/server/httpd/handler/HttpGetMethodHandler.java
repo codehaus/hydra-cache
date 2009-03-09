@@ -94,7 +94,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
     void handleGetData(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (hashKeyDoesNotExist(request))
+        if (hashKeyIsBlank(request))
             return;
 
         Long dataKey = extractDataKeyHash(request);

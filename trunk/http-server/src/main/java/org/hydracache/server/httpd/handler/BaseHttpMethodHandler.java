@@ -18,7 +18,6 @@ package org.hydracache.server.httpd.handler;
 import static org.hydracache.server.httpd.HttpConstants.SLASH;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.hydracache.data.hashing.HashFunction;
@@ -74,8 +73,8 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return requestString;
     }
 
-    protected boolean hashKeyDoesNotExist(HttpRequest request) {
-        return !NumberUtils.isNumber(extractRequestString(request));
+    protected boolean hashKeyIsBlank(HttpRequest request) {
+        return StringUtils.isBlank(extractRequestString(request));
     }
 
 }
