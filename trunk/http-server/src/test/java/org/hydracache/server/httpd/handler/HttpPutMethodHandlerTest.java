@@ -26,6 +26,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
+import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.data.hashing.NativeHashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
@@ -62,6 +64,8 @@ public class HttpPutMethodHandlerTest {
 
     private IncrementVersionFactory versionFactoryMarshaller;
 
+    private HashFunction hashFunction = new NativeHashFunction();
+
     private HttpPutMethodHandler handler;
 
     @Before
@@ -74,7 +78,8 @@ public class HttpPutMethodHandlerTest {
 
     @Test
     public void shouldReturnStatus201ForCreation() throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class, "emptyDataBank");
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
+                "emptyDataBank");
 
         context.checking(new Expectations() {
             {
@@ -82,18 +87,19 @@ public class HttpPutMethodHandlerTest {
                 will(returnValue(null));
             }
         });
-        
+
         handler.dataBank = dataBank;
-        
+
         int statusCode = handler.createStatusCode(1000L);
 
         assertEquals("Status for creation is incorrect", HttpStatus.SC_CREATED,
                 statusCode);
     }
-    
+
     @Test
     public void shouldReturnStatus200ForUpdate() throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class, "nonEmptyDataBank");
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
+                "nonEmptyDataBank");
 
         context.checking(new Expectations() {
             {
@@ -101,9 +107,9 @@ public class HttpPutMethodHandlerTest {
                 will(returnValue(new Data()));
             }
         });
-        
+
         handler.dataBank = dataBank;
-        
+
         int statusCode = handler.createStatusCode(1000L);
 
         assertEquals("Status for update is incorrect", HttpStatus.SC_OK,
@@ -201,8 +207,8 @@ public class HttpPutMethodHandlerTest {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(dataBank,
-                new DefaultProtocolDecoder(new MessageMarshallerFactory(
-                        versionMarshaller)));
+                hashFunction, new DefaultProtocolDecoder(
+                        new MessageMarshallerFactory(versionMarshaller)));
 
         return handler;
     }

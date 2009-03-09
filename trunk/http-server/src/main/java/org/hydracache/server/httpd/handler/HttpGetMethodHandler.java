@@ -24,6 +24,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
+import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
@@ -50,9 +51,9 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     /**
      * Constructor
      */
-    public HttpGetMethodHandler(HarmonyDataBank dataBank,
+    public HttpGetMethodHandler(HarmonyDataBank dataBank, HashFunction hashFunction,
             ProtocolEncoder<DataMessage> messageEncoder) {
-        super(dataBank);
+        super(dataBank, hashFunction);
         this.messageEncoder = messageEncoder;
     }
 
@@ -78,7 +79,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        String requestContext = extractRequestContext(request);
+        String requestContext = extractRequestString(request);
 
         if (printRegistryAction.getName().equals(requestContext)) {
             printRegistryAction.execute(response);

@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.data.hashing.NativeHashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
@@ -49,6 +51,8 @@ public class HttpGetMethodHandlerTest {
     };
 
     private IncrementVersionFactory versionFactoryMarshaller;
+
+    private HashFunction hashFunction = new NativeHashFunction();
 
     private HttpGetMethodHandler handler;
 
@@ -100,8 +104,8 @@ public class HttpGetMethodHandlerTest {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
         final HttpGetMethodHandler handler = new HttpGetMethodHandler(dataBank,
-                new DefaultProtocolEncoder(new MessageMarshallerFactory(
-                        versionMarshaller)));
+                hashFunction, new DefaultProtocolEncoder(
+                        new MessageMarshallerFactory(versionMarshaller)));
 
         return handler;
     }

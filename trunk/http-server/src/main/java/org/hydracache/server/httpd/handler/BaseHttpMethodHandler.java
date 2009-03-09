@@ -18,10 +18,10 @@ package org.hydracache.server.httpd.handler;
 import static org.hydracache.server.httpd.HttpConstants.SLASH;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
@@ -34,8 +34,12 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
     protected HarmonyDataBank dataBank;
 
-    public BaseHttpMethodHandler(HarmonyDataBank dataBank) {
+    protected HashFunction hashFunction;
+
+    public BaseHttpMethodHandler(HarmonyDataBank dataBank,
+            HashFunction hashFunction) {
         this.dataBank = dataBank;
+        this.hashFunction = hashFunction;
     }
 
     protected Long extractDataKeyHash(HttpRequest request) {
@@ -43,12 +47,9 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
     }
 
     protected Long extractDataKeyHash(final String requestUri) {
-        String requestContext = extractRequestContext(requestUri);
+        String requestString = extractRequestString(requestUri);
 
-        Validate.isTrue(NumberUtils.isNumber(requestContext), "Data key hash["
-                + requestContext + "] is not a number");
-
-        return Long.valueOf(requestContext);
+        return hashFunction.hash(requestString);
     }
 
     protected String getRequestUri(HttpRequest request) {
@@ -57,24 +58,24 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return requestUri;
     }
 
-    protected String extractRequestContext(final HttpRequest request) {
-        return extractRequestContext(getRequestUri(request));
+    protected String extractRequestString(final HttpRequest request) {
+        return extractRequestString(getRequestUri(request));
     }
 
-    protected String extractRequestContext(final String requestUri) {
+    protected String extractRequestString(final String requestUri) {
         String cleanUri = StringUtils.trim(requestUri);
 
         if (cleanUri.endsWith(SLASH)) {
             cleanUri = StringUtils.chop(cleanUri);
         }
 
-        String requestContext = StringUtils.substringAfterLast(cleanUri, SLASH);
+        String requestString = StringUtils.substringAfter(cleanUri, SLASH);
 
-        return requestContext;
+        return requestString;
     }
 
     protected boolean hashKeyDoesNotExist(HttpRequest request) {
-        return !NumberUtils.isNumber(extractRequestContext(request));
+        return !NumberUtils.isNumber(extractRequestString(request));
     }
 
 }

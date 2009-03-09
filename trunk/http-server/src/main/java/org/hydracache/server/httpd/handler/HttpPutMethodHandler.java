@@ -27,6 +27,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.message.BlobDataMessage;
@@ -48,9 +49,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     /**
      * Constructor
      */
-    public HttpPutMethodHandler(HarmonyDataBank dataBank,
+    public HttpPutMethodHandler(HarmonyDataBank dataBank, HashFunction hashFunction, 
             ProtocolDecoder<DataMessage> decoder) {
-        super(dataBank);
+        super(dataBank, hashFunction);
         this.decoder = decoder;
     }
 
