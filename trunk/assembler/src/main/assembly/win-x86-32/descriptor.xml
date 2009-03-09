@@ -1,5 +1,5 @@
 <assembly>
-    <id>binary-win-x68-32</id>
+    <id>binary-win-x86-32</id>
     <formats>
         <format>zip</format>
     </formats>
