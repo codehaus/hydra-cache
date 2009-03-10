@@ -18,9 +18,7 @@ package org.hydracache.server.httpd.handler;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -28,13 +26,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.NativeHashFunction;
-import org.hydracache.io.Buffer;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
-import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.protocol.data.message.DataMessage;
-import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
@@ -121,68 +115,6 @@ public class HttpPutMethodHandlerTest {
         final HttpRequest emptyRequest = context.mock(HttpRequest.class);
         handler.handle(emptyRequest, response, httpContext);
         handler.handle(null, response, httpContext);
-    }
-
-    @Test
-    public void testDecodeBlobDataMessage() throws IOException {
-        final DataMessage expectedMessage = createExpectedDataMsg();
-
-        final Buffer buffer = encodeMessageToBuffer(expectedMessage);
-
-        final HttpEntity entity = context.mock(HttpEntity.class);
-
-        {
-            addReturnInputStreamExpectation(buffer, entity);
-
-            addGetContentLengthExpectation(buffer, entity);
-        }
-
-        final DataMessage decodedMessage = handler
-                .decodeProtocolMessage(entity);
-
-        assertEquals("Decoded message is incorrect", expectedMessage,
-                decodedMessage);
-    }
-
-    private void addGetContentLengthExpectation(final Buffer buffer,
-            final HttpEntity entity) {
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(entity).getContentLength();
-                will(returnValue(new Long(buffer.size())));
-            }
-        });
-    }
-
-    private void addReturnInputStreamExpectation(final Buffer buffer,
-            final HttpEntity entity) throws IOException {
-        context.checking(new Expectations() {
-            {
-                one(entity).getContent();
-                will(returnValue(buffer.asDataInputStream()));
-            }
-        });
-    }
-
-    private Buffer encodeMessageToBuffer(final DataMessage expectedMessage)
-            throws IOException {
-        final Buffer buffer = Buffer.allocate();
-
-        new DefaultProtocolEncoder(new MessageMarshallerFactory(
-                versionFactoryMarshaller)).encode(expectedMessage, buffer
-                .asDataOutpuStream());
-
-        return buffer;
-    }
-
-    private DataMessage createExpectedDataMsg() throws UnknownHostException {
-        final DataMessage expectedMessage = new DataMessage();
-
-        expectedMessage.setBlob(new byte[250]);
-        expectedMessage.setVersion(versionFactoryMarshaller
-                .create(new Identity(1)));
-
-        return expectedMessage;
     }
 
     private HttpPutMethodHandler createHandler(

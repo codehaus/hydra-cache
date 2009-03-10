@@ -111,7 +111,7 @@ public class PartitionAwarePutAndGetTest {
         localDataStorage.put(randomKey, data);
         client.put(randomKey, data);
 
-        Data retrievedData = client.get(randomKey);
+        Object retrievedData = client.get(randomKey);
 
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }
@@ -134,7 +134,7 @@ public class PartitionAwarePutAndGetTest {
     private void assertDataIntegrity() {
         for (String key : localDataStorage.keySet()) {
             Data localData = localDataStorage.get(key);
-            Data remoteData = client.get(key);
+            Object remoteData = client.get(key);
 
             assertEquals(
                     "Remote and local copy of the same data are not identical",

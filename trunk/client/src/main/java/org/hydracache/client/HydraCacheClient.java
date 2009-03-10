@@ -16,8 +16,7 @@
 package org.hydracache.client;
 
 import java.io.IOException;
-
-import org.hydracache.server.data.storage.Data;
+import java.io.Serializable;
 
 /**
  * @author Tan Quach (tquach@jointsource.com)
@@ -31,23 +30,23 @@ public interface HydraCacheClient {
      * 
      * @param key
      *            The key of the Data from the cache.
-     * @return The data belonging to this key or null if it does not exist
+     * @return Object retrieved from the cache or null if not found
      * @throws IOException
      *             If there are problems with the connection
      * @throws OperationTimeoutException
      *             if we cannot locate the data in sufficient time.
      */
-    public Data get(String key) throws IOException;
+    public Object get(String key) throws IOException;
 
     /**
      * Add data to the cache with the given key.
      * 
      * @param key
      *            Identifies the data to put
-     * @param data
-     *            The data
+     * @param object
+     *            The object to be cached
      * @return A Future to return true once the operation has completed
      */
-    public void put(String key, Data data);
+    public void put(String key, Serializable object);
 
 }

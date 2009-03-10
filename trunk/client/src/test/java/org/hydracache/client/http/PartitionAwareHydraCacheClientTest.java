@@ -15,48 +15,109 @@
  */
 package org.hydracache.client.http;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
-import static org.junit.Assert.*;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.lang.SerializationUtils;
 import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.io.Buffer;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.Identity;
-import org.hydracache.server.data.storage.Data;
+import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.harmony.core.SubstancePartition;
-import org.junit.Assert;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author Tan Quach (tquach@jointsource.com)
- * @since 1.0
- */
 public class PartitionAwareHydraCacheClientTest {
+    private Mockery context = new Mockery() {
+        {
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }
+    };
 
     private PartitionAwareHydraCacheClient client;
 
     private Identity defaultIdentity;
 
+    private IncrementVersionFactory versionMarshaller;
+
+    private DefaultProtocolEncoder defaultProtocolEncoder;
+
+    private DefaultProtocolDecoder defaultProtocolDecoder;
+
     @Before
     public void beforeTests() throws Exception {
         this.defaultIdentity = new Identity(8080);
-
         List<Identity> ids = Collections.singletonList(defaultIdentity);
         SubstancePartition partition = new SubstancePartition(
                 new NativeHashFunction(), ids);
         client = new PartitionAwareHydraCacheClient(partition);
+
+        versionMarshaller = new IncrementVersionFactory();
+        versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
+        defaultProtocolEncoder = new DefaultProtocolEncoder(
+                new MessageMarshallerFactory(versionMarshaller));
+        defaultProtocolDecoder = new DefaultProtocolDecoder(
+                new MessageMarshallerFactory(versionMarshaller));
     }
 
     @Test
-    public void testShouldReadData() throws Exception {
-        final String key = "key";
-        HttpClient httpClient = new MockHttpClient();
-        client.setHttpClient(httpClient);
+    public void ensureResultRetrievalFromGetMethod() throws Exception {
+        String expectedResult = "Test Message";
 
-        Data data = client.get(key);
-        
-        Assert.assertNull(data);
+        final DataMessage dataMsg = new DataMessage();
+        dataMsg.setBlob(SerializationUtils.serialize(expectedResult));
+        dataMsg.setVersion(versionMarshaller.create(defaultIdentity));
+
+        final GetMethod getMethod = context.mock(GetMethod.class);
+
+        context.checking(new Expectations() {
+            {
+                one(getMethod).getResponseBodyAsStream();
+                will(returnValue(ProtocolUtils.encodeDataMessage(
+                        defaultProtocolEncoder, dataMsg).asDataInputStream()));
+            }
+        });
+
+        Object result = client.retrieveResultFromGet(getMethod);
+
+        assertEquals("Result retrieved from GET method is incorrect",
+                expectedResult, result);
+    }
+
+    @Test
+    public void ensureRequestEntityIsBuiltCorrect() throws IOException {
+        Serializable data = "Test Message";
+
+        RequestEntity requestEntity = client.buildRequestEntity(data,
+                defaultIdentity);
+
+        assertNotNull("Request entity is null", requestEntity);
+
+        Buffer buffer = Buffer.allocate();
+
+        requestEntity.writeRequest(buffer.asDataOutpuStream());
+
+        DataMessage msg = ProtocolUtils.decodeProtocolMessage(
+                defaultProtocolDecoder, buffer.toByteArray());
+
+        assertEquals("Request entity blob content is incorrect", data,
+                SerializationUtils.deserialize(msg.getBlob()));
     }
 
     @Test

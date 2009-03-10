@@ -100,7 +100,7 @@ public class BasicPutAndGetTest {
 
         client.put(randomKey, data);
 
-        Data retrievedData = client.get(randomKey);
+        Object retrievedData = client.get(randomKey);
 
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }

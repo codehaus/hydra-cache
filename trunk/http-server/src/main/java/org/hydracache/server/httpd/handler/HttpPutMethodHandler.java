@@ -27,9 +27,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -108,15 +108,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     DataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
         byte[] entityContent = EntityUtils.toByteArray(entity);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Incoming entity content (bytes): "
-                    + entityContent.length);
-        }
-
-        DataMessage dataMessage = decoder.decode(Buffer.wrap(entityContent)
-                .asDataInputStream());
-
-        return dataMessage;
+        return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
     }
 
     private boolean isEmpty(HttpRequest request) {

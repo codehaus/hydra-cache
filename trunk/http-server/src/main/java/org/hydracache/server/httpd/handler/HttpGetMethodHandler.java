@@ -28,6 +28,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -100,28 +101,13 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
         Data data = dataBank.get(dataKey);
 
-        Buffer buffer = serializeDataMessage(data);
+        Buffer buffer = ProtocolUtils.encodeDataMessage(messageEncoder, data);
 
         ByteArrayEntity body = new ByteArrayEntity(buffer.toByteArray());
 
         body.setContentType(BINARY_RESPONSE_CONTENT_TYPE);
 
         response.setEntity(body);
-    }
-
-    Buffer serializeDataMessage(Data data) throws IOException {
-        Buffer buffer = Buffer.allocate();
-
-        DataMessage msg = new DataMessage();
-
-        if (data != null) {
-            msg.setVersion(data.getVersion());
-            msg.setBlob(data.getContent());
-
-            messageEncoder.encode(msg, buffer.asDataOutpuStream());
-        }
-
-        return buffer;
-    }
+    } 
 
 }
