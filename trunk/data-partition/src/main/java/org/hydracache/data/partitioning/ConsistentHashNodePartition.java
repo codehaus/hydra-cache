@@ -41,10 +41,7 @@ import org.hydracache.data.hashing.HashFunction;
  */
 public class ConsistentHashNodePartition<T> implements NodePartition<T> {
 
-    // a large enough prime number
-    private static final int REPLICA_INTERVAL_MULTIPLIER = 333667;
-
-    private static final int DEFAULT_NUMBER_OF_REPLICAS = 1000;
+    private static final int DEFAULT_NUMBER_OF_REPLICAS = 20;
 
     protected final HashFunction hashFunction;
 
@@ -122,8 +119,7 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
     }
 
     private long replicatedNodeHash(T node, int i) {
-        return hashFunction.hash(node)
-                * (i * REPLICA_INTERVAL_MULTIPLIER);
+        return hashFunction.hash(node.toString() + "-" + i);
     }
 
 }

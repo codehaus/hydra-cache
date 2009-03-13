@@ -117,7 +117,7 @@ public class PartitionAwarePutAndGetTest {
     }
 
     private String createRandomKey() {
-        String randomKey = RandomStringUtils.randomAlphanumeric(10);
+        String randomKey = RandomStringUtils.randomAlphanumeric(20);
         return randomKey;
     }
 

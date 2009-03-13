@@ -22,7 +22,6 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Common identity class that can be used for identifying server nodes in a
@@ -79,7 +78,7 @@ public class Identity implements Serializable, Comparable<Identity> {
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return toString().hashCode();
     }
 
     @Override
