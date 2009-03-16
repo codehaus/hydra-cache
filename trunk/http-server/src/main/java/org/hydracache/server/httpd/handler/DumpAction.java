@@ -5,18 +5,23 @@ import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONT
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.apache.log4j.Logger;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author nick.zhu
  * 
  */
 public class DumpAction implements HttpGetAction {
+    private static Logger log = Logger.getLogger(DumpAction.class);
+
     private DataBank internalDataBank;
 
     public DumpAction(DataBank internalDataBank) {
@@ -43,32 +48,36 @@ public class DumpAction implements HttpGetAction {
             IOException {
         Collection<Data> allData = internalDataBank.getAll();
 
-        StringBuffer content = printDataSet(allData);
+        String content = printDataSet(allData);
 
-        StringEntity body = new StringEntity(content.toString());
+        StringEntity body = new StringEntity(content);
 
         body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
 
         response.setEntity(body);
     }
 
-    StringBuffer printDataSet(Collection<Data> allData) {
-        StringBuffer content = new StringBuffer();
+    String printDataSet(Collection<Data> allData) {
+        JSONArray outputArray = new JSONArray();
 
-        for (Data data : allData) {
-            if (data != null) {
-                content.append("keyHash:").append(data.getKeyHash()).append(
-                        ", ");
-                content.append("version:").append(data.getVersion()).append(
-                        ", ");
-                content.append("size:").append(
-                        data.getContent() == null ? 0
-                                : data.getContent().length);
-                content.append(SystemUtils.LINE_SEPARATOR);
+        try {
+            for (Data data : allData) {
+                if (data != null) {
+                    JSONObject row = new JSONObject();
+
+                    row.put("keyHash", data.getKeyHash());
+                    row.put("version", data.getVersion());
+                    row.put("size", data.getContent() == null ? 0 : data
+                            .getContent().length);
+
+                    outputArray.put(row);
+                }
             }
+        } catch (JSONException e) {
+            log.error("Failed to generate data dump", e);
         }
-        
-        return content;
+
+        return outputArray.toString();
     }
 
 }
