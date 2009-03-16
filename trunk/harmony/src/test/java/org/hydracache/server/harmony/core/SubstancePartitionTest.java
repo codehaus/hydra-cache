@@ -15,20 +15,19 @@
  */
 package org.hydracache.server.harmony.core;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
-import org.hydracache.server.harmony.core.SubstancePartition;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.jgroups.stack.IpAddress;
 import org.junit.Before;
 import org.junit.Test;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 /**
  * @author nzhu
@@ -37,7 +36,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings("unchecked")
 public class SubstancePartitionTest {
 
-    private HashFunction hashFunction = new NativeHashFunction();
+    private HashFunction hashFunction = new KetamaBasedHashFunction();
 
     private JGroupsNode nodeA;
     private JGroupsNode nodeB;
@@ -63,13 +62,13 @@ public class SubstancePartitionTest {
         assertEquals("Node A id should be returned", nodeA.getId(), partition
                 .get(nodeA.getId().toString()));
 
-        assertEquals("Node B id should be returned", nodeB.getId(), partition
+        assertEquals("Node B id should be returned", nodeC.getId(), partition
                 .next(nodeA.getId()));
 
-        assertEquals("Node C id should be returned", nodeC.getId(), partition
+        assertEquals("Node C id should be returned", nodeA.getId(), partition
                 .next(nodeB.getId()));
 
-        assertEquals("Node A id should be returned", nodeA.getId(), partition
+        assertEquals("Node A id should be returned", nodeB.getId(), partition
                 .next(nodeC.getId()));
     }
 }

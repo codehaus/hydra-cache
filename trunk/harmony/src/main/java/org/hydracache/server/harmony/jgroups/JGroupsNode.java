@@ -17,7 +17,6 @@ package org.hydracache.server.harmony.jgroups;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.core.Node;
 import org.jgroups.Address;
@@ -96,7 +95,7 @@ public class JGroupsNode implements Node {
      */
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return id.toString();
     }
 
 }

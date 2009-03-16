@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.lang.SerializationUtils;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
@@ -65,7 +65,7 @@ public class PartitionAwareHydraCacheClientTest {
         this.defaultIdentity = new Identity(8080);
         List<Identity> ids = Collections.singletonList(defaultIdentity);
         SubstancePartition partition = new SubstancePartition(
-                new NativeHashFunction(), ids);
+                new KetamaBasedHashFunction(), ids);
         client = new PartitionAwareHydraCacheClient(partition);
 
         versionMarshaller = new IncrementVersionFactory();

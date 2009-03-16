@@ -24,7 +24,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.httpd.HttpConstants;
 import org.jmock.Mockery;
@@ -43,7 +43,7 @@ public class BaseHttpMethodHandlerTest {
         }
     };
     
-    private final HashFunction hashFunction = new NativeHashFunction();
+    private final HashFunction hashFunction = new KetamaBasedHashFunction();
 
     @Test
     public void ensureCorrectDataKeyExtraction() {

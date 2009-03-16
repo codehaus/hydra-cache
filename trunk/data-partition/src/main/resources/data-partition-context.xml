@@ -23,6 +23,6 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Hash function implementation -->
-    <bean id="hashFunction" class="org.hydracache.data.hashing.NativeHashFunction"></bean>
+    <bean id="hashFunction" class="org.hydracache.data.hashing.KetamaBasedHashFunction"></bean>
 
 </beans>

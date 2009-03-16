@@ -41,6 +41,8 @@ public class JGroupsNodeTest {
 
         assertTrue("Node with same id should be equal", nodeA
                 .equals(new JGroupsNode(nodeA.getId(), new IpAddress(7000))));
+        
+        assertEquals("ToString should be id based", nodeA.getId().toString(), nodeA.toString());
     }
 
     @Test

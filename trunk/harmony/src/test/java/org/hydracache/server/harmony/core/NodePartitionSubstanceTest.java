@@ -23,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.jgroups.stack.IpAddress;
@@ -40,7 +40,7 @@ public class NodePartitionSubstanceTest {
     private JGroupsNode nodeB;
     private JGroupsNode nodeC;
 
-    private HashFunction hashFunction = new NativeHashFunction();
+    private HashFunction hashFunction = new KetamaBasedHashFunction();
 
     private NodeSet allNodes;
 
@@ -114,8 +114,8 @@ public class NodePartitionSubstanceTest {
         Substance substance = new NodePartitionSubstance(nodeA, allNodes,
                 hashFunction, 1);
 
-        assertTrue("Should be neighbor", substance.isNeighbor(nodeB.getId()));
-        assertFalse("Should not be neighbor", substance.isNeighbor(nodeC
+        assertTrue("Should be neighbor", substance.isNeighbor(nodeC.getId()));
+        assertFalse("Should not be neighbor", substance.isNeighbor(nodeB
                 .getId()));
     }
 

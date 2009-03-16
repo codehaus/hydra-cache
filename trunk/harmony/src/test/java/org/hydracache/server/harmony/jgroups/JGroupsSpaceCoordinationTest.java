@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import org.hydracache.concurrent.SimpleResultFuture;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
@@ -70,7 +70,7 @@ public class JGroupsSpaceCoordinationTest {
                 .mock(MultiplexMessageReceiver.class);
 
         final JGroupsSpace space = new JGroupsSpace(serverId, channel,
-                new NativeHashFunction(), SUBSTANCE_SIZE);
+                new KetamaBasedHashFunction(), SUBSTANCE_SIZE);
         space.setMultiplexRecevier(multiplexMessageReceiver);
 
         final PutOperationResponse response = new PutOperationResponse(
@@ -93,7 +93,7 @@ public class JGroupsSpaceCoordinationTest {
         }
 
         final JGroupsSpace space = new JGroupsSpace(serverId, channel,
-                new NativeHashFunction(), SUBSTANCE_SIZE);
+                new KetamaBasedHashFunction(), SUBSTANCE_SIZE);
         space.setMultiplexRecevier(multiplexMessageReceiver);
 
         final PutOperation putOperation = new PutOperation(serverId, new Data());

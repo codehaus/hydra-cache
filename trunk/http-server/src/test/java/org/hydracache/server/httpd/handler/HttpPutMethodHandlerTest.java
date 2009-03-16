@@ -25,7 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
@@ -57,7 +57,7 @@ public class HttpPutMethodHandlerTest {
 
     private IncrementVersionFactory versionFactoryMarshaller;
 
-    private HashFunction hashFunction = new NativeHashFunction();
+    private HashFunction hashFunction = new KetamaBasedHashFunction();
 
     private HttpPutMethodHandler handler;
 

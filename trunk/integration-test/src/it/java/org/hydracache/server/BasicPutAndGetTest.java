@@ -24,7 +24,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.hydracache.client.http.PartitionAwareHydraCacheClient;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.data.storage.Data;
@@ -56,7 +56,7 @@ public class BasicPutAndGetTest {
         serverId = new Identity(InetAddress.getByName(SERVER_NAME), PORT_NUMBER);
 
         NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
-                new NativeHashFunction(), Arrays.asList(serverId));
+                new KetamaBasedHashFunction(), Arrays.asList(serverId));
 
         client = new PartitionAwareHydraCacheClient(partition);
     }

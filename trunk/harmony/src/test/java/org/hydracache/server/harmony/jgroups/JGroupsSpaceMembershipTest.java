@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.core.NodeSet;
 import org.hydracache.server.harmony.core.SubstanceSet;
@@ -170,7 +170,7 @@ public class JGroupsSpaceMembershipTest {
 
     private JGroupsSpace createSpace(Channel channel) throws ChannelException {
         final JGroupsSpace space = new JGroupsSpace(nodeA.getId(), channel,
-                new NativeHashFunction(), 1);
+                new KetamaBasedHashFunction(), 1);
 
         space.setMultiplexRecevier(mockMessageReceiver());
 

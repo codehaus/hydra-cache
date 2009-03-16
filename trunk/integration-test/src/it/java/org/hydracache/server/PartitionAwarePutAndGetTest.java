@@ -26,7 +26,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.hydracache.client.http.PartitionAwareHydraCacheClient;
-import org.hydracache.data.hashing.NativeHashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.data.storage.Data;
@@ -57,7 +57,7 @@ public class PartitionAwarePutAndGetTest {
         versionFactory.setIdentityMarshaller(new IdentityMarshaller());
 
         partition = new ConsistentHashNodePartition<Identity>(
-                new NativeHashFunction(), Arrays.asList(new Identity(
+                new KetamaBasedHashFunction(), Arrays.asList(new Identity(
                         InetAddress.getByName(SERVER_NAME), 8080),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8081),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8082),
