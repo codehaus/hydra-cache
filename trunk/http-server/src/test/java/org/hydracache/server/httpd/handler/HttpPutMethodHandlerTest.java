@@ -29,11 +29,16 @@ import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.data.versioning.VersionConflictException;
+import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
+import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -61,12 +66,63 @@ public class HttpPutMethodHandlerTest {
 
     private HttpPutMethodHandler handler;
 
+    private Identity sourceId = new Identity(70);
+    private Identity localId = new Identity(71);
+
     @Before
     public void initialize() {
         versionFactoryMarshaller = new IncrementVersionFactory();
         handler = createHandler(versionFactoryMarshaller);
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
+    }
+
+    @Test
+    public void ensureLocalVersionConflictDetectionIgnoresNull()
+            throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
+                "conflictLocalDataBank");
+
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                will(returnValue(null));
+            }
+        });
+
+        handler.dataBank = dataBank;
+
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setVersion(new IncrementVersionFactory()
+                .create(sourceId));
+
+        handler.guardConflictWithLocalDataVersion(10L, incomingDataMsg);
+
+        context.assertIsSatisfied();
+    }
+
+    @Test(expected = VersionConflictException.class)
+    public void ensureLocalVersionConflictDetection() throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
+                "conflictLocalDataBank");
+
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId)
+                        .incrementFor(localId));
+                will(returnValue(data));
+            }
+        });
+
+        handler.dataBank = dataBank;
+
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setVersion(new IncrementVersionFactory()
+                .create(sourceId));
+
+        handler.guardConflictWithLocalDataVersion(10L, incomingDataMsg);
     }
 
     @Test
@@ -123,7 +179,8 @@ public class HttpPutMethodHandlerTest {
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(dataBank,
                 hashFunction, new DefaultProtocolDecoder(
-                        new MessageMarshallerFactory(versionMarshaller)));
+                        new MessageMarshallerFactory(versionMarshaller)),
+                new JGroupsNode(localId, new IpAddress(7000)));
 
         return handler;
     }

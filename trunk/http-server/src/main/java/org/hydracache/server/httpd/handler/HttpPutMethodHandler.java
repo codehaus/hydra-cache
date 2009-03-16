@@ -23,6 +23,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +32,9 @@ import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
+import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.data.versioning.VersionConflictException;
+import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
@@ -44,13 +48,17 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
     private ProtocolDecoder<DataMessage> decoder;
 
+    private Node localNode;
+
     /**
      * Constructor
      */
     public HttpPutMethodHandler(HarmonyDataBank dataBank,
-            HashFunction hashFunction, ProtocolDecoder<DataMessage> decoder) {
+            HashFunction hashFunction, ProtocolDecoder<DataMessage> decoder,
+            Node localNode) {
         super(dataBank, hashFunction);
         this.decoder = decoder;
+        this.localNode = localNode;
     }
 
     /*
@@ -64,7 +72,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
 
-        if (isEmpty(request)) {
+        if (emptyRequest(request)) {
             log.warn("Empty request[" + request + "] received and ignored");
             return;
         }
@@ -73,16 +81,55 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             return;
 
         HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-
         DataMessage dataMessage = decodeProtocolMessage(entity);
-
+        increaseVersion(dataMessage);
         Long dataKey = extractDataKeyHash(request);
 
-        int statusCode = createStatusCode(dataKey);
+        try {
+            guardConflictWithLocalDataVersion(dataKey, dataMessage);
 
-        doPut(response, dataKey, dataMessage);
+            int statusCode = createStatusCode(dataKey);
 
-        response.setStatusCode(statusCode);
+            doPut(response, dataKey, dataMessage);
+
+            response.setStatusCode(statusCode);
+        } catch (VersionConflictException vce) {
+            response.setStatusCode(HttpStatus.SC_CONFLICT);
+            response.setEntity(new StringEntity(vce.getMessage()));
+        }
+    }
+
+    private boolean emptyRequest(HttpRequest request) {
+        return !(request instanceof HttpEntityEnclosingRequest);
+    }
+
+    DataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
+        byte[] entityContent = EntityUtils.toByteArray(entity);
+
+        return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
+    }
+
+    private void increaseVersion(DataMessage dataMessage) {
+        dataMessage.setVersion(dataMessage.getVersion().incrementFor(
+                localNode.getId()));
+    }
+
+    void guardConflictWithLocalDataVersion(Long dataKey,
+            DataMessage incomingDataMsg) throws IOException,
+            VersionConflictException {
+        Data localData = dataBank.getLocally(dataKey);
+
+        if (localData != null) {
+            Version existingVersion = localData.getVersion();
+            Version newVersion = incomingDataMsg.getVersion();
+
+            if (!newVersion.isDescendantOf(existingVersion)) {
+                throw new VersionConflictException(
+                        "Version conflict detected between existing["
+                                + existingVersion + "] and new[" + newVersion
+                                + "]");
+            }
+        }
     }
 
     int createStatusCode(Long dataKey) throws IOException {
@@ -103,16 +150,6 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             log.error("Failed to put:", ex);
             response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
         }
-    }
-
-    DataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
-        byte[] entityContent = EntityUtils.toByteArray(entity);
-
-        return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
-    }
-
-    private boolean isEmpty(HttpRequest request) {
-        return !(request instanceof HttpEntityEnclosingRequest);
     }
 
 }
