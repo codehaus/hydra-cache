@@ -16,6 +16,7 @@
 package org.hydracache.server.httpd.handler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -23,6 +24,8 @@ import java.util.Map;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.log4j.Logger;
@@ -45,7 +48,8 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
     /**
      * Constructor
      */
-    public MethodBasedRequestDispatcher(BaseHttpMethodHandler httpGetMethodHandler,
+    public MethodBasedRequestDispatcher(
+            BaseHttpMethodHandler httpGetMethodHandler,
             HttpPutMethodHandler httpPutMethodHandler,
             UnsupportedHttpMethodHandler unsupportedHttpMethodHandler) {
         disallowAllMethods(unsupportedHttpMethodHandler);
@@ -85,7 +89,6 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
                 .toUpperCase(Locale.ENGLISH);
 
         dispatch(request, response, context, httpMethodName);
-
     }
 
     void dispatch(HttpRequest request, HttpResponse response,
@@ -96,7 +99,17 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
             requestHandlerMap.get(httpMethod)
                     .handle(request, response, context);
         } catch (Exception ex) {
-            log.warn("Error occured while handling request", ex);
+            handleException(response, ex);
+        }
+    }
+
+    private void handleException(HttpResponse response, Exception ex) {
+        log.error("Error occured while handling request: ", ex);
+        response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        try {
+            response.setEntity(new StringEntity(ex.getMessage()));
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to generate response: ", e);
         }
     }
 

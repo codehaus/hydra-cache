@@ -96,9 +96,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             response.setStatusCode(statusCode);
         } catch (VersionConflictException vce) {
             handleVersionConflictException(response, vce);
-        } catch (Exception ex) {
-            handleException(response, ex);
-        }
+        } 
     }
 
     private boolean emptyRequest(HttpRequest request) {
@@ -155,13 +153,6 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         log.debug("Version conflict:" + vce.getMessage());
         response.setStatusCode(HttpStatus.SC_CONFLICT);
         response.setEntity(new StringEntity(vce.getMessage()));
-    }
-
-    private void handleException(HttpResponse response, Exception ex)
-            throws UnsupportedEncodingException {
-        log.error("Failed to put:", ex);
-        response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
-        response.setEntity(new StringEntity(ex.getMessage()));
     }
 
 }
