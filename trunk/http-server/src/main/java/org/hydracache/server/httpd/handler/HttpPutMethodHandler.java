@@ -16,6 +16,7 @@
 package org.hydracache.server.httpd.handler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -94,8 +95,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
             response.setStatusCode(statusCode);
         } catch (VersionConflictException vce) {
-            response.setStatusCode(HttpStatus.SC_CONFLICT);
-            response.setEntity(new StringEntity(vce.getMessage()));
+            handleVersionConflictException(response, vce);
+        } catch (Exception ex) {
+            handleException(response, ex);
         }
     }
 
@@ -142,14 +144,24 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     }
 
     private void doPut(HttpResponse response, Long dataKey,
-            DataMessage dataMessage) {
-        try {
-            dataBank.put(new Data(dataKey, dataMessage.getVersion(),
-                    dataMessage.getBlob()));
-        } catch (IOException ex) {
-            log.error("Failed to put:", ex);
-            response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
-        }
+            DataMessage dataMessage) throws IOException,
+            VersionConflictException {
+        dataBank.put(new Data(dataKey, dataMessage.getVersion(), dataMessage
+                .getBlob()));
+    }
+
+    private void handleVersionConflictException(HttpResponse response,
+            VersionConflictException vce) throws UnsupportedEncodingException {
+        log.debug("Version conflict:" + vce.getMessage());
+        response.setStatusCode(HttpStatus.SC_CONFLICT);
+        response.setEntity(new StringEntity(vce.getMessage()));
+    }
+
+    private void handleException(HttpResponse response, Exception ex)
+            throws UnsupportedEncodingException {
+        log.error("Failed to put:", ex);
+        response.setStatusCode(HttpStatus.SC_METHOD_FAILURE);
+        response.setEntity(new StringEntity(ex.getMessage()));
     }
 
 }

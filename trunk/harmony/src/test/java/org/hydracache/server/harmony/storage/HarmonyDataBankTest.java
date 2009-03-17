@@ -17,11 +17,13 @@ package org.hydracache.server.harmony.storage;
 
 import static org.junit.Assert.assertEquals;
 
+
 import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
 import org.hydracache.server.data.storage.EhcacheDataBank;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.test.TestDataGenerator;
@@ -136,6 +138,28 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         {
             addGetLocalNodeExp(context, space);
             addFailedReliablePutExp(context, data, space);
+        }
+
+        ConflictResolver conflictResolver = new ArbitraryResolver();
+
+        DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.put(data);
+    }
+
+    @Test(expected=VersionConflictException.class)
+    public void ensurePutShouldBeRejectedIfRejectionIsReceived()
+            throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+            addRejectedPutExp(context, data, space);
         }
 
         ConflictResolver conflictResolver = new ArbitraryResolver();

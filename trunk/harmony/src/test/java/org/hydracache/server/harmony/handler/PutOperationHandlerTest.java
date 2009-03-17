@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.hydracache.protocol.control.message.PutOperation;
-import org.hydracache.protocol.control.message.VersionConflictRejection;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.DefaultResolutionResult;
@@ -73,15 +72,6 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
         }
 
         return space;
-    }
-
-    protected static void addBroadcastRejectionExp(Mockery context,
-            final Space space) throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(space).broadcast(with(any(VersionConflictRejection.class)));
-            }
-        });
     }
 
     @Test

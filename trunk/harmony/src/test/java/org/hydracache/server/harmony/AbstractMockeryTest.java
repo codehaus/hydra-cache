@@ -9,6 +9,7 @@ import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
+import org.hydracache.protocol.control.message.VersionConflictRejection;
 import org.hydracache.server.Identity;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Node;
@@ -132,7 +133,7 @@ public class AbstractMockeryTest {
                 will(returnValue(putOperationResponses));
             }
         });
-    }
+    }    
 
     protected static void addFailedReliableGetExp(final Mockery context,
             final Data data, final Space space) throws Exception {
@@ -161,5 +162,29 @@ public class AbstractMockeryTest {
             }
         });
     }
+
+    protected static void addBroadcastRejectionExp(Mockery context, final Space space)
+            throws Exception {
+                context.checking(new Expectations() {
+                    {
+                        one(space).broadcast(with(any(VersionConflictRejection.class)));
+                    }
+                });
+            }
+
+    protected static void addRejectedPutExp(final Mockery context, final Data data,
+            final Space space) throws Exception {
+                context.checking(new Expectations() {
+                    {
+                        Collection<ResponseMessage> putOperationResponses = Arrays
+                                .asList(new PutOperationResponse(sourceId, UUID
+                                        .randomUUID()), new VersionConflictRejection(
+                                        sourceId, UUID.randomUUID()));
+            
+                        one(space).broadcast(with(any(PutOperation.class)));
+                        will(returnValue(putOperationResponses));
+                    }
+                });
+            }
 
 }

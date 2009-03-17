@@ -18,6 +18,8 @@ package org.hydracache.server.data.storage;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.hydracache.server.data.versioning.VersionConflictException;
+
 /**
  * Data storage bank interface
  * 
@@ -32,7 +34,7 @@ public interface DataBank {
      * @param data
      *            data
      */
-    void put(Data data) throws IOException;
+    void put(Data data) throws IOException, VersionConflictException;
 
     /**
      * Retrieve data using the given key hash

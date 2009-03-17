@@ -24,10 +24,12 @@ import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.ResponseMessage;
+import org.hydracache.protocol.control.message.VersionConflictRejection;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.ResolutionResult;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.Space;
 
 /**
@@ -84,7 +86,7 @@ public class HarmonyDataBank implements DataBank {
         ensureReliableGet(responses);
 
         Data latestData = getLatestData(keyHash, responses);
-        
+
         putLocally(latestData);
 
         return latestData;
@@ -162,7 +164,7 @@ public class HarmonyDataBank implements DataBank {
      * .data.storage.Data)
      */
     @Override
-    public void put(Data data) throws IOException {
+    public void put(Data data) throws IOException, VersionConflictException {
         PutOperation putOperation = new PutOperation(space.getLocalNode()
                 .getId(), data);
 
@@ -174,7 +176,9 @@ public class HarmonyDataBank implements DataBank {
     }
 
     private void ensureReliablePut(Collection<ResponseMessage> helps)
-            throws ReliableDataStorageException {
+            throws ReliableDataStorageException, VersionConflictException {
+        detectVersionConflictRejection(helps);
+
         if (notEnoughPuts(helps)) {
             throw new ReliableDataStorageException(
                     "Not enough members participated this reliable PUT operation - expected["
@@ -183,12 +187,25 @@ public class HarmonyDataBank implements DataBank {
         }
     }
 
+    private void detectVersionConflictRejection(
+            Collection<ResponseMessage> helps) throws VersionConflictException {
+        for (ResponseMessage responseMessage : helps) {
+            if (responseMessage instanceof VersionConflictRejection) {
+                throw new VersionConflictException("Version conflict detected");
+            }
+        }
+    }
+
     private boolean notEnoughPuts(Collection<ResponseMessage> helps) {
         return helps == null || helps.size() < expectedWrites;
     }
 
     public void putLocally(Data data) throws IOException {
-        localDataBank.put(data);
+        try {
+            localDataBank.put(data);
+        } catch (VersionConflictException e) {
+            throw new IOException(e);
+        }
     }
 
     public Data getLocally(Long keyHash) throws IOException {
