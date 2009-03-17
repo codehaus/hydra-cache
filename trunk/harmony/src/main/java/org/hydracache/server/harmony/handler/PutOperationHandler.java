@@ -24,9 +24,12 @@ import org.apache.log4j.Logger;
 import org.hydracache.protocol.control.message.ControlMessage;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
+import org.hydracache.protocol.control.message.VersionConflictRejection;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.ResolutionResult;
 import org.hydracache.server.data.storage.Data;
+import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -64,23 +67,20 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
 
         PutOperation putOperation = (PutOperation) message;
 
-        if (messageIsNotFromOurNeighbor(putOperation)) {
-            log.debug("Discarding message[" + putOperation + "] from stranger");
-            return;
-        }
-
         Data dataToPut = putOperation.getData();
 
-        Data currentData = consolidateWithLocalData(dataToPut);
-
-        harmonyDataBank.putLocally(currentData);
-
-        broadcastPutResponse(putOperation);
-
-        log.debug("Response message has been sent: " + message);
+        try {
+            Data currentData = consolidateWithLocalData(dataToPut);
+            harmonyDataBank.putLocally(currentData);
+            broadcastPutResponse(putOperation);
+            log.debug("Response message has been sent: " + message);
+        } catch (VersionConflictException vce) {
+            broadcastVersionConflictRejection(putOperation);
+        }
     }
 
-    private Data consolidateWithLocalData(Data dataToPut) throws IOException {
+    private Data consolidateWithLocalData(Data dataToPut) throws IOException,
+            VersionConflictException {
         Data existingData = harmonyDataBank.getLocally(dataToPut.getKeyHash());
         Data result = dataToPut;
 
@@ -96,7 +96,9 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
 
     @SuppressWarnings("unchecked")
     private Collection<Data> performConsolidation(Data dataToPut,
-            Data existingData) {
+            Data existingData) throws VersionConflictException {
+        guardDirectVersionConflict(dataToPut, existingData);
+
         ResolutionResult result = conflictResolver.resolve(Arrays.asList(
                 dataToPut, existingData));
 
@@ -107,12 +109,32 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
         return liveData;
     }
 
+    private void guardDirectVersionConflict(Data dataToPut, Data existingData)
+            throws VersionConflictException {
+        Version existingVersion = existingData.getVersion();
+        Version newVersion = dataToPut.getVersion();
+
+        if (!newVersion.isDescendantOf(existingVersion)) {
+            throw new VersionConflictException(
+                    "Direct version conflict detected between existing["
+                            + existingVersion + "] and new[" + newVersion + "]");
+        }
+    }
+
     private void broadcastPutResponse(PutOperation putOperation)
             throws IOException {
         PutOperationResponse response = new PutOperationResponse(space
                 .getLocalNode().getId(), putOperation.getId());
 
         space.broadcast(response);
+    }
+
+    private void broadcastVersionConflictRejection(PutOperation putOperation)
+            throws IOException {
+        VersionConflictRejection rejection = new VersionConflictRejection(space
+                .getLocalNode().getId(), putOperation.getId());
+
+        space.broadcast(rejection);
     }
 
 }

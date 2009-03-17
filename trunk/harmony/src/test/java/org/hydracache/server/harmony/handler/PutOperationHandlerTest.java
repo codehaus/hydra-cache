@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.hydracache.protocol.control.message.PutOperation;
+import org.hydracache.protocol.control.message.VersionConflictRejection;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.DefaultResolutionResult;
@@ -39,6 +40,49 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
+
+    @Test
+    public void ensureVersionConflictTriggersRejection() throws Exception {
+        ControlMessageHandler handler = new PutOperationHandler(
+                mockSpaceToReject(context), mockDataBankToReturnConflict(),
+                new ArbitraryResolver());
+
+        Data testData = TestDataGenerator.createRandomData();
+
+        PutOperation putOperation = new PutOperation(sourceId, testData);
+        handler.handle(putOperation);
+
+        context.assertIsSatisfied();
+    }
+
+    private HarmonyDataBank mockDataBankToReturnConflict() throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
+        {
+            addLocalGetExp(context, dataBank, TestDataGenerator
+                    .createRandomData());
+        }
+        return dataBank;
+    }
+
+    private static Space mockSpaceToReject(Mockery context) throws Exception {
+        final Space space = context.mock(Space.class);
+        {
+            addGetPositiveSubstanceSetExp(context, space);
+            addGetLocalNodeExp(context, space);
+            addBroadcastRejectionExp(context, space);
+        }
+
+        return space;
+    }
+
+    protected static void addBroadcastRejectionExp(Mockery context,
+            final Space space) throws Exception {
+        context.checking(new Expectations() {
+            {
+                one(space).broadcast(with(any(VersionConflictRejection.class)));
+            }
+        });
+    }
 
     @Test
     public void ensureBrandNewDataIsHandledCorrectly() throws Exception {
@@ -68,7 +112,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
     @Test(expected = IllegalArgumentException.class)
     public void ensureMultipleLiveConflictResolvementResultCanBeHandled()
             throws Exception {
-        final Data testData = TestDataGenerator.createRandomData();
+        final Data existingData = TestDataGenerator.createRandomData();
 
         final ConflictResolver resolverWithConflictResult = context
                 .mock(ConflictResolver.class);
@@ -78,16 +122,18 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
                 one(resolverWithConflictResult).resolve(
                         with(any(Collection.class)));
                 will(returnValue(new DefaultResolutionResult(Arrays.asList(
-                        testData, TestDataGenerator.createRandomData()), Arrays
-                        .asList(testData))));
+                        existingData, TestDataGenerator.createRandomData()),
+                        Arrays.asList(existingData))));
             }
         });
 
         ControlMessageHandler handler = new PutOperationHandler(
                 mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
-                        testData), resolverWithConflictResult);
+                        existingData), resolverWithConflictResult);
 
-        PutOperation putOperation = new PutOperation(sourceId, testData);
+        Data newData = generateValidNewData(existingData);
+
+        PutOperation putOperation = new PutOperation(sourceId, newData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -96,16 +142,24 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
     @Test
     public void putRequestFromWithinNeighborhoodShouldBeHonored()
             throws Exception {
-        Data testData = TestDataGenerator.createRandomData();
+        Data existingData = TestDataGenerator.createRandomData();
 
         ControlMessageHandler handler = new PutOperationHandler(
                 mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
-                        testData), new ArbitraryResolver());
+                        existingData), new ArbitraryResolver());
 
-        PutOperation putOperation = new PutOperation(sourceId, testData);
+        Data newData = generateValidNewData(existingData);
+
+        PutOperation putOperation = new PutOperation(sourceId, newData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
+    }
+
+    private Data generateValidNewData(final Data existingData) {
+        Data newData = new Data(existingData.getKeyHash(), existingData
+                .getVersion().incrementFor(sourceId), existingData.getContent());
+        return newData;
     }
 
     @Test
