@@ -36,8 +36,8 @@ import org.junit.Test;
  * @author nzhu
  * 
  */
-public class BasicPutAndGetTest {
-    private static Logger log = Logger.getLogger(BasicPutAndGetTest.class);
+public class BasicPutAndGetIntegrationTest {
+    private static Logger log = Logger.getLogger(BasicPutAndGetIntegrationTest.class);
 
     private static final int PORT_NUMBER = 8080;
 
@@ -93,7 +93,7 @@ public class BasicPutAndGetTest {
                 + numberOfTests + " put and get pairs");
     }
 
-    private void assertPutAndGet() {
+    private void assertPutAndGet() throws Exception {
         String randomKey = createRandomKey();
 
         Data data = createRandomDataSample(randomKey);

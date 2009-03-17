@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.lang.SerializationUtils;
@@ -36,6 +37,7 @@ import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.SubstancePartition;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -74,6 +76,33 @@ public class PartitionAwareHydraCacheClientTest {
                 new MessageMarshallerFactory(versionMarshaller));
         defaultProtocolDecoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionMarshaller));
+    }
+    
+    @Test
+    public void ensureOkAndCreatedStatusCodeAreAcceptableInGet() throws Exception {
+        client.validateGetResponseCode(HttpStatus.SC_OK);
+        client.validateGetResponseCode(HttpStatus.SC_CREATED);
+    }
+
+    @Test(expected = IOException.class)
+    public void ensureNotFoundTriggersExceptionInGet() throws Exception {
+        client.validateGetResponseCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void ensureOkAndCreatedStatusCodeAreAcceptableInPut() throws Exception {
+        client.validatePutResponseCode(HttpStatus.SC_OK);
+        client.validatePutResponseCode(HttpStatus.SC_CREATED);
+    }
+
+    @Test(expected = VersionConflictException.class)
+    public void ensureConflictTriggersExceptionInPut() throws Exception {
+        client.validatePutResponseCode(HttpStatus.SC_CONFLICT);
+    }
+
+    @Test(expected = IOException.class)
+    public void ensureNotFoundTriggersExceptionInPut() throws Exception {
+        client.validatePutResponseCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test

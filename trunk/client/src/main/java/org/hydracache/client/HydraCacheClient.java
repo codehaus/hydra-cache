@@ -18,6 +18,8 @@ package org.hydracache.client;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.hydracache.server.data.versioning.VersionConflictException;
+
 /**
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
@@ -46,7 +48,10 @@ public interface HydraCacheClient {
      * @param object
      *            The object to be cached
      * @return A Future to return true once the operation has completed
+     * @exception VersionConflictException
+     *                thrown if version conflict has been detected
      */
-    public void put(String key, Serializable object);
+    public void put(String key, Serializable object)
+            throws IOException, VersionConflictException;
 
 }

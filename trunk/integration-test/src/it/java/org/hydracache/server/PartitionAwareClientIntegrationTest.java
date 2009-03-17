@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.hydracache.client.http.PartitionAwareHydraCacheClient;
@@ -31,6 +32,7 @@ import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,9 +40,9 @@ import org.junit.Test;
  * @author nzhu
  * 
  */
-public class PartitionAwarePutAndGetTest {
+public class PartitionAwareClientIntegrationTest {
     private static Logger log = Logger
-            .getLogger(PartitionAwarePutAndGetTest.class);
+            .getLogger(PartitionAwareClientIntegrationTest.class);
 
     private static final String SERVER_NAME = "localhost";
 
@@ -66,6 +68,23 @@ public class PartitionAwarePutAndGetTest {
         client = new PartitionAwareHydraCacheClient(partition);
 
         localDataStorage = new HashMap<String, Data>();
+    }
+
+    // Thrown version conflict exception due to incomplete implementation in hydra client
+    @Test(expected=VersionConflictException.class)
+    public void testUpdates() throws Exception {
+        String randomKey = createRandomKey();
+
+        String data = RandomStringUtils.randomAlphanumeric(200);
+        client.put(randomKey, data);
+
+        for (int i = 0; i < 10; i++) {
+            data = RandomStringUtils.randomAlphanumeric(RandomUtils
+                    .nextInt(500));
+            client.put(randomKey, data);
+        }
+
+        assertEquals("Updated data is incorrect", data, client.get(randomKey));
     }
 
     @Test
@@ -104,7 +123,7 @@ public class PartitionAwarePutAndGetTest {
                 + numberOfRepetition + "] put and get pair");
     }
 
-    private void assertPutAndGet() {
+    private void assertPutAndGet() throws Exception {
         String randomKey = createRandomKey();
 
         Data data = createRandomDataSample(randomKey);
@@ -131,7 +150,7 @@ public class PartitionAwarePutAndGetTest {
         return data;
     }
 
-    private void assertDataIntegrity() {
+    private void assertDataIntegrity() throws Exception {
         for (String key : localDataStorage.keySet()) {
             Data localData = localDataStorage.get(key);
             Object remoteData = client.get(key);

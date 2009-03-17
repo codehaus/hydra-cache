@@ -26,7 +26,6 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.lang.SerializationUtils;
-import org.apache.log4j.Logger;
 import org.hydracache.client.HydraCacheClient;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.io.Buffer;
@@ -39,6 +38,7 @@ import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.Substance;
 
 /**
@@ -50,9 +50,6 @@ import org.hydracache.server.harmony.core.Substance;
 public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
     private static final String PROTOCOL = "http://";
-
-    private static final Logger logger = Logger
-            .getLogger(PartitionAwareHydraCacheClient.class);
 
     private final NodePartition<Identity> nodePartition;
 
@@ -97,24 +94,19 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
      * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
      */
     @Override
-    public Object get(String key) {
+    public Object get(String key) throws IOException {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
         Object object = null;
 
-        try {
-            GetMethod getMethod = new GetMethod(uri);
+        GetMethod getMethod = new GetMethod(uri);
 
-            int responseCode = httpClient.executeMethod(getMethod);
+        int responseCode = httpClient.executeMethod(getMethod);
 
-            validateResponseCode(responseCode);
+        validateGetResponseCode(responseCode);
 
-            object = retrieveResultFromGet(getMethod);
-
-        } catch (IOException ioe) {
-            logger.error("Cannot retrieve data from cache.", ioe);
-        }
+        object = retrieveResultFromGet(getMethod);
 
         return object;
     }
@@ -126,12 +118,16 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         return uri.toString();
     }
 
+    void validateGetResponseCode(int rc) throws IOException {
+        handleUnsuccessfulHttpStatus(rc);
+    }
+
     Object retrieveResultFromGet(GetMethod getMethod) throws IOException {
         Object object;
         DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(
                 getMethod.getResponseBodyAsStream()));
         // TODO: track version here
-        object = SerializationUtils.deserialize(dataMessage.getBlob());        
+        object = SerializationUtils.deserialize(dataMessage.getBlob());
         return object;
     }
 
@@ -142,25 +138,22 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
      * java.io.Serializable)
      */
     @Override
-    public void put(String key, Serializable data) {
+    public void put(String key, Serializable data) throws IOException,
+            VersionConflictException {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
-        try {
-            PutMethod putMethod = new PutMethod(uri);
+        PutMethod putMethod = new PutMethod(uri);
 
-            RequestEntity requestEntity = buildRequestEntity(data, identity);
+        RequestEntity requestEntity = buildRequestEntity(data, identity);
 
-            putMethod.setRequestEntity(requestEntity);
+        putMethod.setRequestEntity(requestEntity);
 
-            validateResponseCode(httpClient.executeMethod(putMethod));
-        } catch (IOException ioe) {
-            logger.error("Cannot write to cache.", ioe);
-        }
+        validatePutResponseCode(httpClient.executeMethod(putMethod));
     }
 
-    RequestEntity buildRequestEntity(Serializable data,
-            Identity identity) throws IOException {
+    RequestEntity buildRequestEntity(Serializable data, Identity identity)
+            throws IOException {
         Buffer buffer = encodePutData(data, identity);
 
         RequestEntity requestEntity = new InputStreamRequestEntity(buffer
@@ -179,6 +172,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         dataMessage.setVersion(new IncrementVersionFactory().create(identity));
 
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
+
         return buffer;
     }
 
@@ -187,10 +181,25 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
      * 
      * @param executeMethod
      * @throws IOException
+     * @throws VersionConflictException
      */
-    private void validateResponseCode(int rc) throws IOException {
+    void validatePutResponseCode(int rc) throws IOException,
+            VersionConflictException {
+        handleConflictHttpStatus(rc);
+
+        handleUnsuccessfulHttpStatus(rc);
+    }
+
+    private void handleUnsuccessfulHttpStatus(int rc) throws IOException {
         if (rc != HttpStatus.SC_OK && rc != HttpStatus.SC_CREATED)
             throw new IOException("Error HTTP response received: " + rc);
+    }
+
+    private void handleConflictHttpStatus(int rc)
+            throws VersionConflictException {
+        if (rc == HttpStatus.SC_CONFLICT)
+            throw new VersionConflictException(
+                    "Version conflict detected, please refresh your local cache");
     }
 
 }
