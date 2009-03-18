@@ -18,6 +18,8 @@ package org.hydracache.data.partitioning;
 import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.hydracache.data.hashing.HashFunction;
 
@@ -49,12 +51,22 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
 
     private int numberOfReplicas;
 
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    protected final Lock readLock = readWriteLock.readLock();
+    protected final Lock writeLock = readWriteLock.writeLock();
+
     public ConsistentHashNodePartition(HashFunction hashFunction,
             Collection<T> nodes, int numberOfReplicas) {
         this.hashFunction = hashFunction;
         this.numberOfReplicas = numberOfReplicas;
-        for (T node : nodes) {
-            add(node);
+
+        writeLock.lock();
+        try {
+            for (T node : nodes) {
+                add(node);
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -69,13 +81,18 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#add(java.lang.Object)
      */
     public void add(T node) {
-        if (numberOfReplicas == 0) {
-            circle.put(hashFunction.hash(node), node);
-            return;
-        }
+        writeLock.lock();
+        try {
+            if (numberOfReplicas == 0) {
+                circle.put(hashFunction.hash(node), node);
+                return;
+            }
 
-        for (int i = 1; i <= numberOfReplicas; i++) {
-            circle.put(replicatedNodeHash(node, i), node);
+            for (int i = 1; i <= numberOfReplicas; i++) {
+                circle.put(replicatedNodeHash(node, i), node);
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -85,13 +102,18 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodePartition#get(java.lang.String)
      */
     public T get(String key) {
-        if (circle.isEmpty()) {
-            return null;
+        readLock.lock();
+        try {
+            if (circle.isEmpty()) {
+                return null;
+            }
+
+            long hash = hashFunction.hash(key);
+
+            return getByHash(hash);
+        } finally {
+            readLock.unlock();
         }
-
-        long hash = hashFunction.hash(key);
-
-        return getByHash(hash);
     }
 
     protected T getByHash(long hash) {
@@ -108,13 +130,18 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * @see org.hydracache.data.partitioning.NodeCircle#remove(java.lang.Object)
      */
     public void remove(T node) {
-        if (numberOfReplicas == 0) {
-            circle.remove(hashFunction.hash(node));
-            return;
-        }
+        writeLock.lock();
+        try {
+            if (numberOfReplicas == 0) {
+                circle.remove(hashFunction.hash(node));
+                return;
+            }
 
-        for (int i = 1; i <= numberOfReplicas; i++) {
-            circle.remove(replicatedNodeHash(node, i));
+            for (int i = 1; i <= numberOfReplicas; i++) {
+                circle.remove(replicatedNodeHash(node, i));
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 

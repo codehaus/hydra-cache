@@ -136,7 +136,7 @@ public class ConsistentHashNodePartitionTest {
 
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
                 hashFunction, serverNodes, 20);
-        
+
         return circle;
     }
 
@@ -155,7 +155,7 @@ public class ConsistentHashNodePartitionTest {
             counter++;
             counterMap.put(node, counter);
         }
-        
+
         return counterMap;
     }
 
@@ -168,7 +168,7 @@ public class ConsistentHashNodePartitionTest {
                 counterMap.get(C));
 
         int counterDifference = maxCounter - minCounter;
-        
+
         System.out.println("maxCounter: " + maxCounter);
         System.out.println("minCounter: " + minCounter);
         System.out.println("Delta Counter: " + counterDifference);

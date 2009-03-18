@@ -47,11 +47,16 @@ public class SubstancePartition extends ConsistentHashNodePartition<Identity> {
      * @return the next {@link Identity} from the given one in the circle
      */
     public Identity next(Identity id) {
-        long hash = hashFunction.hash(id);
+        readLock.lock();
+        try {
+            long hash = hashFunction.hash(id);
 
-        hash++;
+            hash++;
 
-        return getByHash(hash);
+            return getByHash(hash);
+        } finally {
+            readLock.unlock();
+        }
     }
 
 }
