@@ -73,7 +73,7 @@ public class SpringContainer implements Container {
     private class ShutdownThread extends Thread {
 
         public ShutdownThread() {
-            super(ShutdownThread.class.getSimpleName());
+            super("shutdown");
         }
 
         /*
