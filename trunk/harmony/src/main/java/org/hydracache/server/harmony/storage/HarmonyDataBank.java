@@ -83,6 +83,9 @@ public class HarmonyDataBank implements DataBank {
 
         Collection<ResponseMessage> responses = space.broadcast(getOperation);
 
+        if (dataNotFound(keyHash, responses))
+            return null;
+
         ensureReliableGet(responses);
 
         Data latestData = getLatestData(keyHash, responses);
@@ -90,6 +93,12 @@ public class HarmonyDataBank implements DataBank {
         putLocally(latestData);
 
         return latestData;
+    }
+
+    private boolean dataNotFound(Long keyHash,
+            Collection<ResponseMessage> responses) throws IOException {
+        Data localData = localDataBank.get(keyHash);
+        return responses.isEmpty() && localData == null;
     }
 
     private void ensureReliableGet(Collection<ResponseMessage> responses)

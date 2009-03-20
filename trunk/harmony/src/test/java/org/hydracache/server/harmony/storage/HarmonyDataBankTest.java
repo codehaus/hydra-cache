@@ -16,6 +16,8 @@
 package org.hydracache.server.harmony.storage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 
 
 import org.hydracache.server.data.resolver.ArbitraryResolver;
@@ -52,7 +54,28 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         assertEquals("Data is incorrect after local put and get operations",
                 data, dataBank.getLocally(data.getKeyHash()));
     }
+    
+    @Test
+    public void ensureGetWithNoResultShouldReturnNull() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
 
+        Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+            addGetNullExp(context, data, space);
+        }
+
+        ConflictResolver conflictResolver = new ArbitraryResolver();
+
+        DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        assertNull("Should return null", dataBank.get(1000L));
+    }
+    
     @Test(expected = ReliableDataStorageException.class)
     public void ensureNotReliableGetIsDetected() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
@@ -67,11 +90,12 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         ConflictResolver conflictResolver = new ArbitraryResolver();
 
         DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+        localDataBank.put(data);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
                 conflictResolver, space);
 
-        dataBank.get(1000L);
+        dataBank.get(data.getKeyHash());
     }
 
     @Test

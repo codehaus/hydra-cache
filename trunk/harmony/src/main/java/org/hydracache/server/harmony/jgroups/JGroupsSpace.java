@@ -49,7 +49,7 @@ import org.jgroups.Message;
  */
 public class JGroupsSpace implements Space {
 
-    private static final int DEFAULT_RECEIVE_TIMEOUT = 3000;
+    private static final int DEFAULT_RECEIVE_TIMEOUT = 1000;
 
     public static final String DEFAULT_SPACE_NAME = "HydraSpace";
 

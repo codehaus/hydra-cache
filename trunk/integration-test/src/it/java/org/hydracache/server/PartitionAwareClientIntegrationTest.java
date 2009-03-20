@@ -16,11 +16,14 @@
 package org.hydracache.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -85,6 +88,15 @@ public class PartitionAwareClientIntegrationTest {
         }
 
         assertEquals("Updated data is incorrect", data, client.get(randomKey));
+    }
+    
+    @Test
+    public void ensureNotFoundDataReturnsAsNull() throws IOException{
+        String uniqueKey = UUID.randomUUID().toString();        
+        
+        Object result = client.get(uniqueKey);
+        
+        assertNull("Result should be null", result);
     }
 
     @Test

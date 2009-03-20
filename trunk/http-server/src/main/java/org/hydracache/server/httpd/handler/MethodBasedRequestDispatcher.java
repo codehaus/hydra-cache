@@ -15,6 +15,8 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -92,7 +94,8 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
     }
 
     void dispatch(HttpRequest request, HttpResponse response,
-            HttpContext context, String httpMethodName) {
+            HttpContext context, String httpMethodName) throws HttpException,
+            IOException {
         try {
             HttpMethod httpMethod = HttpMethod.valueOf(httpMethodName);
 
@@ -104,10 +107,12 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
     }
 
     private void handleException(HttpResponse response, Exception ex) {
-        log.error("Error occured while handling request: ", ex);
+        log.debug("Error occured while handling request: ", ex);
         response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         try {
-            response.setEntity(new StringEntity(ex.getMessage()));
+            StringEntity body = new StringEntity(ex.getMessage());
+            body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
+            response.setEntity(body);
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to generate response: ", e);
         }

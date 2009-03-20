@@ -15,6 +15,8 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -152,7 +154,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             VersionConflictException vce) throws UnsupportedEncodingException {
         log.debug("Version conflict:" + vce.getMessage());
         response.setStatusCode(HttpStatus.SC_CONFLICT);
-        response.setEntity(new StringEntity(vce.getMessage()));
+        StringEntity body = new StringEntity(vce.getMessage());
+        body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
+        response.setEntity(body);
     }
 
 }

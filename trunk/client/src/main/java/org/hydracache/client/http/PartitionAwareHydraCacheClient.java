@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.log4j.Logger;
 import org.hydracache.client.HydraCacheClient;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.io.Buffer;
@@ -48,6 +49,8 @@ import org.hydracache.server.harmony.core.Substance;
  * @since 1.0
  */
 public class PartitionAwareHydraCacheClient implements HydraCacheClient {
+    private static Logger log = Logger
+            .getLogger(PartitionAwareHydraCacheClient.class);
 
     private static final String PROTOCOL = "http://";
 
@@ -104,6 +107,11 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         int responseCode = httpClient.executeMethod(getMethod);
 
+        log.debug("GET response code: " + responseCode);
+
+        if (responseCode == HttpStatus.SC_NOT_FOUND)
+            return null;
+
         validateGetResponseCode(responseCode);
 
         object = retrieveResultFromGet(getMethod);
@@ -118,8 +126,8 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         return uri.toString();
     }
 
-    void validateGetResponseCode(int rc) throws IOException {
-        handleUnsuccessfulHttpStatus(rc);
+    void validateGetResponseCode(int responseCode) throws IOException {
+        handleUnsuccessfulHttpStatus(responseCode);
     }
 
     Object retrieveResultFromGet(GetMethod getMethod) throws IOException {
@@ -149,7 +157,11 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         putMethod.setRequestEntity(requestEntity);
 
-        validatePutResponseCode(httpClient.executeMethod(putMethod));
+        int responseCode = httpClient.executeMethod(putMethod);
+
+        log.debug("PUT response code: " + responseCode);
+
+        validatePutResponseCode(responseCode);
     }
 
     RequestEntity buildRequestEntity(Serializable data, Identity identity)
@@ -176,28 +188,20 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         return buffer;
     }
 
-    /**
-     * Validate the response code
-     * 
-     * @param executeMethod
-     * @throws IOException
-     * @throws VersionConflictException
-     */
-    void validatePutResponseCode(int rc) throws IOException,
+    void validatePutResponseCode(int responseCode) throws IOException,
             VersionConflictException {
-        handleConflictHttpStatus(rc);
-
-        handleUnsuccessfulHttpStatus(rc);
+        handleConflictHttpStatus(responseCode);
+        handleUnsuccessfulHttpStatus(responseCode);
     }
 
-    private void handleUnsuccessfulHttpStatus(int rc) throws IOException {
-        if (rc != HttpStatus.SC_OK && rc != HttpStatus.SC_CREATED)
-            throw new IOException("Error HTTP response received: " + rc);
+    private void handleUnsuccessfulHttpStatus(int responseCode) throws IOException {
+        if (responseCode != HttpStatus.SC_OK && responseCode != HttpStatus.SC_CREATED)
+            throw new IOException("Error HTTP response received: " + responseCode);
     }
 
-    private void handleConflictHttpStatus(int rc)
+    private void handleConflictHttpStatus(int responseCode)
             throws VersionConflictException {
-        if (rc == HttpStatus.SC_CONFLICT)
+        if (responseCode == HttpStatus.SC_CONFLICT)
             throw new VersionConflictException(
                     "Version conflict detected, please refresh your local cache");
     }

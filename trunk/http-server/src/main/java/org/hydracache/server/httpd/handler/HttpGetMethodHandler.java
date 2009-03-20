@@ -16,14 +16,19 @@
 package org.hydracache.server.httpd.handler;
 
 import static org.hydracache.server.httpd.HttpConstants.BINARY_RESPONSE_CONTENT_TYPE;
+import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
@@ -39,6 +44,7 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  * 
  */
 public class HttpGetMethodHandler extends BaseHttpMethodHandler {
+    private static Logger log = Logger.getLogger(HttpGetMethodHandler.class);
 
     private ProtocolEncoder<DataMessage> messageEncoder;
 
@@ -51,7 +57,8 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     /**
      * Constructor
      */
-    public HttpGetMethodHandler(HarmonyDataBank dataBank, HashFunction hashFunction,
+    public HttpGetMethodHandler(HarmonyDataBank dataBank,
+            HashFunction hashFunction,
             ProtocolEncoder<DataMessage> messageEncoder) {
         super(dataBank, hashFunction);
         this.messageEncoder = messageEncoder;
@@ -101,6 +108,11 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
         Data data = dataBank.get(dataKey);
 
+        if (data == null) {
+            handleNotFound(response);
+            return;
+        }
+
         Buffer buffer = ProtocolUtils.encodeDataMessage(messageEncoder, data);
 
         ByteArrayEntity body = new ByteArrayEntity(buffer.toByteArray());
@@ -108,6 +120,17 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         body.setContentType(BINARY_RESPONSE_CONTENT_TYPE);
 
         response.setEntity(body);
-    } 
+    }
+
+    private void handleNotFound(HttpResponse response) {
+        response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+        try {
+            StringEntity body = new StringEntity("Data not found");
+            body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
+            response.setEntity(body);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to generate response: ", e);
+        }
+    }
 
 }
