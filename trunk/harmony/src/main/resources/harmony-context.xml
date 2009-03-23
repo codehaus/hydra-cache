@@ -41,6 +41,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
         <property name="multiplexRecevier" ref="multiplexMessageReceiver" />
         <property name="membershipRegistry" ref="membershipRegistry" />
+        <property name="multicastTimeOut" value="${hop.multicastTimeOut}" />
     </bean>
     
     <!-- Local Node -->

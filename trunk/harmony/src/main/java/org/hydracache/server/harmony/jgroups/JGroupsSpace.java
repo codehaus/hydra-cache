@@ -49,7 +49,7 @@ import org.jgroups.Message;
  */
 public class JGroupsSpace implements Space {
 
-    private static final int DEFAULT_RECEIVE_TIMEOUT = 1000;
+    private static final int DEFAULT_MULTICAST_TIMEOUT = 1000;
 
     public static final String DEFAULT_SPACE_NAME = "HydraSpace";
 
@@ -62,6 +62,8 @@ public class JGroupsSpace implements Space {
     private Identity serverId;
 
     private int substanceSize;
+
+    private int multicastTimeOut = DEFAULT_MULTICAST_TIMEOUT;
 
     private HashFunction hashFunction;
 
@@ -89,6 +91,10 @@ public class JGroupsSpace implements Space {
 
     public void setMembershipRegistry(MembershipRegistry membershipRegistry) {
         this.membershipRegistry = membershipRegistry;
+    }
+
+    public void setMulticastTimeOut(int multicastTimeOut) {
+        this.multicastTimeOut = multicastTimeOut;
     }
 
     /*
@@ -178,7 +184,7 @@ public class JGroupsSpace implements Space {
 
         try {
             Collection<ResponseMessage> responseMessages = responseFuture.get(
-                    DEFAULT_RECEIVE_TIMEOUT, TimeUnit.MILLISECONDS);
+                    multicastTimeOut, TimeUnit.MILLISECONDS);
 
             log.debug("Response messages received: " + responseMessages);
 
