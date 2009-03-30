@@ -43,6 +43,46 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
     private DataBank localDataBank = new EhcacheDataBank(conflictResolver);
     
     @Test
+    public void ensureNegativeWorRCanBeHandledAsOne() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+        
+        Space space = context.mock(Space.class);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.setExpectedWrites(-5);
+        dataBank.setExpectedReads(-5);
+        
+        dataBank.put(data);
+
+        assertEquals("Data is incorrect with R, W=-5 put and get operations",
+                data, dataBank.get(data.getKeyHash()));
+        
+        context.assertIsSatisfied();
+    }
+    
+    @Test
+    public void ensureZeroWorRCanBeHandledAsOne() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+        
+        Space space = context.mock(Space.class);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.setExpectedWrites(0);
+        dataBank.setExpectedReads(0);
+        
+        dataBank.put(data);
+
+        assertEquals("Data is incorrect with R, W=0 put and get operations",
+                data, dataBank.get(data.getKeyHash()));
+        
+        context.assertIsSatisfied();
+    }
+    
+    @Test
     public void ensureDataBankCanBeConfiguredToWriteLocally() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
         
@@ -55,7 +95,7 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         
         dataBank.put(data);
 
-        assertEquals("Data is incorrect after W=1 put and get operations",
+        assertEquals("Data is incorrect with W=1 put and get operations",
                 data, dataBank.getLocally(data.getKeyHash()));
         
         context.assertIsSatisfied();
@@ -73,7 +113,7 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         dataBank.putLocally(data);
         dataBank.setExpectedReads(1);
 
-        assertEquals("Data is incorrect after R=1 put and get operations",
+        assertEquals("Data is incorrect with R=1 put and get operations",
                 data, dataBank.get(data.getKeyHash()));
         
         context.assertIsSatisfied();
