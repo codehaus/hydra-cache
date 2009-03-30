@@ -114,8 +114,8 @@ public class NodePartitionSubstanceTest {
         Substance substance = new NodePartitionSubstance(nodeA, allNodes,
                 hashFunction, 1);
 
-        assertTrue("Should be neighbor", substance.isNeighbor(nodeC.getId()));
-        assertFalse("Should not be neighbor", substance.isNeighbor(nodeB
+        assertTrue("Should be neighbor", substance.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be neighbor", substance.isNeighbor(nodeC
                 .getId()));
     }
 
