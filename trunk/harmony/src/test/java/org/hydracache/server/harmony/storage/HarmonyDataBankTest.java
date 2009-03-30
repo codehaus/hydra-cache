@@ -41,6 +41,25 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
     private ConflictResolver conflictResolver = new ArbitraryResolver();
 
     private DataBank localDataBank = new EhcacheDataBank(conflictResolver);
+    
+    @Test
+    public void ensureDataBankCanBeConfiguredToWriteLocally() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+        
+        Space space = context.mock(Space.class);
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.setExpectedWrites(1);
+        
+        dataBank.put(data);
+
+        assertEquals("Data is incorrect after W=1 put and get operations",
+                data, dataBank.getLocally(data.getKeyHash()));
+        
+        context.assertIsSatisfied();
+    }
 
     @Test
     public void ensureDataBankCanBeConfiguredToReadLocally() throws Exception {

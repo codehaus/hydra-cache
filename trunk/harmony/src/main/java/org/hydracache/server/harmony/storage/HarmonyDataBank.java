@@ -193,14 +193,21 @@ public class HarmonyDataBank implements DataBank {
      */
     @Override
     public void put(Data data) throws IOException, VersionConflictException {
-        PutOperation putOperation = new PutOperation(space.getLocalNode()
-                .getId(), data);
+        if (reliablePutRequired()) {
+            PutOperation putOperation = new PutOperation(space.getLocalNode()
+                    .getId(), data);
 
-        Collection<ResponseMessage> responses = space.broadcast(putOperation);
+            Collection<ResponseMessage> responses = space
+                    .broadcast(putOperation);
 
-        ensureReliablePut(responses);
+            ensureReliablePut(responses);
+        }
 
         putLocally(data);
+    }
+
+    private boolean reliablePutRequired() {
+        return expectedWrites > 1;
     }
 
     private void ensureReliablePut(Collection<ResponseMessage> helps)
