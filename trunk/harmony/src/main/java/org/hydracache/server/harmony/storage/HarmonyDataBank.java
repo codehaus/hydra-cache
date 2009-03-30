@@ -17,6 +17,7 @@ package org.hydracache.server.harmony.storage;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
@@ -78,15 +79,24 @@ public class HarmonyDataBank implements DataBank {
      */
     @Override
     public Data get(Long keyHash) throws IOException {
-        GetOperation getOperation = new GetOperation(space.getLocalNode()
-                .getId(), keyHash);
+        int expectedReads = this.expectedReads;
 
-        Collection<ResponseMessage> responses = space.broadcast(getOperation);
+        if (hasLocalCopy(keyHash))
+            expectedReads--;
+
+        Collection<ResponseMessage> responses = Collections.emptyList();
+
+        if (requireReliableGet(expectedReads)) {
+            GetOperation getOperation = new GetOperation(space.getLocalNode()
+                    .getId(), keyHash);
+
+            responses = space.broadcast(getOperation);
+        }
 
         if (dataNotFound(keyHash, responses))
             return null;
 
-        ensureReliableGet(responses);
+        ensureReliableGet(responses, expectedReads);
 
         Data latestData = getLatestData(keyHash, responses);
 
@@ -95,15 +105,23 @@ public class HarmonyDataBank implements DataBank {
         return latestData;
     }
 
+    private boolean hasLocalCopy(Long keyHash) throws IOException {
+        return getLocally(keyHash) != null;
+    }
+
+    private boolean requireReliableGet(int expectedReads) {
+        return expectedReads > 0;
+    }
+
     private boolean dataNotFound(Long keyHash,
             Collection<ResponseMessage> responses) throws IOException {
         Data localData = localDataBank.get(keyHash);
         return responses.isEmpty() && localData == null;
     }
 
-    private void ensureReliableGet(Collection<ResponseMessage> responses)
-            throws ReliableDataStorageException {
-        if (notEnoughGets(responses)) {
+    private void ensureReliableGet(Collection<ResponseMessage> responses,
+            int expectedReads) throws ReliableDataStorageException {
+        if (notEnoughGets(responses, expectedReads)) {
             throw new ReliableDataStorageException(
                     "Not enough members participated this reliable GET operation - expected["
                             + expectedReads + "] : received["
@@ -111,7 +129,8 @@ public class HarmonyDataBank implements DataBank {
         }
     }
 
-    private boolean notEnoughGets(Collection<ResponseMessage> responses) {
+    private boolean notEnoughGets(Collection<ResponseMessage> responses,
+            int expectedReads) {
         return responses == null || responses.size() < expectedReads;
     }
 
