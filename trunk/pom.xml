@@ -19,6 +19,7 @@
         <module>data-partition</module>
         <module>data-storage</module>
         <module>harmony</module>
+        <module>test-kit</module>
     </modules>
 
     <build>
@@ -29,6 +30,13 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -198,6 +206,13 @@
                 <artifactId>backport-util-concurrent</artifactId>
                 <version>2.2</version>
             </dependency>
+            
+            <!-- JMETER DEPENDENCIES -->
+            <dependency>
+                <groupId>org.apache.jmeter</groupId>
+                <artifactId>jmeter</artifactId>
+                <version>2.2</version>
+            </dependency>
 
             <!-- TEST DEPENDENCIES -->
             <dependency>
@@ -226,6 +241,11 @@
             <id>jboss</id>
             <url>http://repository.jboss.com/maven2/</url>
         </repository>
+        <!-- Only this repository contains JMeter jars -->
+        <repository>
+            <id>thinkpond.org</id>
+            <url>http://bin.thinkpond.org/repo</url>
+        </repository>        
     </repositories>
 
     <reporting>
