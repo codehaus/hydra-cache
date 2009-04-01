@@ -1,47 +1,60 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.codehaus.hydra-cache</groupId>
-		<artifactId>parent</artifactId>
-		<version>0.4-SNAPSHOT</version>
-	</parent>
-	<artifactId>test-kit</artifactId>
-	<name>Hydra Test Kit</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.codehaus.hydra-cache</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.4-SNAPSHOT</version>
+    </parent>
+    <artifactId>test-kit</artifactId>
+    <name>Hydra Test Kit</name>
 
-	<dependencies>
+    <dependencies>
+        <!-- INTERNAL DEPENDENCIES -->
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>client</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
 
-		<!-- COMMON DEPENDENCIES -->
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-		</dependency>
-                
-                <!-- JMETER DEPENDENCIES -->
-                <dependency>
-                        <groupId>org.apache.jmeter</groupId>
-                        <artifactId>jmeter</artifactId>
-                </dependency>
+        <!-- COMMON DEPENDENCIES -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
 
-		<!-- TEST DEPENDENCIES -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jmock</groupId>
-			<artifactId>jmock-junit4</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jmock</groupId>
-			<artifactId>jmock-legacy</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <!-- JMETER DEPENDENCIES -->
+        <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>jmeter</artifactId>
+        </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-legacy</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -105,16 +105,16 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         GetMethod getMethod = new GetMethod(uri);
 
-        int responseCode = httpClient.executeMethod(getMethod);
-
-        log.debug("GET response code: " + responseCode);
-
-        if (responseCode == HttpStatus.SC_NOT_FOUND)
-            return null;
-
-        validateGetResponseCode(responseCode);
-
-        object = retrieveResultFromGet(getMethod);
+        try {
+            int responseCode = httpClient.executeMethod(getMethod);
+            log.debug("GET response code: " + responseCode);
+            if (responseCode == HttpStatus.SC_NOT_FOUND)
+                return null;
+            validateGetResponseCode(responseCode);
+            object = retrieveResultFromGet(getMethod);
+        } finally {
+            getMethod.releaseConnection();
+        }
 
         return object;
     }
@@ -153,15 +153,15 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         PutMethod putMethod = new PutMethod(uri);
 
-        RequestEntity requestEntity = buildRequestEntity(data, identity);
-
-        putMethod.setRequestEntity(requestEntity);
-
-        int responseCode = httpClient.executeMethod(putMethod);
-
-        log.debug("PUT response code: " + responseCode);
-
-        validatePutResponseCode(responseCode);
+        try {
+            RequestEntity requestEntity = buildRequestEntity(data, identity);
+            putMethod.setRequestEntity(requestEntity);
+            int responseCode = httpClient.executeMethod(putMethod);
+            log.debug("PUT response code: " + responseCode);
+            validatePutResponseCode(responseCode);
+        } finally {
+            putMethod.releaseConnection();
+        }
     }
 
     RequestEntity buildRequestEntity(Serializable data, Identity identity)
@@ -194,9 +194,12 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         handleUnsuccessfulHttpStatus(responseCode);
     }
 
-    private void handleUnsuccessfulHttpStatus(int responseCode) throws IOException {
-        if (responseCode != HttpStatus.SC_OK && responseCode != HttpStatus.SC_CREATED)
-            throw new IOException("Error HTTP response received: " + responseCode);
+    private void handleUnsuccessfulHttpStatus(int responseCode)
+            throws IOException {
+        if (responseCode != HttpStatus.SC_OK
+                && responseCode != HttpStatus.SC_CREATED)
+            throw new IOException("Error HTTP response received: "
+                    + responseCode);
     }
 
     private void handleConflictHttpStatus(int responseCode)
