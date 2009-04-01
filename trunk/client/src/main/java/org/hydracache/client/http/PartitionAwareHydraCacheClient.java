@@ -21,10 +21,12 @@ import java.io.Serializable;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.client.HydraCacheClient;
@@ -71,7 +73,8 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
      */
     public PartitionAwareHydraCacheClient(NodePartition<Identity> nodePartition) {
         this.nodePartition = nodePartition;
-        this.httpClient = new HttpClient();
+        
+        createHttpClient();
 
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory();
         versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
@@ -81,6 +84,16 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         protocolDecoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionMarshaller));
+    }
+
+    private void createHttpClient() {
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        HttpConnectionManagerParams connectionManagerParams = new HttpConnectionManagerParams();
+        connectionManagerParams.setDefaultMaxConnectionsPerHost(10);
+        connectionManagerParams.setMaxTotalConnections(100);
+        connectionManager.setParams(connectionManagerParams);
+        
+        this.httpClient = new HttpClient(connectionManager);
     }
 
     /**

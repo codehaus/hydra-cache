@@ -29,7 +29,7 @@ public class InMemoryPutSampler extends AbstractHydraSampler implements JavaSamp
             results.setSuccessful(false);
             results.setResponseMessage(e.getMessage());
         }
-
+        
         results.sampleEnd();
 
         return results;
