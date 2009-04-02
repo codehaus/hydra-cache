@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -20,12 +21,14 @@ import org.json.JSONObject;
 
 public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
 
+    private static final String DATA_LENGTH = "dataLength";
+
     private static final String PORT = "port";
 
     private static final String IP = "ip";
 
     protected static final int SAMPLE_SIZE = 1000;
-    
+
     private static final String SEED_SERVER_LIST = "seedServerList";
 
     protected static final String LOCALHOST = "localhost";
@@ -33,6 +36,8 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     protected PartitionAwareHydraCacheClient client;
 
     private String seedServerListParam;
+
+    protected int dataLength;
 
     private List<Identity> seedServerIds;
 
@@ -46,6 +51,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
 
         params.addArgument(SEED_SERVER_LIST, "[{\"" + PORT + "\":8080,\"" + IP
                 + "\":\"127.0.0.1\"}]");
+        params.addArgument(DATA_LENGTH, "200");
 
         return params;
     }
@@ -54,6 +60,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     public void setupTest(JavaSamplerContext context) {
         try {
             contructSeedServerIds(context);
+            dataLength = context.getIntParameter(DATA_LENGTH);
             client = createHydraClient();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -96,6 +103,10 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     protected String getRandomKey() {
         String key = UUID.randomUUID().toString();
         return key;
+    }
+
+    protected String createRandomData() {
+        return RandomStringUtils.randomAlphanumeric(dataLength);
     }
 
 }
