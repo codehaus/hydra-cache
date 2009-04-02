@@ -16,7 +16,13 @@
             <artifactId>client</artifactId>
             <version>${pom.version}</version>
         </dependency>
-        
+
+        <!-- SPRING DEPENDENCIES -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+        </dependency>
+
         <!-- JSON -->
         <dependency>
             <groupId>org.json</groupId>

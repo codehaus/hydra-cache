@@ -18,22 +18,7 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
-    <!-- Load system configuration from classpath conf file -->
-    <context:property-placeholder location="classpath:hydra.conf" />
-
-    <!-- Server address configured -->
-    <bean id="serverAddress" class="java.net.Inet4Address"
-        factory-method="getByName">
-        <constructor-arg>
-            <value>${server.ip}</value>
-        </constructor-arg>
-    </bean>
-
-    <!-- An unique identity for this specific server node  -->
-    <bean id="serverId" class="org.hydracache.server.Identity">
-        <constructor-arg ref="serverAddress" />
-        <constructor-arg value="${server.port}" />
-    </bean>
-
-    <bean id="identityMarshaller" class="org.hydracache.server.IdentityMarshaller" />
+   
+   <context:component-scan base-package="org.hydracache.testkit" />
+   
 </beans>
