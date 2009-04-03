@@ -121,7 +121,7 @@ public class PartitionAwareClientIntegrationTest {
 
         stopwatch.start();
 
-        int numberOfRepetition = 100;
+        int numberOfRepetition = 500;
 
         for (int i = 0; i < numberOfRepetition; i++) {
             assertPutAndGet();

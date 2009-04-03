@@ -30,13 +30,17 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  * @author nzhu
  * 
  */
-public class Identity implements Serializable, Comparable<Identity> {
+public class Identity implements  Serializable, Comparable<Identity> {
 
     private static final long serialVersionUID = 1L;
 
     private final InetAddress address;
 
     private final short port;
+    
+    private transient String stringValue;
+    
+    private transient int hashCode;
 
     public Identity(final InetAddress address, final short port) {
         Validate.notNull(address, "Address can not be null");
@@ -73,12 +77,18 @@ public class Identity implements Serializable, Comparable<Identity> {
 
     @Override
     public String toString() {
-        return address.getHostAddress() + ":" + port;
+        if(stringValue == null)
+            stringValue = address.getHostAddress() + ":" + port;
+            
+        return stringValue;
     }
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        if(hashCode == 0)
+            hashCode = toString().hashCode();
+            
+        return hashCode;
     }
 
     @Override
