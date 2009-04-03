@@ -26,10 +26,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="dataSource"
         class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName">
-            <value>com.mysql.jdbc.Driver</value>
+            <value>org.hsqldb.jdbcDriver</value>
         </property>
-        <property name="url" value="jdbc:mysql://localhost:3306/hydra-test" />
-        <property name="username" value="hydra" />
+        <property name="url" value="jdbc:hsqldb:mem:npath" />
+        <property name="username" value="sa" />
         <property name="password" value="hydra" />
     </bean>
 
@@ -45,26 +45,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">
-                    org.hibernate.dialect.MySQLDialect
+                    org.hibernate.dialect.HSQLDialect
                 </prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
                 <prop key="hibernate.show_sql">true</prop>
             </props>
         </property>
     </bean>
-
-    <!--
-        Enable the configuration of transactional behaviour based on
-        annotations
-    -->
-    <tx:annotation-driven />
-
-    <!-- PlatformTransactionManager for transactional infrastructure -->
-    <bean id="transactionManager"
-        class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
-    
-    <context:component-scan base-package="org.hydracache.testkit" />
 
 </beans>
