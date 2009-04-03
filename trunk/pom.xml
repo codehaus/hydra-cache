@@ -34,9 +34,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
-                  <encoding>UTF-8</encoding>
+                    <encoding>UTF-8</encoding>
                 </configuration>
-            </plugin>            
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -147,11 +147,40 @@
                 <version>${spring.version}</version>
             </dependency>
 
+            <!-- HIBERNATE DEPENDENCIES -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate</artifactId>
+                <version>3.2.6.ga</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-annotations</artifactId>
+                <version>3.3.1.GA</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-tools</artifactId>
+                <version>3.2.0.ga</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-commons-annotations</artifactId>
+                <version>3.3.0.ga</version>
+            </dependency>
+
             <!-- EHCACHE DEPENDENCIES -->
             <dependency>
                 <groupId>net.sf.ehcache</groupId>
                 <artifactId>ehcache</artifactId>
                 <version>1.5.0</version>
+            </dependency>
+
+            <!-- MYSQL DEPENDENCIES -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.6</version>
             </dependency>
 
             <!-- HTTP COMPONENTS DEPENDENCIE -->
@@ -206,7 +235,7 @@
                 <artifactId>backport-util-concurrent</artifactId>
                 <version>2.2</version>
             </dependency>
-            
+
             <!-- JMETER DEPENDENCIES -->
             <dependency>
                 <groupId>org.apache.jmeter</groupId>
@@ -233,6 +262,12 @@
                 <version>2.5.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>1.8.0.7</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -245,7 +280,7 @@
         <repository>
             <id>thinkpond.org</id>
             <url>http://bin.thinkpond.org/repo</url>
-        </repository>        
+        </repository>
     </repositories>
 
     <reporting>
