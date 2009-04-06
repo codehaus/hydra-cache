@@ -73,7 +73,9 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
             Data currentData = consolidateWithLocalData(dataToPut);
             harmonyDataBank.putLocally(currentData);
             broadcastPutResponse(putOperation);
-            log.debug("Response message has been sent: " + message);
+
+            if (log.isDebugEnabled())
+                log.debug("Response message has been sent: " + message);
         } catch (VersionConflictException vce) {
             broadcastVersionConflictRejection(putOperation);
         }

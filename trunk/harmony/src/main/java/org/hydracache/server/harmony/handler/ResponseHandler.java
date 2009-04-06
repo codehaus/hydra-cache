@@ -28,8 +28,9 @@ public class ResponseHandler implements ControlMessageHandler {
         UUID requestId = responseMsg.getReplyToId();
 
         if (requestId == null) {
-            log.debug("Ignoring response message with missing replyTo: "
-                    + message);
+            if (log.isDebugEnabled())
+                log.debug("Ignoring response message with missing replyTo: "
+                        + message);
             return;
         }
 
@@ -37,13 +38,15 @@ public class ResponseHandler implements ControlMessageHandler {
                 .retrieveResultFuture(requestId);
 
         if (requestResultFuture == null) {
-            log.debug("Ignoring unrelated response message: " + message);
+            if (log.isDebugEnabled())
+                log.debug("Ignoring unrelated response message: " + message);
             return;
         }
 
         requestResultFuture.add(responseMsg);
 
-        log.debug("Successfully processed response message: " + message);
+        if (log.isDebugEnabled())
+            log.debug("Successfully processed response message: " + message);
     }
 
     protected boolean messageIsNotFromOurNeighbor(ControlMessage message) {

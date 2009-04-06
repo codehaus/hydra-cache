@@ -23,7 +23,8 @@ public abstract class AbstractControlMessageHandler implements
     @Override
     public void handle(ControlMessage message) throws Exception {
         if (messageIsNotFromOurNeighbor(message)) {
-            log.debug("Discarding message[" + message + "] from stranger");
+            if (log.isDebugEnabled())
+                log.debug("Discarding message[" + message + "] from stranger");
             return;
         }
 

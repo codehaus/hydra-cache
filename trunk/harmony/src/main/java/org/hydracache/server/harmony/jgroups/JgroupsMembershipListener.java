@@ -45,7 +45,8 @@ public class JgroupsMembershipListener implements MembershipListener {
      */
     @Override
     public void viewAccepted(View newView) {
-        log.debug("New view receive: " + newView);
+        if (log.isDebugEnabled())
+            log.debug("New view receive: " + newView);
     }
 
 }

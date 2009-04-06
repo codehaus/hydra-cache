@@ -96,7 +96,8 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
 
         Object payload = msg.getObject();
 
-        log.debug("Received message: " + msg + " with object: " + payload);
+        if (log.isDebugEnabled())
+            log.debug("Received message: " + msg + " with object: " + payload);
 
         Validate.isTrue(payload instanceof ControlMessage);
 
@@ -114,7 +115,7 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
                 responseHandler.handle(controlMessage);
                 return;
             }
-            
+
             if (controlMessage instanceof GetOperation) {
                 getOperationHandler.handle(controlMessage);
                 return;
@@ -151,7 +152,8 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
     public Future<Collection<ResponseMessage>> receiveFor(ControlMessage request) {
         Validate.notNull(request, "Request can not be null");
 
-        log.debug("Registering request: " + request);
+        if (log.isDebugEnabled())
+            log.debug("Registering request: " + request);
 
         SimpleResultFuture<ResponseMessage> resultFuture = new SimpleResultFuture<ResponseMessage>(
                 expectedResponses);

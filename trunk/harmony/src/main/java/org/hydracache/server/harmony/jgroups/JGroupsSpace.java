@@ -121,8 +121,6 @@ public class JGroupsSpace implements Space {
             Substance substance = new NodePartitionSubstance(eachNode,
                     allNodes, hashFunction, substanceSize);
 
-            log.debug("Getting substance for node[" + eachNode + "]");
-
             substances.add(substance);
         }
 
@@ -144,13 +142,7 @@ public class JGroupsSpace implements Space {
         for (Substance eachSubstance : allSubstances) {
             NodeSet neighbours = eachSubstance.getNeighbours();
 
-            log.debug("Scanning substance neighbourhood [" + neighbours
-                    + "] owner[" + eachSubstance.getOwner() + "]");
-
             if (neighbours.contains(localNode)) {
-                log.debug("Getting substance [" + eachSubstance
-                        + "] for local node[" + localNode + "]");
-
                 substances.add(eachSubstance);
             }
         }
@@ -169,7 +161,8 @@ public class JGroupsSpace implements Space {
     public Collection<ResponseMessage> broadcast(RequestMessage request)
             throws IOException {
 
-        log.debug("Sending operation request: " + request);
+        if (log.isDebugEnabled())
+            log.debug("Sending operation request: " + request);
 
         Message message = new Message();
 
@@ -186,7 +179,8 @@ public class JGroupsSpace implements Space {
             Collection<ResponseMessage> responseMessages = responseFuture.get(
                     multicastTimeOut, TimeUnit.MILLISECONDS);
 
-            log.debug("Response messages received: " + responseMessages);
+            if (log.isDebugEnabled())
+                log.debug("Response messages received: " + responseMessages);
 
             List<ResponseMessage> results = new ArrayList<ResponseMessage>();
 
@@ -202,7 +196,8 @@ public class JGroupsSpace implements Space {
     }
 
     private void send(Message message) throws IOException {
-        log.debug("Sending message[" + message + "]");
+        if (log.isDebugEnabled())
+            log.debug("Sending message[" + message + "]");
 
         try {
             channel.send(message);
