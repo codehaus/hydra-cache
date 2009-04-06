@@ -9,7 +9,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-import org.hydracache.client.http.PartitionAwareHydraCacheClient;
+import org.hydracache.client.http.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -33,7 +33,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
 
     protected static final String LOCALHOST = "localhost";
 
-    protected PartitionAwareHydraCacheClient client;
+    protected PartitionAwareClient client;
 
     private String seedServerListParam;
 
@@ -82,7 +82,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
         }
     }
 
-    protected PartitionAwareHydraCacheClient createHydraClient() {
+    protected PartitionAwareClient createHydraClient() {
         IncrementVersionFactory versionFactory = new IncrementVersionFactory();
 
         versionFactory.setIdentityMarshaller(new IdentityMarshaller());
@@ -90,7 +90,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
         NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
                 new KetamaBasedHashFunction(), seedServerIds);
 
-        PartitionAwareHydraCacheClient client = new PartitionAwareHydraCacheClient(
+        PartitionAwareClient client = new PartitionAwareClient(
                 partition);
 
         return client;

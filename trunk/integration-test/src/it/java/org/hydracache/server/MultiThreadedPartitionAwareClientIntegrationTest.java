@@ -28,7 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.http.PartitionAwareHydraCacheClient;
+import org.hydracache.client.http.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -76,7 +76,7 @@ public class MultiThreadedPartitionAwareClientIntegrationTest {
         private final CountDownLatch doneLatch;
         private Map<String, Data> localDataStorage = new HashMap<String, Data>();
         private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
-        private PartitionAwareHydraCacheClient client;
+        private PartitionAwareClient client;
         private NodePartition<Identity> partition;
 
         private TesterThread(CountDownLatch doneLatch) throws Exception {
@@ -93,7 +93,7 @@ public class MultiThreadedPartitionAwareClientIntegrationTest {
                             new Identity(InetAddress.getByName(SERVER_NAME),
                                     8083)));
 
-            client = new PartitionAwareHydraCacheClient(partition);
+            client = new PartitionAwareClient(partition);
         }
 
         @Override
