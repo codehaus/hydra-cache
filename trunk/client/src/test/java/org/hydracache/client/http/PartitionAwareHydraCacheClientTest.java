@@ -52,7 +52,7 @@ public class PartitionAwareHydraCacheClientTest {
         }
     };
 
-    private PartitionAwareHydraCacheClient client;
+    private PartitionAwareClient client;
 
     private Identity defaultIdentity;
 
@@ -61,6 +61,8 @@ public class PartitionAwareHydraCacheClientTest {
     private DefaultProtocolEncoder defaultProtocolEncoder;
 
     private DefaultProtocolDecoder defaultProtocolDecoder;
+    
+    private String testKey = "testKey";
 
     @Before
     public void beforeTests() throws Exception {
@@ -68,7 +70,7 @@ public class PartitionAwareHydraCacheClientTest {
         List<Identity> ids = Collections.singletonList(defaultIdentity);
         SubstancePartition partition = new SubstancePartition(
                 new KetamaBasedHashFunction(), ids);
-        client = new PartitionAwareHydraCacheClient(partition);
+        client = new PartitionAwareClient(partition);
 
         versionMarshaller = new IncrementVersionFactory();
         versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
@@ -123,7 +125,7 @@ public class PartitionAwareHydraCacheClientTest {
             }
         });
 
-        Object result = client.retrieveResultFromGet(getMethod);
+        Object result = client.retrieveResultFromGet(testKey, getMethod);
 
         assertEquals("Result retrieved from GET method is incorrect",
                 expectedResult, result);
@@ -133,7 +135,7 @@ public class PartitionAwareHydraCacheClientTest {
     public void ensureRequestEntityIsBuiltCorrect() throws IOException {
         Serializable data = "Test Message";
 
-        RequestEntity requestEntity = client.buildRequestEntity(data,
+        RequestEntity requestEntity = client.buildRequestEntity(testKey, data,
                 defaultIdentity);
 
         assertNotNull("Request entity is null", requestEntity);

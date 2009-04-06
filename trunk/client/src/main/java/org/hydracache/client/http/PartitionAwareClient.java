@@ -18,6 +18,8 @@ package org.hydracache.client.http;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -41,6 +43,7 @@ import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.Substance;
 
@@ -50,9 +53,9 @@ import org.hydracache.server.harmony.core.Substance;
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
-public class PartitionAwareHydraCacheClient implements HydraCacheClient {
+public class PartitionAwareClient implements HydraCacheClient {
     private static Logger log = Logger
-            .getLogger(PartitionAwareHydraCacheClient.class);
+            .getLogger(PartitionAwareClient.class);
 
     private static final String PROTOCOL = "http://";
 
@@ -63,6 +66,9 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
     private ProtocolEncoder<DataMessage> protocolEncoder;
 
     private ProtocolDecoder<DataMessage> protocolDecoder;
+    
+    // FIXME: use a weak but thread safe map here to avoid memory leak
+    private ConcurrentMap<String, Version> versionMap;
 
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
@@ -71,7 +77,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
      * @param connection
      *            The connection to the {@link Substance}.
      */
-    public PartitionAwareHydraCacheClient(NodePartition<Identity> nodePartition) {
+    public PartitionAwareClient(NodePartition<Identity> nodePartition) {
         this.nodePartition = nodePartition;
         
         createHttpClient();
@@ -84,6 +90,8 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
 
         protocolDecoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionMarshaller));
+        
+        versionMap = new ConcurrentHashMap<String, Version>();
     }
 
     private void createHttpClient() {
@@ -124,7 +132,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
             if (responseCode == HttpStatus.SC_NOT_FOUND)
                 return null;
             validateGetResponseCode(responseCode);
-            object = retrieveResultFromGet(getMethod);
+            object = retrieveResultFromGet(key, getMethod);
         } finally {
             getMethod.releaseConnection();
         }
@@ -143,13 +151,18 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         handleUnsuccessfulHttpStatus(responseCode);
     }
 
-    Object retrieveResultFromGet(GetMethod getMethod) throws IOException {
+    Object retrieveResultFromGet(String key, GetMethod getMethod) throws IOException {
         Object object;
         DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(
                 getMethod.getResponseBodyAsStream()));
-        // TODO: track version here
+        updateVersion(key, dataMessage);
         object = SerializationUtils.deserialize(dataMessage.getBlob());
         return object;
+    }
+
+    // FIXME: implement weak map to avoid memory leak
+    private void updateVersion(String key, DataMessage dataMessage) {
+        versionMap.put(key, dataMessage.getVersion());
     }
 
     /*
@@ -167,7 +180,7 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         PutMethod putMethod = new PutMethod(uri);
 
         try {
-            RequestEntity requestEntity = buildRequestEntity(data, identity);
+            RequestEntity requestEntity = buildRequestEntity(key, data, identity);
             putMethod.setRequestEntity(requestEntity);
             int responseCode = httpClient.executeMethod(putMethod);
             log.debug("PUT response code: " + responseCode);
@@ -177,9 +190,9 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         }
     }
 
-    RequestEntity buildRequestEntity(Serializable data, Identity identity)
+    RequestEntity buildRequestEntity(String key, Serializable data, Identity identity)
             throws IOException {
-        Buffer buffer = encodePutData(data, identity);
+        Buffer buffer = encodePutData(key, data, identity);
 
         RequestEntity requestEntity = new InputStreamRequestEntity(buffer
                 .asDataInputStream());
@@ -187,14 +200,19 @@ public class PartitionAwareHydraCacheClient implements HydraCacheClient {
         return requestEntity;
     }
 
-    private Buffer encodePutData(Serializable data, Identity identity)
+    private Buffer encodePutData(String key, Serializable data, Identity identity)
             throws IOException {
         Buffer buffer = Buffer.allocate();
 
         DataMessage dataMessage = new DataMessage();
         dataMessage.setBlob(SerializationUtils.serialize(data));
-        // FIXME: put last known version here instead of new version each time
-        dataMessage.setVersion(new IncrementVersionFactory().create(identity));
+
+        Version version = versionMap.get(key);
+        
+        if(version == null)
+            version = new IncrementVersionFactory().create(identity);
+        
+        dataMessage.setVersion(version);
 
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
 
