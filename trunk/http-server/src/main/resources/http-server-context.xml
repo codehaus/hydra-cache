@@ -73,6 +73,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="versionFactory" />
         <constructor-arg ref="harmonyDataBank" />
         <constructor-arg ref="hashFunction" />
+        <constructor-arg ref="protocolEncoder" />
         <constructor-arg ref="protocolDecoder" />
         <constructor-arg ref="localNode" />
     </bean>

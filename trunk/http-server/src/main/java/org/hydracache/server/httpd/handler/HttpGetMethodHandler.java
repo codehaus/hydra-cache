@@ -15,7 +15,6 @@
  */
 package org.hydracache.server.httpd.handler;
 
-import static org.hydracache.server.httpd.HttpConstants.BINARY_RESPONSE_CONTENT_TYPE;
 import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
 
 import java.io.IOException;
@@ -30,10 +29,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.DataMessage;
-import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -45,8 +42,6 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  */
 public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     private static Logger log = Logger.getLogger(HttpGetMethodHandler.class);
-
-    private ProtocolEncoder<DataMessage> messageEncoder;
 
     private HttpGetAction printRegistryAction;
 
@@ -60,8 +55,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     public HttpGetMethodHandler(HarmonyDataBank dataBank,
             HashFunction hashFunction,
             ProtocolEncoder<DataMessage> messageEncoder) {
-        super(dataBank, hashFunction);
-        this.messageEncoder = messageEncoder;
+        super(dataBank, hashFunction, messageEncoder);
     }
 
     public void setPrintRegistryAction(HttpGetAction getRegistryHandler) {
@@ -113,11 +107,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
             return;
         }
 
-        Buffer buffer = ProtocolUtils.encodeDataMessage(messageEncoder, data);
-
-        ByteArrayEntity body = new ByteArrayEntity(buffer.toByteArray());
-
-        body.setContentType(BINARY_RESPONSE_CONTENT_TYPE);
+        ByteArrayEntity body = generateEntityForData(data);
 
         response.setEntity(body);
     }

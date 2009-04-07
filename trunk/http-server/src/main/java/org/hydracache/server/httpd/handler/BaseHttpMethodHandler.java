@@ -15,12 +15,21 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import static org.hydracache.server.httpd.HttpConstants.BINARY_RESPONSE_CONTENT_TYPE;
 import static org.hydracache.server.httpd.HttpConstants.SLASH;
+
+import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpRequest;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.io.Buffer;
+import org.hydracache.protocol.data.codec.ProtocolEncoder;
+import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.protocol.util.ProtocolUtils;
+import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
@@ -35,10 +44,14 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
     protected HashFunction hashFunction;
 
+    protected ProtocolEncoder<DataMessage> messageEncoder;
+
     public BaseHttpMethodHandler(HarmonyDataBank dataBank,
-            HashFunction hashFunction) {
+            HashFunction hashFunction,
+            ProtocolEncoder<DataMessage> messageEncoder) {
         this.dataBank = dataBank;
         this.hashFunction = hashFunction;
+        this.messageEncoder = messageEncoder;
     }
 
     protected Long extractDataKeyHash(HttpRequest request) {
@@ -75,6 +88,16 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
     protected boolean keyIsBlank(HttpRequest request) {
         return StringUtils.isBlank(extractRequestString(request));
+    }
+
+    protected ByteArrayEntity generateEntityForData(Data data)
+            throws IOException {
+        Buffer buffer = ProtocolUtils.encodeDataMessage(messageEncoder, data);
+
+        ByteArrayEntity body = new ByteArrayEntity(buffer.toByteArray());
+
+        body.setContentType(BINARY_RESPONSE_CONTENT_TYPE);
+        return body;
     }
 
 }

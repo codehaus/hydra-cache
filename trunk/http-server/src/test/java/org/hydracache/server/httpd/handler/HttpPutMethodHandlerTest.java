@@ -28,6 +28,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
@@ -210,11 +211,14 @@ public class HttpPutMethodHandlerTest {
             final Marshaller<Version> versionMarshaller) {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
+        DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
+                new MessageMarshallerFactory(versionFactoryMarshaller));
+        DefaultProtocolDecoder messageDecoder = new DefaultProtocolDecoder(
+                new MessageMarshallerFactory(versionMarshaller));
+        
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(
-                versionFactory, dataBank, hashFunction,
-                new DefaultProtocolDecoder(new MessageMarshallerFactory(
-                        versionMarshaller)), new JGroupsNode(localId,
-                        new IpAddress(7000)));
+                versionFactory, dataBank, hashFunction, messageEncoder,
+                messageDecoder, new JGroupsNode(localId, new IpAddress(7000)));
 
         return handler;
     }

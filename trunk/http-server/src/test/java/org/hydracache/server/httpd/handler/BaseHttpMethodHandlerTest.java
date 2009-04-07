@@ -25,10 +25,15 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.httpd.HttpConstants;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -42,8 +47,17 @@ public class BaseHttpMethodHandlerTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
-    
+
     private final HashFunction hashFunction = new KetamaBasedHashFunction();
+
+    private IncrementVersionFactory versionFactoryMarshaller;
+
+    @Before
+    public void initialize() {
+        versionFactoryMarshaller = new IncrementVersionFactory();
+        versionFactoryMarshaller
+                .setIdentityMarshaller(new IdentityMarshaller());
+    }
 
     @Test
     public void ensureCorrectDataKeyExtraction() {
@@ -62,7 +76,7 @@ public class BaseHttpMethodHandlerTest {
         uri = HttpConstants.SLASH + expectedDataKey + HttpConstants.SLASH + " ";
 
         checkKeyExtrationResult(handler, expectedDataKey, uri);
-        
+
         expectedDataKey = "session/jsession94598429";
         uri = HttpConstants.SLASH + expectedDataKey + " ";
 
@@ -76,9 +90,9 @@ public class BaseHttpMethodHandlerTest {
         String expectedContext = "registry";
 
         String uri = HttpConstants.SLASH + expectedContext;
-        
-        assertEquals("Extracted context is incorrect", expectedContext,
-                handler.extractRequestString(uri));
+
+        assertEquals("Extracted context is incorrect", expectedContext, handler
+                .extractRequestString(uri));
     }
 
     @Test
@@ -95,21 +109,26 @@ public class BaseHttpMethodHandlerTest {
     private BaseHttpMethodHandler createHandler() {
         HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
-        BaseHttpMethodHandler handler = new StubHandler(dataBank);
+        BaseHttpMethodHandler handler = new StubHandler(dataBank,
+                versionFactoryMarshaller);
 
         return handler;
     }
 
     private void checkKeyExtrationResult(BaseHttpMethodHandler handler,
             String expectedDataKey, String uri) {
-        assertEquals("Extracted data key is incorrect", hashFunction.hash(expectedDataKey),
-                handler.extractDataKeyHash(uri).longValue());
+        assertEquals("Extracted data key is incorrect", hashFunction
+                .hash(expectedDataKey), handler.extractDataKeyHash(uri)
+                .longValue());
     }
 
     private class StubHandler extends BaseHttpMethodHandler {
 
-        public StubHandler(HarmonyDataBank dataBank) {
-            super(dataBank, BaseHttpMethodHandlerTest.this.hashFunction);
+        public StubHandler(HarmonyDataBank dataBank,
+                IncrementVersionFactory versionFactoryMarshaller) {
+            super(dataBank, BaseHttpMethodHandlerTest.this.hashFunction,
+                    new DefaultProtocolEncoder(new MessageMarshallerFactory(
+                            versionFactoryMarshaller)));
         }
 
         @Override

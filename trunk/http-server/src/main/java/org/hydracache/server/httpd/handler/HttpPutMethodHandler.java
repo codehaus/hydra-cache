@@ -26,12 +26,14 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
+import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
@@ -61,8 +63,9 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
      */
     public HttpPutMethodHandler(VersionFactory versionFactory,
             HarmonyDataBank dataBank, HashFunction hashFunction,
+            ProtocolEncoder<DataMessage> messageEncoder,
             ProtocolDecoder<DataMessage> decoder, Node localNode) {
-        super(dataBank, hashFunction);
+        super(dataBank, hashFunction, messageEncoder);
         this.versionFactory = versionFactory;
         this.decoder = decoder;
         this.localNode = localNode;
@@ -97,9 +100,13 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
             int statusCode = createStatusCode(dataKey);
 
-            doPut(response, dataKey, dataMessage);
+            Data data = doPut(response, dataKey, dataMessage);
 
             response.setStatusCode(statusCode);
+
+            ByteArrayEntity body = generateEntityForData(data);
+
+            response.setEntity(body);
         } catch (VersionConflictException vce) {
             handleVersionConflictException(response, vce);
         }
@@ -152,11 +159,15 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         return returnStatusCode;
     }
 
-    private void doPut(HttpResponse response, Long dataKey,
+    private Data doPut(HttpResponse response, Long dataKey,
             DataMessage dataMessage) throws IOException,
             VersionConflictException {
-        dataBank.put(new Data(dataKey, dataMessage.getVersion(), dataMessage
-                .getBlob()));
+        Data data = new Data(dataKey, dataMessage.getVersion(), dataMessage
+                .getBlob());
+
+        dataBank.put(data);
+
+        return data;
     }
 
     private void handleVersionConflictException(HttpResponse response,
