@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.lang.SerializationUtils;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
@@ -45,7 +46,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PartitionAwareHydraCacheClientTest {
+public class PartitionAwareClientTest {
     private Mockery context = new Mockery() {
         {
             setImposteriser(ClassImposteriser.INSTANCE);
@@ -61,7 +62,7 @@ public class PartitionAwareHydraCacheClientTest {
     private DefaultProtocolEncoder defaultProtocolEncoder;
 
     private DefaultProtocolDecoder defaultProtocolDecoder;
-    
+
     private String testKey = "testKey";
 
     @Before
@@ -79,9 +80,10 @@ public class PartitionAwareHydraCacheClientTest {
         defaultProtocolDecoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionMarshaller));
     }
-    
+
     @Test
-    public void ensureOkAndCreatedStatusCodeAreAcceptableInGet() throws Exception {
+    public void ensureOkAndCreatedStatusCodeAreAcceptableInGet()
+            throws Exception {
         client.validateGetResponseCode(HttpStatus.SC_OK);
         client.validateGetResponseCode(HttpStatus.SC_CREATED);
     }
@@ -92,7 +94,8 @@ public class PartitionAwareHydraCacheClientTest {
     }
 
     @Test
-    public void ensureOkAndCreatedStatusCodeAreAcceptableInPut() throws Exception {
+    public void ensureOkAndCreatedStatusCodeAreAcceptableInPut()
+            throws Exception {
         client.validatePutResponseCode(HttpStatus.SC_OK);
         client.validatePutResponseCode(HttpStatus.SC_CREATED);
     }
@@ -105,6 +108,30 @@ public class PartitionAwareHydraCacheClientTest {
     @Test(expected = IOException.class)
     public void ensureNotFoundTriggersExceptionInPut() throws Exception {
         client.validatePutResponseCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void ensureVersionUpdateAfterPutMethod() throws Exception {
+        String expectedResult = "Test Message";
+
+        final DataMessage dataMsg = new DataMessage();
+        dataMsg.setBlob(SerializationUtils.serialize(expectedResult));
+        dataMsg.setVersion(versionMarshaller.create(defaultIdentity));
+
+        final PutMethod putMethod = context.mock(PutMethod.class);
+
+        context.checking(new Expectations() {
+            {
+                one(putMethod).getResponseBodyAsStream();
+                will(returnValue(ProtocolUtils.encodeDataMessage(
+                        defaultProtocolEncoder, dataMsg).asDataInputStream()));
+            }
+        });
+
+        client.retrievePutResponse(testKey, putMethod);
+
+        assertEquals("Version should be updated", dataMsg.getVersion(),
+                client.versionMap.get(testKey));
     }
 
     @Test
@@ -125,7 +152,9 @@ public class PartitionAwareHydraCacheClientTest {
             }
         });
 
-        Object result = client.retrieveResultFromGet(testKey, getMethod);
+        Object object = client.getReturnedObject(testKey, getMethod);
+
+        Object result = object;
 
         assertEquals("Result retrieved from GET method is incorrect",
                 expectedResult, result);

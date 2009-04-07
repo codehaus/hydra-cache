@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -69,7 +70,7 @@ public class PartitionAwareClient implements HydraCacheClient {
     private IncrementVersionFactory versionFactory;
 
     // FIXME: use a weak but thread safe map here to avoid memory leak
-    private ConcurrentMap<String, Version> versionMap;
+    ConcurrentMap<String, Version> versionMap;
 
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
@@ -129,11 +130,15 @@ public class PartitionAwareClient implements HydraCacheClient {
 
         try {
             int responseCode = httpClient.executeMethod(getMethod);
+
             log.debug("GET response code: " + responseCode);
+
             if (responseCode == HttpStatus.SC_NOT_FOUND)
                 return null;
+
             validateGetResponseCode(responseCode);
-            object = retrieveResultFromGet(key, getMethod);
+
+            object = getReturnedObject(key, getMethod);
         } finally {
             getMethod.releaseConnection();
         }
@@ -152,14 +157,22 @@ public class PartitionAwareClient implements HydraCacheClient {
         handleUnsuccessfulHttpStatus(responseCode);
     }
 
-    Object retrieveResultFromGet(String key, GetMethod getMethod)
+    Object getReturnedObject(String key, GetMethod getMethod)
             throws IOException {
         Object object;
-        DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(
-                getMethod.getResponseBodyAsStream()));
+        DataMessage dataMessage = retrieveDataMessage(getMethod);
+
         updateVersion(key, dataMessage);
+
         object = SerializationUtils.deserialize(dataMessage.getBlob());
         return object;
+    }
+
+    private DataMessage retrieveDataMessage(HttpMethod httpMethod)
+            throws IOException {
+        DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(
+                httpMethod.getResponseBodyAsStream()));
+        return dataMessage;
     }
 
     // FIXME: implement weak map to avoid memory leak
@@ -184,10 +197,16 @@ public class PartitionAwareClient implements HydraCacheClient {
         try {
             RequestEntity requestEntity = buildRequestEntity(key, data,
                     identity);
+
             putMethod.setRequestEntity(requestEntity);
+
             int responseCode = httpClient.executeMethod(putMethod);
+
             log.debug("PUT response code: " + responseCode);
+
             validatePutResponseCode(responseCode);
+
+            retrievePutResponse(key, putMethod);
         } finally {
             putMethod.releaseConnection();
         }
@@ -217,6 +236,13 @@ public class PartitionAwareClient implements HydraCacheClient {
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
 
         return buffer;
+    }
+
+    void retrievePutResponse(String key, PutMethod putMethod)
+            throws IOException {
+        DataMessage dataMessage = retrieveDataMessage(putMethod);
+
+        updateVersion(key, dataMessage);
     }
 
     private Version getNewVersion(String key, Identity identity) {
