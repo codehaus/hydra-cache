@@ -84,30 +84,39 @@ public class PartitionAwareClientTest {
     @Test
     public void ensureOkAndCreatedStatusCodeAreAcceptableInGet()
             throws Exception {
-        client.validateGetResponseCode(HttpStatus.SC_OK);
-        client.validateGetResponseCode(HttpStatus.SC_CREATED);
+        client.validateGetResponseCode(HttpStatus.SC_OK, null);
+        client.validateGetResponseCode(HttpStatus.SC_CREATED, null);
     }
 
     @Test(expected = IOException.class)
     public void ensureNotFoundTriggersExceptionInGet() throws Exception {
-        client.validateGetResponseCode(HttpStatus.SC_NOT_FOUND);
+        client.validateGetResponseCode(HttpStatus.SC_NOT_FOUND, null);
     }
 
     @Test
     public void ensureOkAndCreatedStatusCodeAreAcceptableInPut()
             throws Exception {
-        client.validatePutResponseCode(HttpStatus.SC_OK);
-        client.validatePutResponseCode(HttpStatus.SC_CREATED);
+        client.validatePutResponseCode(HttpStatus.SC_OK, null);
+        client.validatePutResponseCode(HttpStatus.SC_CREATED, null);
     }
 
     @Test(expected = VersionConflictException.class)
     public void ensureConflictTriggersExceptionInPut() throws Exception {
-        client.validatePutResponseCode(HttpStatus.SC_CONFLICT);
+        final PutMethod putMethod = context.mock(PutMethod.class);
+
+        context.checking(new Expectations() {
+            {
+                one(putMethod).getResponseBodyAsString();
+                will(returnValue("Response"));
+            }
+        });
+
+        client.validatePutResponseCode(HttpStatus.SC_CONFLICT, putMethod);
     }
 
     @Test(expected = IOException.class)
     public void ensureNotFoundTriggersExceptionInPut() throws Exception {
-        client.validatePutResponseCode(HttpStatus.SC_NOT_FOUND);
+        client.validatePutResponseCode(HttpStatus.SC_NOT_FOUND, null);
     }
 
     @Test

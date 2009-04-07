@@ -81,7 +81,6 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-
         if (emptyRequest(request)) {
             log.warn("Empty request[" + request + "] received and ignored");
             return;
@@ -143,7 +142,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
             if (!newVersion.isDescendantOf(existingVersion)) {
                 throw new VersionConflictException(
-                        "Version conflict detected between existing["
+                        "Version conflict detected between local existing["
                                 + existingVersion + "] and new[" + newVersion
                                 + "]");
             }

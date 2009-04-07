@@ -120,7 +120,7 @@ public class PartitionAwareClient implements HydraCacheClient {
      * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
      */
     @Override
-    public Object get(String key) throws IOException {
+    public synchronized Object get(String key) throws IOException {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
@@ -136,7 +136,7 @@ public class PartitionAwareClient implements HydraCacheClient {
             if (responseCode == HttpStatus.SC_NOT_FOUND)
                 return null;
 
-            validateGetResponseCode(responseCode);
+            validateGetResponseCode(responseCode, getMethod);
 
             object = getReturnedObject(key, getMethod);
         } finally {
@@ -153,8 +153,9 @@ public class PartitionAwareClient implements HydraCacheClient {
         return uri.toString();
     }
 
-    void validateGetResponseCode(int responseCode) throws IOException {
-        handleUnsuccessfulHttpStatus(responseCode);
+    void validateGetResponseCode(int responseCode, HttpMethod httpMethod)
+            throws IOException {
+        handleUnsuccessfulHttpStatus(responseCode, httpMethod);
     }
 
     Object getReturnedObject(String key, GetMethod getMethod)
@@ -187,8 +188,8 @@ public class PartitionAwareClient implements HydraCacheClient {
      * java.io.Serializable)
      */
     @Override
-    public void put(String key, Serializable data) throws IOException,
-            VersionConflictException {
+    public synchronized void put(String key, Serializable data)
+            throws IOException, VersionConflictException {
         Identity identity = nodePartition.get(key);
         String uri = constructUri(key, identity);
 
@@ -204,7 +205,7 @@ public class PartitionAwareClient implements HydraCacheClient {
 
             log.debug("PUT response code: " + responseCode);
 
-            validatePutResponseCode(responseCode);
+            validatePutResponseCode(responseCode, putMethod);
 
             retrievePutResponse(key, putMethod);
         } finally {
@@ -254,25 +255,42 @@ public class PartitionAwareClient implements HydraCacheClient {
         return version;
     }
 
-    void validatePutResponseCode(int responseCode) throws IOException,
-            VersionConflictException {
-        handleConflictHttpStatus(responseCode);
-        handleUnsuccessfulHttpStatus(responseCode);
+    void validatePutResponseCode(int responseCode, HttpMethod httpMethod)
+            throws IOException, VersionConflictException {
+        handleConflictHttpStatus(responseCode, httpMethod);
+        handleUnsuccessfulHttpStatus(responseCode, httpMethod);
     }
 
-    private void handleUnsuccessfulHttpStatus(int responseCode)
-            throws IOException {
+    private void handleUnsuccessfulHttpStatus(int responseCode,
+            HttpMethod httpMethod) throws IOException {
         if (responseCode != HttpStatus.SC_OK
-                && responseCode != HttpStatus.SC_CREATED)
+                && responseCode != HttpStatus.SC_CREATED) {
             throw new IOException("Error HTTP response received: "
                     + responseCode);
+        }
     }
 
-    private void handleConflictHttpStatus(int responseCode)
-            throws VersionConflictException {
-        if (responseCode == HttpStatus.SC_CONFLICT)
+    private void handleConflictHttpStatus(int responseCode,
+            HttpMethod httpMethod) throws VersionConflictException {
+        if (responseCode == HttpStatus.SC_CONFLICT) {
+            String response = getResponseMessage(httpMethod);
+
             throw new VersionConflictException(
-                    "Version conflict detected, please refresh your local cache");
+                    "Version conflict detected, please refresh your local cache. Detail message: "
+                            + response);
+        }
+    }
+
+    private String getResponseMessage(HttpMethod httpMethod) {
+        String response = "";
+
+        try {
+            response = httpMethod.getResponseBodyAsString();
+        } catch (IOException e) {
+            log.warn("Failed to retrieve response", e);
+        }
+
+        return response;
     }
 
 }

@@ -226,7 +226,9 @@ public class HarmonyDataBank implements DataBank {
             Collection<ResponseMessage> helps) throws VersionConflictException {
         for (ResponseMessage responseMessage : helps) {
             if (responseMessage instanceof VersionConflictRejection) {
-                throw new VersionConflictException("Version conflict detected");
+                throw new VersionConflictException(
+                        "Distributed version conflict detected from ["
+                                + responseMessage.getSource() + "]");
             }
         }
     }

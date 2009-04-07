@@ -33,7 +33,6 @@ import org.hydracache.client.http.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
-import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +41,8 @@ import org.junit.Test;
  * @author nzhu
  * 
  */
-public class PartitionAwareClientIntegrationTest {
+public class PartitionAwareClientIntegrationTest extends
+        AbstractHydraClientIntegrationTest {
     private static Logger log = Logger
             .getLogger(PartitionAwareClientIntegrationTest.class);
 
@@ -54,7 +54,7 @@ public class PartitionAwareClientIntegrationTest {
 
     private NodePartition<Identity> partition;
 
-    private Map<String, Data> localDataStorage;
+    private Map<String, String> localDataStorage;
 
     @Before
     public void setup() throws Exception {
@@ -69,7 +69,7 @@ public class PartitionAwareClientIntegrationTest {
 
         client = new PartitionAwareClient(partition);
 
-        localDataStorage = new HashMap<String, Data>();
+        localDataStorage = new HashMap<String, String>();
     }
 
     @Test
@@ -87,13 +87,13 @@ public class PartitionAwareClientIntegrationTest {
 
         assertEquals("Updated data is incorrect", data, client.get(randomKey));
     }
-    
+
     @Test
-    public void ensureNotFoundDataReturnsAsNull() throws IOException{
-        String uniqueKey = UUID.randomUUID().toString();        
-        
+    public void ensureNotFoundDataReturnsAsNull() throws IOException {
+        String uniqueKey = UUID.randomUUID().toString();
+
         Object result = client.get(uniqueKey);
-        
+
         assertNull("Result should be null", result);
     }
 
@@ -119,7 +119,7 @@ public class PartitionAwareClientIntegrationTest {
 
         stopwatch.start();
 
-        int numberOfRepetition = 500;
+        int numberOfRepetition = 100;
 
         for (int i = 0; i < numberOfRepetition; i++) {
             assertPutAndGet();
@@ -136,8 +136,11 @@ public class PartitionAwareClientIntegrationTest {
     private void assertPutAndGet() throws Exception {
         String randomKey = createRandomKey();
 
-        Data data = createRandomDataSample(randomKey);
+        String data = createRandomDataSample(randomKey);
         localDataStorage.put(randomKey, data);
+
+        log.info("Putting key: " + randomKey);
+
         client.put(randomKey, data);
 
         Object retrievedData = client.get(randomKey);
@@ -145,24 +148,9 @@ public class PartitionAwareClientIntegrationTest {
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }
 
-    private String createRandomKey() {
-        String randomKey = RandomStringUtils.randomAlphanumeric(20);
-        return randomKey;
-    }
-
-    private Data createRandomDataSample(String randomKey) {
-        Data data = new Data();
-
-        data.setKeyHash((long) randomKey.hashCode());
-        data.setVersion(versionFactory.create(partition.get(randomKey)));
-        data.setContent(RandomStringUtils.randomAlphanumeric(200).getBytes());
-
-        return data;
-    }
-
     private void assertDataIntegrity() throws Exception {
         for (String key : localDataStorage.keySet()) {
-            Data localData = localDataStorage.get(key);
+            String localData = localDataStorage.get(key);
             Object remoteData = client.get(key);
 
             assertEquals(

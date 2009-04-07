@@ -22,17 +22,14 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.hydracache.client.http.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
-import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Test;
 
@@ -40,7 +37,8 @@ import org.junit.Test;
  * @author nzhu
  * 
  */
-public class MultiThreadedPartitionAwareClientIntegrationTest {
+public class MultiThreadedPartitionAwareClientIntegrationTest extends
+        AbstractHydraClientIntegrationTest {
 
     private static Logger log = Logger
             .getLogger(MultiThreadedPartitionAwareClientIntegrationTest.class);
@@ -74,7 +72,7 @@ public class MultiThreadedPartitionAwareClientIntegrationTest {
 
     private final class TesterThread extends Thread {
         private final CountDownLatch doneLatch;
-        private Map<String, Data> localDataStorage = new HashMap<String, Data>();
+        private Map<String, String> localDataStorage = new HashMap<String, String>();
         private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
         private PartitionAwareClient client;
         private NodePartition<Identity> partition;
@@ -120,10 +118,13 @@ public class MultiThreadedPartitionAwareClientIntegrationTest {
         private void assertPutAndGet() throws Exception {
             String randomKey = createRandomKey();
 
-            Data data = createRandomDataSample(randomKey);
+            String data = createRandomDataSample(randomKey);
             localDataStorage.put(randomKey, data);
+
+            log.info("Putting key: " + randomKey);
+
             client.put(randomKey, data);
-            
+
             Thread.sleep(100);
 
             Object retrievedData = client.get(randomKey);
@@ -131,25 +132,9 @@ public class MultiThreadedPartitionAwareClientIntegrationTest {
             assertEquals("Retrieved data is incorrect", data, retrievedData);
         }
 
-        private String createRandomKey() {
-            String randomKey = UUID.randomUUID().toString();
-            return randomKey;
-        }
-
-        private Data createRandomDataSample(String randomKey) {
-            Data data = new Data();
-
-            data.setKeyHash((long) randomKey.hashCode());
-            data.setVersion(versionFactory.create(partition.get(randomKey)));
-            data.setContent(RandomStringUtils.randomAlphanumeric(200)
-                    .getBytes());
-
-            return data;
-        }
-
         private void assertDataIntegrity() throws Exception {
             for (String key : localDataStorage.keySet()) {
-                Data localData = localDataStorage.get(key);
+                String localData = localDataStorage.get(key);
                 Object remoteData = client.get(key);
                 if (!localData.equals(remoteData))
                     failed = true;
