@@ -37,6 +37,7 @@ import org.hydracache.protocol.util.ProtocolUtils;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionConflictException;
+import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
@@ -53,13 +54,16 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
     private Node localNode;
 
+    private VersionFactory versionFactory;
+
     /**
      * Constructor
      */
-    public HttpPutMethodHandler(HarmonyDataBank dataBank,
-            HashFunction hashFunction, ProtocolDecoder<DataMessage> decoder,
-            Node localNode) {
+    public HttpPutMethodHandler(VersionFactory versionFactory,
+            HarmonyDataBank dataBank, HashFunction hashFunction,
+            ProtocolDecoder<DataMessage> decoder, Node localNode) {
         super(dataBank, hashFunction);
+        this.versionFactory = versionFactory;
         this.decoder = decoder;
         this.localNode = localNode;
     }
@@ -98,7 +102,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             response.setStatusCode(statusCode);
         } catch (VersionConflictException vce) {
             handleVersionConflictException(response, vce);
-        } 
+        }
     }
 
     private boolean emptyRequest(HttpRequest request) {
@@ -111,9 +115,14 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
     }
 
-    private void increaseVersion(DataMessage dataMessage) {
-        dataMessage.setVersion(dataMessage.getVersion().incrementFor(
-                localNode.getId()));
+    void increaseVersion(DataMessage dataMessage) {
+        if (dataMessage.getVersion() == null
+                || dataMessage.getVersion().equals(versionFactory.createNull())) {
+            dataMessage.setVersion(versionFactory.create(localNode.getId()));
+        } else {
+            dataMessage.setVersion(dataMessage.getVersion().incrementFor(
+                    localNode.getId()));
+        }
     }
 
     void guardConflictWithLocalDataVersion(Long dataKey,

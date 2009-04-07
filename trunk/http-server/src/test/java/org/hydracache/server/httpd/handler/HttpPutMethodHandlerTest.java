@@ -15,7 +15,7 @@
  */
 package org.hydracache.server.httpd.handler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -36,6 +36,7 @@ import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionConflictException;
+import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jgroups.stack.IpAddress;
@@ -72,7 +73,8 @@ public class HttpPutMethodHandlerTest {
     @Before
     public void initialize() {
         versionFactoryMarshaller = new IncrementVersionFactory();
-        handler = createHandler(versionFactoryMarshaller);
+        handler = createHandler(versionFactoryMarshaller,
+                versionFactoryMarshaller);
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
     }
@@ -126,6 +128,36 @@ public class HttpPutMethodHandlerTest {
     }
 
     @Test
+    public void ensureNewVersionIsCreatedIfGivenVersionIsNull()
+            throws Exception {
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
+                "conflictLocalDataBank");
+
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId)
+                        .incrementFor(localId));
+                will(returnValue(data));
+            }
+        });
+
+        handler.dataBank = dataBank;
+
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setVersion(versionFactoryMarshaller.createNull());
+
+        handler.increaseVersion(incomingDataMsg);
+
+        assertNotNull("New 0 version should be created", incomingDataMsg
+                .getVersion());
+        assertFalse("Data message should not have a NULL version",
+                versionFactoryMarshaller.createNull().equals(
+                        incomingDataMsg.getVersion()));
+    }
+
+    @Test
     public void shouldReturnStatus201ForCreation() throws Exception {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
                 "emptyDataBank");
@@ -174,13 +206,15 @@ public class HttpPutMethodHandlerTest {
     }
 
     private HttpPutMethodHandler createHandler(
+            final VersionFactory versionFactory,
             final Marshaller<Version> versionMarshaller) {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
 
-        final HttpPutMethodHandler handler = new HttpPutMethodHandler(dataBank,
-                hashFunction, new DefaultProtocolDecoder(
-                        new MessageMarshallerFactory(versionMarshaller)),
-                new JGroupsNode(localId, new IpAddress(7000)));
+        final HttpPutMethodHandler handler = new HttpPutMethodHandler(
+                versionFactory, dataBank, hashFunction,
+                new DefaultProtocolDecoder(new MessageMarshallerFactory(
+                        versionMarshaller)), new JGroupsNode(localId,
+                        new IpAddress(7000)));
 
         return handler;
     }

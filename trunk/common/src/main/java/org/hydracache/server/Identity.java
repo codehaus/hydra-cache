@@ -30,16 +30,16 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  * @author nzhu
  * 
  */
-public class Identity implements  Serializable, Comparable<Identity> {
+public class Identity implements Serializable, Comparable<Identity> {
 
     private static final long serialVersionUID = 1L;
 
     private final InetAddress address;
 
     private final short port;
-    
+
     private transient String stringValue;
-    
+
     private transient int hashCode;
 
     public Identity(final InetAddress address, final short port) {
@@ -53,7 +53,7 @@ public class Identity implements  Serializable, Comparable<Identity> {
         this(address, (short) port);
     }
 
-    public Identity(short port) {
+    public Identity(final short port) {
         try {
             this.address = Inet4Address.getLocalHost();
             this.port = port;
@@ -67,6 +67,14 @@ public class Identity implements  Serializable, Comparable<Identity> {
         this((short) port);
     }
 
+    public static final Identity getNullIdentity() {
+        try {
+            return new Identity(InetAddress.getByName("127.0.0.1"), 0);
+        } catch (UnknownHostException ex) {
+            throw new RuntimeException("Failed to create NULL identity", ex);
+        }
+    }
+
     public InetAddress getAddress() {
         return address;
     }
@@ -77,17 +85,17 @@ public class Identity implements  Serializable, Comparable<Identity> {
 
     @Override
     public String toString() {
-        if(stringValue == null)
+        if (stringValue == null)
             stringValue = address.getHostAddress() + ":" + port;
-            
+
         return stringValue;
     }
 
     @Override
     public int hashCode() {
-        if(hashCode == 0)
+        if (hashCode == 0)
             hashCode = toString().hashCode();
-            
+
         return hashCode;
     }
 
@@ -98,9 +106,9 @@ public class Identity implements  Serializable, Comparable<Identity> {
 
     @Override
     public int compareTo(Identity o) {
-        if(o == null)
+        if (o == null)
             return -2;
-        
+
         return toString().compareTo(o.toString());
     }
 

@@ -31,6 +31,12 @@ import org.hydracache.server.Identity;
  * @see Version
  */
 public interface VersionFactory extends Marshaller<Version> {
+    
+    /**
+     * Create a null version instance
+     */
+    Version createNull();
+    
     /**
      * Creates a new version object for the provided node ID.
      */

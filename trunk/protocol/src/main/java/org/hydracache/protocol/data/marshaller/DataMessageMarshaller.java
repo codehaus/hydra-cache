@@ -48,8 +48,7 @@ public class DataMessageMarshaller implements Marshaller<DataMessage> {
      * @see org.hydracache.io.Marshaller#readObject(java.io.DataInputStream)
      */
     @Override
-    public DataMessage readObject(DataInputStream dataIn)
-            throws IOException {
+    public DataMessage readObject(DataInputStream dataIn) throws IOException {
         DataMessage msg = new DataMessage();
 
         msg.setVersion(versionMarshaller.readObject(dataIn));

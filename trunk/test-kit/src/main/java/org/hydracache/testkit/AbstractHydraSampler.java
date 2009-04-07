@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -32,6 +33,14 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     private static final String SEED_SERVER_LIST = "seedServerList";
 
     protected static final String LOCALHOST = "localhost";
+
+    private static List<String> sampleKeys = new ArrayList<String>();
+
+    static {
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            sampleKeys.add(UUID.randomUUID().toString());
+        }
+    }
 
     protected PartitionAwareClient client;
 
@@ -90,8 +99,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
         NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
                 new KetamaBasedHashFunction(), seedServerIds);
 
-        PartitionAwareClient client = new PartitionAwareClient(
-                partition);
+        PartitionAwareClient client = new PartitionAwareClient(partition);
 
         return client;
     }
@@ -101,7 +109,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     }
 
     protected String getRandomKey() {
-        String key = UUID.randomUUID().toString();
+        String key = sampleKeys.get(RandomUtils.nextInt(sampleKeys.size()));
         return key;
     }
 

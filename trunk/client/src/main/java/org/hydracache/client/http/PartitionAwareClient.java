@@ -54,8 +54,7 @@ import org.hydracache.server.harmony.core.Substance;
  * @since 1.0
  */
 public class PartitionAwareClient implements HydraCacheClient {
-    private static Logger log = Logger
-            .getLogger(PartitionAwareClient.class);
+    private static Logger log = Logger.getLogger(PartitionAwareClient.class);
 
     private static final String PROTOCOL = "http://";
 
@@ -66,7 +65,9 @@ public class PartitionAwareClient implements HydraCacheClient {
     private ProtocolEncoder<DataMessage> protocolEncoder;
 
     private ProtocolDecoder<DataMessage> protocolDecoder;
-    
+
+    private IncrementVersionFactory versionFactory;
+
     // FIXME: use a weak but thread safe map here to avoid memory leak
     private ConcurrentMap<String, Version> versionMap;
 
@@ -79,18 +80,18 @@ public class PartitionAwareClient implements HydraCacheClient {
      */
     public PartitionAwareClient(NodePartition<Identity> nodePartition) {
         this.nodePartition = nodePartition;
-        
+
         createHttpClient();
 
-        IncrementVersionFactory versionMarshaller = new IncrementVersionFactory();
-        versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
+        versionFactory = new IncrementVersionFactory();
+        versionFactory.setIdentityMarshaller(new IdentityMarshaller());
 
         protocolEncoder = new DefaultProtocolEncoder(
-                new MessageMarshallerFactory(versionMarshaller));
+                new MessageMarshallerFactory(versionFactory));
 
         protocolDecoder = new DefaultProtocolDecoder(
-                new MessageMarshallerFactory(versionMarshaller));
-        
+                new MessageMarshallerFactory(versionFactory));
+
         versionMap = new ConcurrentHashMap<String, Version>();
     }
 
@@ -100,7 +101,7 @@ public class PartitionAwareClient implements HydraCacheClient {
         connectionManagerParams.setDefaultMaxConnectionsPerHost(10);
         connectionManagerParams.setMaxTotalConnections(100);
         connectionManager.setParams(connectionManagerParams);
-        
+
         this.httpClient = new HttpClient(connectionManager);
     }
 
@@ -151,7 +152,8 @@ public class PartitionAwareClient implements HydraCacheClient {
         handleUnsuccessfulHttpStatus(responseCode);
     }
 
-    Object retrieveResultFromGet(String key, GetMethod getMethod) throws IOException {
+    Object retrieveResultFromGet(String key, GetMethod getMethod)
+            throws IOException {
         Object object;
         DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(
                 getMethod.getResponseBodyAsStream()));
@@ -180,7 +182,8 @@ public class PartitionAwareClient implements HydraCacheClient {
         PutMethod putMethod = new PutMethod(uri);
 
         try {
-            RequestEntity requestEntity = buildRequestEntity(key, data, identity);
+            RequestEntity requestEntity = buildRequestEntity(key, data,
+                    identity);
             putMethod.setRequestEntity(requestEntity);
             int responseCode = httpClient.executeMethod(putMethod);
             log.debug("PUT response code: " + responseCode);
@@ -190,8 +193,8 @@ public class PartitionAwareClient implements HydraCacheClient {
         }
     }
 
-    RequestEntity buildRequestEntity(String key, Serializable data, Identity identity)
-            throws IOException {
+    RequestEntity buildRequestEntity(String key, Serializable data,
+            Identity identity) throws IOException {
         Buffer buffer = encodePutData(key, data, identity);
 
         RequestEntity requestEntity = new InputStreamRequestEntity(buffer
@@ -200,23 +203,29 @@ public class PartitionAwareClient implements HydraCacheClient {
         return requestEntity;
     }
 
-    private Buffer encodePutData(String key, Serializable data, Identity identity)
-            throws IOException {
+    private Buffer encodePutData(String key, Serializable data,
+            Identity identity) throws IOException {
         Buffer buffer = Buffer.allocate();
 
         DataMessage dataMessage = new DataMessage();
         dataMessage.setBlob(SerializationUtils.serialize(data));
 
-        Version version = versionMap.get(key);
-        
-        if(version == null)
-            version = new IncrementVersionFactory().create(identity);
-        
+        Version version = getNewVersion(key, identity);
+
         dataMessage.setVersion(version);
 
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
 
         return buffer;
+    }
+
+    private Version getNewVersion(String key, Identity identity) {
+        Version version = versionMap.get(key);
+
+        if (version == null)
+            version = versionFactory.createNull();
+
+        return version;
     }
 
     void validatePutResponseCode(int responseCode) throws IOException,

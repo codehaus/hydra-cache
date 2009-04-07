@@ -27,6 +27,13 @@ import org.hydracache.server.Identity;
  * 
  */
 public class IncrementVersionFactory extends AbstractVersionFactoryMarshaller {
+    private static final Increment NULL_VERSION = new Increment(Identity
+            .getNullIdentity(), 0L);
+
+    @Override
+    public Version createNull() {
+        return NULL_VERSION;
+    }
 
     @Override
     public Version create(final Identity nodeId) {
@@ -46,7 +53,6 @@ public class IncrementVersionFactory extends AbstractVersionFactoryMarshaller {
     @Override
     public void writeObject(final Version version,
             final DataOutputStream dataOut) throws IOException {
-
         Validate.isTrue(version instanceof Increment,
                 "version must be non null and an instance of Increment");
 

@@ -16,7 +16,7 @@
 package org.hydracache.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -35,7 +35,6 @@ import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
-import org.hydracache.server.data.versioning.VersionConflictException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,8 +72,7 @@ public class PartitionAwareClientIntegrationTest {
         localDataStorage = new HashMap<String, Data>();
     }
 
-    // Thrown version conflict exception due to incomplete implementation in hydra client
-    @Test(expected=VersionConflictException.class)
+    @Test
     public void testUpdates() throws Exception {
         String randomKey = createRandomKey();
 
