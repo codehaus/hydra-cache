@@ -41,7 +41,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">org.hydracache.testkit.InMemoryGetSampler</stringProp>
+          <stringProp name="classname">org.hydracache.testkit.ThroughputGetSampler</stringProp>
         </JavaSampler>
         <hashTree/>
         <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">

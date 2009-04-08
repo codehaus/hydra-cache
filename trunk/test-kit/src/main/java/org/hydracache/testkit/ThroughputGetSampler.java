@@ -5,13 +5,13 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.log4j.Logger;
 
-public class InMemoryGetSampler extends AbstractHydraSampler implements
+public class ThroughputGetSampler extends AbstractHydraSampler implements
         JavaSamplerClient {
-    private static Logger log = Logger.getLogger(InMemoryGetSampler.class);
+    private static Logger log = Logger.getLogger(ThroughputGetSampler.class);
     
     private String key;
 
-    public InMemoryGetSampler() {
+    public ThroughputGetSampler() {
     }
 
     @Override

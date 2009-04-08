@@ -34,9 +34,14 @@
                 <stringProp name="Argument.value">[{&quot;port&quot;:8080,&quot;ip&quot;:&quot;127.0.0.1&quot;},{&quot;port&quot;:8081,&quot;ip&quot;:&quot;127.0.0.1&quot;},{&quot;port&quot;:8082,&quot;ip&quot;:&quot;127.0.0.1&quot;},{&quot;port&quot;:8083,&quot;ip&quot;:&quot;127.0.0.1&quot;}]</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="dataLength" elementType="Argument">
+                <stringProp name="Argument.name">dataLength</stringProp>
+                <stringProp name="Argument.value">200</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">org.hydracache.testkit.InMemoryPutSampler</stringProp>
+          <stringProp name="classname">org.hydracache.testkit.ThroughputPutSampler</stringProp>
         </JavaSampler>
         <hashTree/>
         <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
