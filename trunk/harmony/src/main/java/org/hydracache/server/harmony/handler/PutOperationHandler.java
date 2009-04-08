@@ -31,6 +31,7 @@ import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 /**
@@ -46,9 +47,10 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
 
     private ConflictResolver conflictResolver;
 
-    public PutOperationHandler(Space space, HarmonyDataBank harmonyDataBank,
-            ConflictResolver conflictResolver) {
-        super(space);
+    public PutOperationHandler(Space space,
+            MembershipRegistry membershipRegistry,
+            HarmonyDataBank harmonyDataBank, ConflictResolver conflictResolver) {
+        super(space, membershipRegistry);
         this.harmonyDataBank = harmonyDataBank;
         this.conflictResolver = conflictResolver;
     }

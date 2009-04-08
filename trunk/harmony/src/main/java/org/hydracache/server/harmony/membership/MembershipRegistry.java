@@ -46,15 +46,14 @@ public class MembershipRegistry {
         return registry.size();
     }
 
-    public boolean isNeigbor(Node node) {
-        Validate.notNull(node, "Node can not be null");
+    public boolean isNeighbor(Identity nodeId) {
+        Validate.notNull(nodeId, "Node ID can not be null");
 
-        Boolean isNeighbor = neighborLookup.get(node.getId());
+        Boolean isNeighbor = neighborLookup.get(nodeId);
 
         if (isNeighbor == null) {
-            isNeighbor = space.findSubstancesForLocalNode().isNeighbor(
-                    node.getId());
-            neighborLookup.putIfAbsent(node.getId(), isNeighbor);
+            isNeighbor = space.findSubstancesForLocalNode().isNeighbor(nodeId);
+            neighborLookup.putIfAbsent(nodeId, isNeighbor);
         }
 
         return isNeighbor;

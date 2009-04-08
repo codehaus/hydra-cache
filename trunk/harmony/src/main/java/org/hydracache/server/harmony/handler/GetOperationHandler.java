@@ -5,14 +5,17 @@ import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 
 public class GetOperationHandler extends AbstractControlMessageHandler {
 
     private HarmonyDataBank harmonyDataBank;
 
-    public GetOperationHandler(Space space, HarmonyDataBank harmonyDataBank) {
-        super(space);
+    public GetOperationHandler(Space space,
+            MembershipRegistry membershipRegistry,
+            HarmonyDataBank harmonyDataBank) {
+        super(space, membershipRegistry);
         this.harmonyDataBank = harmonyDataBank;
     }
 

@@ -3,6 +3,7 @@ package org.hydracache.server.harmony.handler;
 import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jmock.Mockery;
@@ -32,8 +33,11 @@ public class GetOperationHandlerTest extends AbstractMockeryTest {
             addGetLocalNodeExp(context, space);
             addBroadcastResponseExp(context, space);
         }
+        
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
 
-        GetOperationHandler handler = new GetOperationHandler(space, dataBank);
+        GetOperationHandler handler = new GetOperationHandler(space, memberRegistry, dataBank);
 
         GetOperation getOperation = new GetOperation(sourceId, testHashKey);
 

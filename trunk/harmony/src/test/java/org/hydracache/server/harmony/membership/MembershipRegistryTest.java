@@ -51,13 +51,13 @@ public class MembershipRegistryTest {
 
         registry.setSpace(space);
 
-        assertTrue("Should be a neigbor", registry.isNeigbor(nodeB));
-        assertFalse("Should not be a neigbor", registry.isNeigbor(nodeC));
+        assertTrue("Should be a neigbor", registry.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be a neigbor", registry.isNeighbor(nodeC.getId()));
 
         registry.deregister(nodeA2);
 
-        assertTrue("Should be a neigbor", registry.isNeigbor(nodeB));
-        assertFalse("Should not be a neigbor", registry.isNeigbor(nodeC));
+        assertTrue("Should be a neigbor", registry.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be a neigbor", registry.isNeighbor(nodeC.getId()));
 
         context.assertIsSatisfied();
     }
@@ -83,13 +83,13 @@ public class MembershipRegistryTest {
 
         registry.setSpace(space);
 
-        assertTrue("Should be a neigbor", registry.isNeigbor(nodeB));
-        assertFalse("Should not be a neigbor", registry.isNeigbor(nodeC));
+        assertTrue("Should be a neigbor", registry.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be a neigbor", registry.isNeighbor(nodeC.getId()));
 
         registry.register(nodeA2);
 
-        assertTrue("Should be a neigbor", registry.isNeigbor(nodeB));
-        assertFalse("Should not be a neigbor", registry.isNeigbor(nodeC));
+        assertTrue("Should be a neigbor", registry.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be a neigbor", registry.isNeighbor(nodeC.getId()));
 
         context.assertIsSatisfied();
     }
@@ -113,10 +113,10 @@ public class MembershipRegistryTest {
 
         registry.setSpace(space);
 
-        assertTrue("Should be a neigbor", registry.isNeigbor(nodeB));
-        assertTrue("Should be a neigbor again", registry.isNeigbor(nodeB));
-        assertFalse("Should not be a neigbor", registry.isNeigbor(nodeC));
-        assertFalse("Should not be a neigbor again", registry.isNeigbor(nodeC));
+        assertTrue("Should be a neigbor", registry.isNeighbor(nodeB.getId()));
+        assertTrue("Should be a neigbor again", registry.isNeighbor(nodeB.getId()));
+        assertFalse("Should not be a neigbor", registry.isNeighbor(nodeC.getId()));
+        assertFalse("Should not be a neigbor again", registry.isNeighbor(nodeC.getId()));
 
         context.assertIsSatisfied();
     }

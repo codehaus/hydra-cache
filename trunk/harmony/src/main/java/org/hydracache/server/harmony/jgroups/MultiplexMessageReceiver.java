@@ -78,9 +78,9 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
                 membershipRegistry);
         this.expectedResponses = expectedResponses;
         this.putOperationHandler = new PutOperationHandler(space,
-                harmonyDataBank, conflictResolver);
+                membershipRegistry, harmonyDataBank, conflictResolver);
         this.getOperationHandler = new GetOperationHandler(space,
-                harmonyDataBank);
+                membershipRegistry, harmonyDataBank);
         this.responseHandler = new ResponseHandler(requestRegistry);
         this.heartBeatHandler = new HeartBeatHandler(membershipRegistry);
     }

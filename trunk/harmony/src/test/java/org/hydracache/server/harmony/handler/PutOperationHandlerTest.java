@@ -26,6 +26,7 @@ import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.core.SubstanceSet;
+import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jmock.Expectations;
@@ -42,8 +43,13 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
     @Test
     public void ensureVersionConflictTriggersRejection() throws Exception {
-        ControlMessageHandler handler = new PutOperationHandler(
-                mockSpaceToReject(context), mockDataBankToReturnConflict(),
+        Space space = mockSpaceToReject(context);
+
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
+
+        ControlMessageHandler handler = new PutOperationHandler(space,
+                memberRegistry, mockDataBankToReturnConflict(),
                 new ArbitraryResolver());
 
         Data testData = TestDataGenerator.createRandomData();
@@ -76,11 +82,17 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
     @Test
     public void ensureBrandNewDataIsHandledCorrectly() throws Exception {
+        Space space = mockSpaceToRespond(context);
+
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
+
         Data testData = TestDataGenerator.createRandomData();
 
-        ControlMessageHandler handler = new PutOperationHandler(
-                mockSpaceToRespond(context), mockDataBankToPutBrandNewData(
-                        context, testData), new ArbitraryResolver());
+        ControlMessageHandler handler = new PutOperationHandler(space,
+                memberRegistry,
+                mockDataBankToPutBrandNewData(context, testData),
+                new ArbitraryResolver());
 
         PutOperation putOperation = new PutOperation(sourceId, testData);
         handler.handle(putOperation);
@@ -117,9 +129,14 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             }
         });
 
-        ControlMessageHandler handler = new PutOperationHandler(
-                mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
-                        existingData), resolverWithConflictResult);
+        Space space = mockSpaceToRespond(context);
+
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
+
+        ControlMessageHandler handler = new PutOperationHandler(space,
+                memberRegistry, mockDataBankToGetAndPut(context, existingData),
+                resolverWithConflictResult);
 
         Data newData = generateValidNewData(existingData);
 
@@ -134,9 +151,14 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             throws Exception {
         Data existingData = TestDataGenerator.createRandomData();
 
-        ControlMessageHandler handler = new PutOperationHandler(
-                mockSpaceToRespond(context), mockDataBankToGetAndPut(context,
-                        existingData), new ArbitraryResolver());
+        Space space = mockSpaceToRespond(context);
+
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
+
+        ControlMessageHandler handler = new PutOperationHandler(space,
+                memberRegistry, mockDataBankToGetAndPut(context, existingData),
+                new ArbitraryResolver());
 
         Data newData = generateValidNewData(existingData);
 
@@ -166,8 +188,11 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
         HarmonyDataBank doNothingDatabank = context.mock(HarmonyDataBank.class);
 
+        MembershipRegistry memberRegistry = new MembershipRegistry(localNode);
+        memberRegistry.setSpace(space);
+
         ControlMessageHandler handler = new PutOperationHandler(space,
-                doNothingDatabank, new ArbitraryResolver());
+                memberRegistry, doNothingDatabank, new ArbitraryResolver());
 
         handler.handle(new PutOperation(sourceId, TestDataGenerator
                 .createRandomData()));
