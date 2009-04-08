@@ -15,13 +15,12 @@
  */
 package org.hydracache.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -31,11 +30,12 @@ import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.junit.Test;
 
 /**
- * @author nzhu
- * 
+ * Note: having too many threads and a small key pool can cause a live-lock in
+ * this test. 
  */
 public class MultiThreadedPartitionAwareClientIntegrationTest extends
         AbstractHydraClientIntegrationTest {
@@ -49,10 +49,11 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
 
     @Test
     public void testRepetitivePutAndGet() throws Exception {
-        int N = 25;
-        final CountDownLatch doneLatch = new CountDownLatch(N);
+        int numberOfThreads = 5;
 
-        for (int i = 0; i < N; i++) {
+        final CountDownLatch doneLatch = new CountDownLatch(numberOfThreads);
+
+        for (int i = 0; i < numberOfThreads; i++) {
             createTesterThread(doneLatch).start();
         }
 
@@ -72,7 +73,6 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
 
     private final class TesterThread extends Thread {
         private final CountDownLatch doneLatch;
-        private Map<String, String> localDataStorage = new HashMap<String, String>();
         private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
         private PartitionAwareClient client;
         private NodePartition<Identity> partition;
@@ -99,14 +99,17 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
             try {
                 StopWatch stopwatch = new StopWatch();
                 stopwatch.start();
+
                 int numberOfRepetition = 30;
+
                 for (int i = 0; i < numberOfRepetition; i++) {
-                    assertPutAndGet();
+                    doPutAndGet();
                 }
+
                 stopwatch.stop();
+
                 log.info("Took [" + stopwatch.getTime() + "]ms to perform ["
                         + numberOfRepetition + "] put and get pair");
-                assertDataIntegrity();
             } catch (Exception e) {
                 e.printStackTrace();
                 failed = true;
@@ -115,30 +118,31 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
             }
         }
 
-        private void assertPutAndGet() throws Exception {
-            String randomKey = createRandomKey();
+        private void doPutAndGet() throws Exception {
+            String key = getKeyFromThePool();
 
-            String data = createRandomDataSample(randomKey);
-            localDataStorage.put(randomKey, data);
+            String data = createRandomDataSample(key);
 
-            log.info("Putting key: " + randomKey);
+            log.info("Putting key: " + key);
 
-            client.put(randomKey, data);
-
-            Thread.sleep(100);
-
-            Object retrievedData = client.get(randomKey);
-
-            assertEquals("Retrieved data is incorrect", data, retrievedData);
+            tryPut(key, data, 1);
         }
 
-        private void assertDataIntegrity() throws Exception {
-            for (String key : localDataStorage.keySet()) {
-                String localData = localDataStorage.get(key);
-                Object remoteData = client.get(key);
-                if (!localData.equals(remoteData))
-                    failed = true;
+        private void tryPut(String key, String data, int retryCount)
+                throws IOException, VersionConflictException {
+            try {
+                client.put(key, data);
+                log.info("Put was successful at [" + retryCount + "] try");
+            } catch (VersionConflictException e) {
+                refresh(key);
+                tryPut(key, data, ++retryCount);
             }
+        }
+
+        private void refresh(String key) throws IOException {
+            log.info("Version conflict detected, refreshing [" + key + "]");
+            Object newData = client.get(key);
+            assertNotNull("Data retrieve after conflict is null", newData);
         }
     }
 

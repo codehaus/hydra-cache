@@ -74,7 +74,7 @@ public class PartitionAwareClientIntegrationTest extends
 
     @Test
     public void testUpdates() throws Exception {
-        String randomKey = createRandomKey();
+        String randomKey = getKeyFromThePool();
 
         String data = RandomStringUtils.randomAlphanumeric(200);
         client.put(randomKey, data);
@@ -134,7 +134,7 @@ public class PartitionAwareClientIntegrationTest extends
     }
 
     private void assertPutAndGet() throws Exception {
-        String randomKey = createRandomKey();
+        String randomKey = getKeyFromThePool();
 
         String data = createRandomDataSample(randomKey);
         localDataStorage.put(randomKey, data);

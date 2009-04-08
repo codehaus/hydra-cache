@@ -9,13 +9,13 @@ import org.apache.commons.lang.math.RandomUtils;
 
 public class AbstractHydraClientIntegrationTest {
 
-    protected static final int SAMPLE_SIZE = 10;
+    protected static final int KEY_POOL_SIZE = 50;
 
-    protected static final List<String> keys = new ArrayList<String>();
+    protected static final List<String> keyPool = new ArrayList<String>();
 
     static {
-        for (int i = 0; i < SAMPLE_SIZE; i++) {
-            keys.add(UUID.randomUUID().toString());
+        for (int i = 0; i < KEY_POOL_SIZE; i++) {
+            keyPool.add(UUID.randomUUID().toString());
         }
     }
 
@@ -23,8 +23,8 @@ public class AbstractHydraClientIntegrationTest {
         super();
     }
 
-    protected String createRandomKey() {
-        String randomKey = keys.get(RandomUtils.nextInt(SAMPLE_SIZE));
+    protected String getKeyFromThePool() {
+        String randomKey = keyPool.get(RandomUtils.nextInt(KEY_POOL_SIZE));
         return randomKey;
     }
 
