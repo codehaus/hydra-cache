@@ -29,6 +29,12 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav</artifactId>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -411,6 +417,23 @@
             <url>http://repository.codehaus.org</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>codehaus.org</id>
+            <name>Central Repository</name>
+            <url>dav:https://dav.codehaus.org/repository/hydra-cache/</url>
+        </repository>
+        <snapshotRepository>
+            <id>codehaus.org</id>
+            <name>Central Development Repository</name>
+            <url>dav:https://dav.codehaus.org/snapshots.repository/hydra-cache/</url>
+        </snapshotRepository>
+        <site>
+            <id>codehaus.org</id>
+            <url>dav:https://dav.codehaus.org/hydra-cache/</url>
+        </site>
+    </distributionManagement>
 
     <profiles>
         <profile>
