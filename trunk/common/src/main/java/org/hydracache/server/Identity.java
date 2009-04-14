@@ -31,7 +31,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  * 
  */
 public class Identity implements Serializable, Comparable<Identity> {
-
+    public static final Identity NULL_IDENTITY = getNullIdentity();
+    
     private static final long serialVersionUID = 1L;
 
     private final InetAddress address;
@@ -41,7 +42,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     private transient String stringValue;
 
     private transient int hashCode;
-
+    
     public Identity(final InetAddress address, final short port) {
         Validate.notNull(address, "Address can not be null");
 
@@ -66,15 +67,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     public Identity(final int port) {
         this((short) port);
     }
-
-    public static final Identity getNullIdentity() {
-        try {
-            return new Identity(InetAddress.getByName("127.0.0.1"), 0);
-        } catch (UnknownHostException ex) {
-            throw new RuntimeException("Failed to create NULL identity", ex);
-        }
-    }
-
+    
     public InetAddress getAddress() {
         return address;
     }
@@ -82,7 +75,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     public short getPort() {
         return port;
     }
-
+    
     @Override
     public String toString() {
         if (stringValue == null)
@@ -112,4 +105,11 @@ public class Identity implements Serializable, Comparable<Identity> {
         return toString().compareTo(o.toString());
     }
 
+    private static final Identity getNullIdentity() {
+        try {
+            return new Identity(InetAddress.getByName("127.0.0.1"), 0);
+        } catch (UnknownHostException ex) {
+            throw new RuntimeException("Failed to create NULL identity", ex);
+        }
+    }
 }

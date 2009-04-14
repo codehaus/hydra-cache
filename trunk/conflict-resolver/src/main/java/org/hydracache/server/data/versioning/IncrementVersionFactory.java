@@ -21,14 +21,25 @@ import java.io.IOException;
 
 import org.apache.commons.lang.Validate;
 import org.hydracache.server.Identity;
+import org.hydracache.server.IdentityMarshaller;
 
 /**
  * @author David Dossot (david@dossot.net)
  * 
  */
 public class IncrementVersionFactory extends AbstractVersionFactoryMarshaller {
-    private static final Increment NULL_VERSION = new Increment(Identity
-            .getNullIdentity(), 0L);
+    private static final Increment NULL_VERSION = new Increment(Identity.NULL_IDENTITY, 0L);
+
+    public IncrementVersionFactory() {
+        super();
+    }
+
+    /**
+     * @param identityMarshaller
+     */
+    public IncrementVersionFactory(IdentityMarshaller identityMarshaller) {
+        super(identityMarshaller);
+    }
 
     @Override
     public Version createNull() {

@@ -30,8 +30,7 @@ import org.hydracache.server.Identity;
 public final class VectorClockVersionFactory extends
         AbstractVersionFactoryMarshaller {
 
-    private static final VectorClock NULL_VERSION = new VectorClock(Identity
-            .getNullIdentity());
+    private static final VectorClock NULL_VERSION = new VectorClock(Identity.NULL_IDENTITY);
 
     @Override
     public Version createNull() {

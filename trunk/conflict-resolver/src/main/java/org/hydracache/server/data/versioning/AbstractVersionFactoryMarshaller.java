@@ -17,6 +17,7 @@ package org.hydracache.server.data.versioning;
 
 import org.hydracache.io.Marshaller;
 import org.hydracache.server.Identity;
+import org.hydracache.server.IdentityMarshaller;
 
 /**
  * @author David Dossot (david@dossot.net)
@@ -24,6 +25,21 @@ import org.hydracache.server.Identity;
 abstract class AbstractVersionFactoryMarshaller implements VersionFactory {
 
     private Marshaller<Identity> identityMarshaller;
+
+    /**
+     * Default constructor
+     */
+    protected AbstractVersionFactoryMarshaller() {
+    }
+    
+    /**
+     * Alternate constructor to initialize identityMarshaller.
+     * 
+     * @param identityMarshaller
+     */
+    protected AbstractVersionFactoryMarshaller(IdentityMarshaller identityMarshaller) {
+        this.identityMarshaller = identityMarshaller;
+    }
 
     protected Marshaller<Identity> getIdentityMarshaller() {
         return identityMarshaller;

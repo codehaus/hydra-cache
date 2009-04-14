@@ -29,7 +29,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.http.PartitionAwareClient;
+import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -61,8 +61,8 @@ public class PartitionAwareClientIntegrationTest extends
         versionFactory.setIdentityMarshaller(new IdentityMarshaller());
 
         partition = new ConsistentHashNodePartition<Identity>(
-                new KetamaBasedHashFunction(), Arrays.asList(new Identity(
-                        InetAddress.getByName(SERVER_NAME), 8080),
+                new KetamaBasedHashFunction(), Arrays.asList(
+                        new Identity(InetAddress.getByName(SERVER_NAME), 8080),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8081),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8082),
                         new Identity(InetAddress.getByName(SERVER_NAME), 8083)));
@@ -89,7 +89,7 @@ public class PartitionAwareClientIntegrationTest extends
     }
 
     @Test
-    public void ensureNotFoundDataReturnsAsNull() throws IOException {
+    public void ensureNotFoundDataReturnsAsNull() throws Exception {
         String uniqueKey = UUID.randomUUID().toString();
 
         Object result = client.get(uniqueKey);

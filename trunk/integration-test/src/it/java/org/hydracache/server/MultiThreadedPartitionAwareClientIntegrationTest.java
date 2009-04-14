@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.http.PartitionAwareClient;
+import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
@@ -129,7 +129,7 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
         }
 
         private void tryPut(String key, String data, int retryCount)
-                throws IOException, VersionConflictException {
+                throws Exception {
             try {
                 client.put(key, data);
                 log.info("Put was successful at [" + retryCount + "] try");
@@ -139,7 +139,7 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
             }
         }
 
-        private void refresh(String key) throws IOException {
+        private void refresh(String key) throws Exception {
             log.info("Version conflict detected, refreshing [" + key + "]");
             Object newData = client.get(key);
             assertNotNull("Data retrieve after conflict is null", newData);

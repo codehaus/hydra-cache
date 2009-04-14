@@ -21,6 +21,8 @@ import java.io.Serializable;
 import org.hydracache.server.data.versioning.VersionConflictException;
 
 /**
+ * Represents the entry point for users to access the distributed cache.
+ * 
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
@@ -38,7 +40,7 @@ public interface HydraCacheClient {
      * @throws OperationTimeoutException
      *             if we cannot locate the data in sufficient time.
      */
-    public Object get(String key) throws IOException;
+    public Object get(String key) throws Exception;
 
     /**
      * Add data to the cache with the given key.
@@ -51,7 +53,6 @@ public interface HydraCacheClient {
      * @exception VersionConflictException
      *                thrown if version conflict has been detected
      */
-    public void put(String key, Serializable object)
-            throws IOException, VersionConflictException;
-
+    public void put(String key, Serializable object) throws Exception,
+            VersionConflictException;
 }

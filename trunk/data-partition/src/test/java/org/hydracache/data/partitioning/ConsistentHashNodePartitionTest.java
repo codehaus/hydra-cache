@@ -32,7 +32,8 @@ import org.junit.Test;
 /**
  * Test basic functionality of consistent hashing.
  * 
- * @author Tan Quach, Nick Zhu
+ * @author Tan Quach
+ * @author Nick Zhu
  * @since 1.0
  */
 public class ConsistentHashNodePartitionTest {
