@@ -255,13 +255,6 @@
                 <version>2.2</version>
             </dependency>
 
-            <!-- JMETER DEPENDENCIES -->
-            <dependency>
-                <groupId>org.apache.jmeter</groupId>
-                <artifactId>jmeter</artifactId>
-                <version>2.2</version>
-            </dependency>
-
             <!-- TEST DEPENDENCIES -->
             <dependency>
                 <groupId>junit</groupId>
@@ -294,11 +287,6 @@
         <repository>
             <id>jboss</id>
             <url>http://repository.jboss.com/maven2/</url>
-        </repository>
-        <!-- Only this repository contains JMeter jars -->
-        <repository>
-            <id>thinkpond.org</id>
-            <url>http://bin.thinkpond.org/repo</url>
         </repository>
     </repositories>
 
