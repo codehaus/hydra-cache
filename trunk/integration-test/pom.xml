@@ -7,6 +7,7 @@
     </parent>
     <artifactId>integration-test</artifactId>
     <name>Hydra Integration Test Suites</name>
+    <description>Hydra Cache integration test suites</description>
 
     <build>
         <testSourceDirectory>src/it/java</testSourceDirectory>

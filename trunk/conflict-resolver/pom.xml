@@ -8,6 +8,7 @@
 
 	<artifactId>conflict-resolver</artifactId>
 	<name>Hydra Conflict Resolver</name>
+    <description>Hydra Cache version conflict resolver module</description>
 	<dependencies>
 
 		<!-- COMMON DEPENDENCIES -->

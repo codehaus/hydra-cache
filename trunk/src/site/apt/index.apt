@@ -1,0 +1,51 @@
+[http://hydracache.org/images/hydra-logo.png] Hydra Cache Project 
+
+Welcome to Hydra Cache
+
+* Challenge
+
+        In an ultra large enterprise application, such as an online e-commerce 
+        or online gaming site, you are dealing with millions of users and 
+        thousands of transactions every second. To handle this kind of traffic 
+        the number of servers, routers, databases, and storage hardware makes 
+        hardware or network failure a norm instead of an exception. Despite the 
+        constant hardware failure in your system, your customers will not tolerate 
+        the slightest down time; the more successful your system is, the more 
+        important it becomes to your client, and the less happy they will be when 
+        they experience an outage.
+
+* Solution
+
+        To solve this challenge we need a highly available, decentralized and 
+        highly performant data storage service that shields the application from 
+        this harsh reality and complexity. No exceptions will be thrown when hardware 
+        or network failures occur and the application code can always safely assume 
+        that the data storage service is available to write and read at any given 
+        point in time. This data storage service also needs to be evolutionarily 
+        scalable since down time is not acceptable, thus adding new nodes and storage 
+        capacity, should not require shutting down the entire system and it should 
+        only have limited impact on the service and it's client. A bonus side effect 
+        of this solution is that the distributed data storage can also act as a 
+        distributed cache system to reduce the hit to the persistent data storage 
+        such as a relational database.
+
+* What is Hydra Cache
+
+        Hydra Cache is an open source implementation of 
+        Amazon's Dynamo {{{http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html}Amazon's Dynamo}} in Java. 
+        Since probably no one can explain Dynamo and its benefits better than 
+        Werner Vogels, we will just provide the link to his paper Amazon Dynamo 
+        here if you are interested. In our own words, the ultimate goal of Hydra Cache 
+        is to build a distributed, decentralized and generic data storage/cache 
+        system that, in theory, at least can provide an infinite amount of high 
+        performance and reliable memory for any enterprise application, big or small. 
+        Just as the Lernaean Hydra of Greek mythology was nearly impossible to kill, 
+        so will be the case for your application. 
+
+* Wiki
+
+        * User Wiki {{{http://www.hydracache.org/project/wiki/UserWiki}User Wiki}}
+
+        * Developer Wiki {{{http://www.hydracache.org/project/wiki/DeveloperWiki}Developer Wiki}}
+
+

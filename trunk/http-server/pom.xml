@@ -8,7 +8,7 @@
     </parent>
     <artifactId>http-server</artifactId>
     <name>Hydra HTTP Light Server</name>
-    <description>A ultra light async non-blocking http server implementation</description>
+    <description>A ultra lightweight async non-blocking custom HTTP server implementation</description>
 
     <dependencies>
 

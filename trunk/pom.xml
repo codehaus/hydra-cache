@@ -6,7 +6,20 @@
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <name>Hydra Project Parent</name>
+    <description>Java implementation of Dynamo - consistent-hash based distributed cache system</description>
+    <inceptionYear>2008</inceptionYear>
     <version>0.4-SNAPSHOT</version>
+    <url>http://www.hydracache.org</url>
+
+    <scm>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
+        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/trunk</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>http://jira.codehaus.org/browse/HYDRACACHE</url>
+    </issueManagement>
 
     <modules>
         <module>assembler</module>
@@ -367,11 +380,6 @@
         </plugins>
     </reporting>
 
-    <scm>
-        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
-        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/trunk</developerConnection>
-    </scm>
-
     <developers>
         <developer>
             <id>nzhu</id>
@@ -409,6 +417,19 @@
             </roles>
         </developer>
     </developers>
+
+    <mailingLists>
+        <mailingList>
+            <name>Developer Mailing List</name>
+            <post>dev@hydra-cache.codehaus.org</post>
+            <archive>http://archive.codehaus.org/lists/org.codehaus.hydra-cache.dev/</archive>
+        </mailingList>
+        <mailingList>
+            <name>User Mailing List</name>
+            <post>user@hydra-cache.codehaus.org</post>
+            <archive>http://archive.codehaus.org/lists/org.codehaus.hydra-cache.user/</archive>
+        </mailingList>
+    </mailingLists>
 
     <pluginRepositories>
         <pluginRepository>

@@ -8,6 +8,7 @@
     </parent>
     <artifactId>test-kit</artifactId>
     <name>Hydra Test Kit</name>
+    <description>Hydra Cache performance and stability test kit</description>
 
     <dependencies>
         <!-- INTERNAL DEPENDENCIES -->

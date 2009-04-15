@@ -7,6 +7,7 @@
     </parent>
     <artifactId>protocol</artifactId>
     <name>Hydra Protocol Codec</name>
+    <description>Hydra Cache server protocol module and its codec</description>
 
     <dependencies>
 
