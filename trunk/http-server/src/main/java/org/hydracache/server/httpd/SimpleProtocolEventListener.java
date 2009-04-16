@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class SimpleProtocolEventListener implements EventListener {
-    private static Logger log = Logger
+    static Logger log = Logger
             .getLogger(SimpleProtocolEventListener.class);
 
     /*
