@@ -8,7 +8,6 @@
     <artifactId>client</artifactId>
     <name>Hydra Cache Java Client</name>
     <description>Hydra Cache java client API library</description>
-    <url>http://www.hydracache.org/hcjc</url>
     <dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
