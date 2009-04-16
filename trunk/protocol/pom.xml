@@ -22,11 +22,6 @@
             <artifactId>conflict-resolver</artifactId>
             <version>${version}</version>
         </dependency>
-        <dependency>
-            <groupId>${groupId}</groupId>
-            <artifactId>data-storage</artifactId>
-            <version>${version}</version>
-        </dependency>
 
         <!-- COMMON DEPENDENCIES -->
         <dependency>
