@@ -17,6 +17,7 @@ package org.hydracache.server.httpd.handler;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ByteArrayEntity;
@@ -36,7 +37,6 @@ import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
-import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -160,10 +160,13 @@ public class HttpPutMethodHandlerTest {
 
     private DataMessage createValidNewDataMessage() {
         DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setBlob(TestDataGenerator.createRandomData()
-                .getContent());
+        incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
         return incomingDataMsg;
+    }
+
+    private byte[] generateRandomBytes() {
+        return RandomStringUtils.random(10).getBytes();
     }
 
     @Test
@@ -261,8 +264,7 @@ public class HttpPutMethodHandlerTest {
 
     private DataMessage createValidUpdateDataMessage() {
         DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setBlob(TestDataGenerator.createRandomData()
-                .getContent());
+        incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory()
                 .create(localId).incrementFor(localId));
         return incomingDataMsg;
