@@ -20,6 +20,7 @@ import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONT
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -95,7 +96,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
     void handleGetData(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (keyIsBlank(request))
+        if (StringUtils.isBlank(extractRequestString(request)))
             return;
 
         Long dataKey = extractDataKeyHash(request);

@@ -58,6 +58,17 @@ public class BaseHttpMethodHandlerTest {
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
     }
+    
+    @Test
+    public void testEmptyRequestShouldBeRejected() throws HttpException,
+            IOException {
+        final HttpRequest emptyRequest = context.mock(HttpRequest.class);
+        final HttpResponse emptyResponse = context.mock(HttpResponse.class);
+        final HttpContext mockHttpContext = context.mock(HttpContext.class);
+        BaseHttpMethodHandler handler = createHandler();
+        handler.handle(emptyRequest, emptyResponse, mockHttpContext);
+        handler.handle(null, emptyResponse, mockHttpContext);
+    }
 
     @Test
     public void ensureCorrectDataKeyExtraction() {

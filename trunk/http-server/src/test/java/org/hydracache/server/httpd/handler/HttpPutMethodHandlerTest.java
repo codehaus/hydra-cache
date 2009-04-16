@@ -15,15 +15,12 @@
  */
 package org.hydracache.server.httpd.handler;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Marshaller;
@@ -36,14 +33,15 @@ import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
-import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
+import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,15 +50,9 @@ import org.junit.Test;
  * 
  */
 public class HttpPutMethodHandlerTest {
-    private Mockery context = new Mockery() {
-        {
-            setImposteriser(ClassImposteriser.INSTANCE);
-        }
-    };
+    private Mockery context;
 
-    private final HttpResponse response = context.mock(HttpResponse.class);
-
-    private final HttpContext httpContext = context.mock(HttpContext.class);
+    private HttpResponse response;
 
     private IncrementVersionFactory versionFactoryMarshaller;
 
@@ -68,142 +60,27 @@ public class HttpPutMethodHandlerTest {
 
     private HttpPutMethodHandler handler;
 
+    private Long testKey = 1234L;
+
     private Identity sourceId = new Identity(70);
     private Identity localId = new Identity(71);
 
     @Before
     public void initialize() {
+        context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
+
+        response = context.mock(HttpResponse.class);
+
         versionFactoryMarshaller = new IncrementVersionFactory();
-        handler = createHandler(versionFactoryMarshaller,
-                versionFactoryMarshaller);
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
-    }
 
-    @Test
-    public void ensureLocalVersionConflictDetectionIgnoresNull()
-            throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
-                "conflictLocalDataBank");
-
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                will(returnValue(null));
-            }
-        });
-
-        handler.dataBank = dataBank;
-
-        DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setVersion(new IncrementVersionFactory()
-                .create(sourceId));
-
-        handler.guardConflictWithLocalDataVersion(10L, incomingDataMsg);
-
-        context.assertIsSatisfied();
-    }
-
-    @Test(expected = VersionConflictException.class)
-    public void ensureLocalVersionConflictDetection() throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
-                "conflictLocalDataBank");
-
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                Data data = new Data();
-                data.setVersion(new IncrementVersionFactory().create(sourceId)
-                        .incrementFor(localId));
-                will(returnValue(data));
-            }
-        });
-
-        handler.dataBank = dataBank;
-
-        DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setVersion(new IncrementVersionFactory()
-                .create(sourceId));
-
-        handler.guardConflictWithLocalDataVersion(10L, incomingDataMsg);
-    }
-
-    @Test
-    public void ensureNewVersionIsCreatedIfGivenVersionIsNull()
-            throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
-                "conflictLocalDataBank");
-
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                Data data = new Data();
-                data.setVersion(new IncrementVersionFactory().create(sourceId)
-                        .incrementFor(localId));
-                will(returnValue(data));
-            }
-        });
-
-        handler.dataBank = dataBank;
-
-        DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setVersion(versionFactoryMarshaller.createNull());
-
-        handler.increaseVersion(incomingDataMsg);
-
-        assertNotNull("New 0 version should be created", incomingDataMsg
-                .getVersion());
-        assertFalse("Data message should not have a NULL version",
-                versionFactoryMarshaller.createNull().equals(
-                        incomingDataMsg.getVersion()));
-    }
-
-    @Test
-    public void shouldReturnStatus201ForCreation() throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
-                "emptyDataBank");
-
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                will(returnValue(null));
-            }
-        });
-
-        handler.dataBank = dataBank;
-
-        int statusCode = handler.createStatusCode(1000L);
-
-        assertEquals("Status for creation is incorrect", HttpStatus.SC_CREATED,
-                statusCode);
-    }
-
-    @Test
-    public void shouldReturnStatus200ForUpdate() throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class,
-                "nonEmptyDataBank");
-
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                will(returnValue(new Data()));
-            }
-        });
-
-        handler.dataBank = dataBank;
-
-        int statusCode = handler.createStatusCode(1000L);
-
-        assertEquals("Status for update is incorrect", HttpStatus.SC_OK,
-                statusCode);
-    }
-
-    @Test
-    public void testEmptyRequestShouldBeRejected() throws HttpException,
-            IOException {
-        final HttpRequest emptyRequest = context.mock(HttpRequest.class);
-        handler.handle(emptyRequest, response, httpContext);
-        handler.handle(null, response, httpContext);
+        handler = createHandler(versionFactoryMarshaller,
+                versionFactoryMarshaller);
     }
 
     private HttpPutMethodHandler createHandler(
@@ -215,11 +92,188 @@ public class HttpPutMethodHandlerTest {
                 new MessageMarshallerFactory(versionFactoryMarshaller));
         DefaultProtocolDecoder messageDecoder = new DefaultProtocolDecoder(
                 new MessageMarshallerFactory(versionMarshaller));
-        
+
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(
                 versionFactory, dataBank, hashFunction, messageEncoder,
                 messageDecoder, new JGroupsNode(localId, new IpAddress(7000)));
 
         return handler;
     }
+
+    @After
+    public void after() {
+        context.assertIsSatisfied();
+    }
+
+    @Test
+    public void ensureLocalVersionConflictDetectionIgnoresNull()
+            throws Exception {
+        {
+            addNullReturnedFromLocalGetExp(handler.dataBank);
+            addSuccessLocalPutExp(handler.dataBank);
+        }
+
+        {
+            addSetCreatedStatusCodeExp(response);
+            addSetBinaryDataEntityExp(response);
+        }
+
+        DataMessage validNewDataMessage = createValidNewDataMessage();
+
+        handler.processDataMessage(response, testKey, validNewDataMessage);
+    }
+
+    private void addNullReturnedFromLocalGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(dataBank).getLocally(with(testKey));
+                will(returnValue(null));
+            }
+        });
+    }
+
+    private void addSuccessLocalPutExp(final HarmonyDataBank dataBank)
+            throws Exception {
+        context.checking(new Expectations() {
+            {
+                one(dataBank).put(with(any(Data.class)));
+            }
+        });
+    }
+
+    private void addSetCreatedStatusCodeExp(final HttpResponse response) {
+        context.checking(new Expectations() {
+            {
+                one(response).setStatusCode(HttpStatus.SC_CREATED);
+            }
+        });
+    }
+
+    private void addSetBinaryDataEntityExp(final HttpResponse response) {
+        context.checking(new Expectations() {
+            {
+                one(response).setEntity(with(any(ByteArrayEntity.class)));
+            }
+        });
+    }
+
+    private DataMessage createValidNewDataMessage() {
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setBlob(TestDataGenerator.createRandomData()
+                .getContent());
+        incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
+        return incomingDataMsg;
+    }
+
+    @Test
+    public void ensureLocalVersionConflictDetection() throws Exception {
+        {
+            addConflictLocalGetExp(handler.dataBank);
+        }
+
+        {
+            addSetConflictStatusCodeExp(response);
+            addSetStringMessageEntityExp(response);
+        }
+
+        DataMessage validNewDataMessage = createValidNewDataMessage();
+
+        handler.processDataMessage(response, testKey, validNewDataMessage);
+    }
+
+    private void addConflictLocalGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
+        context.checking(new Expectations() {
+            {
+                one(dataBank).getLocally(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId)
+                        .incrementFor(localId));
+                will(returnValue(data));
+            }
+        });
+    }
+
+    private void addSetConflictStatusCodeExp(final HttpResponse response) {
+        context.checking(new Expectations() {
+            {
+                one(response).setStatusCode(HttpStatus.SC_CONFLICT);
+            }
+        });
+    }
+
+    private void addSetStringMessageEntityExp(final HttpResponse response) {
+        context.checking(new Expectations() {
+            {
+                one(response).setEntity(with(any(StringEntity.class)));
+            }
+        });
+    }
+
+    @Test
+    public void ensureNewVersionIsCreatedIfGivenVersionIsNull()
+            throws Exception {
+        {
+            addNullReturnedFromLocalGetExp(handler.dataBank);
+            addSuccessLocalPutExp(handler.dataBank);
+        }
+
+        {
+            addSetCreatedStatusCodeExp(response);
+            addSetBinaryDataEntityExp(response);
+        }
+
+        DataMessage nullVersionDataMessage = createValidNewDataMessage();
+        nullVersionDataMessage.setVersion(null);
+
+        handler.processDataMessage(response, testKey, nullVersionDataMessage);
+    }
+
+    @Test
+    public void ensureStatusOkIsReturnedForUpdate() throws Exception {
+        {
+            addExistingDataReturnedFromLocalGetExp(handler.dataBank);
+            addSuccessLocalPutExp(handler.dataBank);
+        }
+
+        {
+            addSetOkStatusCodeExp(response);
+            addSetBinaryDataEntityExp(response);
+        }
+
+        DataMessage validUpdateDataMessage = createValidUpdateDataMessage();
+
+        handler.processDataMessage(response, testKey, validUpdateDataMessage);
+    }
+
+    private void addExistingDataReturnedFromLocalGetExp(
+            final HarmonyDataBank dataBank) throws IOException {
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId));
+                will(returnValue(data));
+            }
+        });
+    }
+
+    private DataMessage createValidUpdateDataMessage() {
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setBlob(TestDataGenerator.createRandomData()
+                .getContent());
+        incomingDataMsg.setVersion(new IncrementVersionFactory()
+                .create(localId).incrementFor(localId));
+        return incomingDataMsg;
+    }
+
+    private void addSetOkStatusCodeExp(final HttpResponse response) {
+        context.checking(new Expectations() {
+            {
+                one(response).setStatusCode(HttpStatus.SC_OK);
+            }
+        });
+    }
+
 }

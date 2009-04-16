@@ -81,18 +81,27 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        if (emptyRequest(request)) {
-            log.warn("Empty request[" + request + "] received and ignored");
-            return;
-        }
+        super.handle(request, response, context);
 
-        if (keyIsBlank(request))
-            return;
-
-        HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
-        DataMessage dataMessage = decodeProtocolMessage(entity);
-        increaseVersion(dataMessage);
         Long dataKey = extractDataKeyHash(request);
+
+        DataMessage dataMessage = decodeProtocolMessage(((HttpEntityEnclosingRequest) request)
+                .getEntity());
+
+        processDataMessage(response, dataKey, dataMessage);
+    }
+
+    private DataMessage decodeProtocolMessage(HttpEntity entity)
+            throws IOException {
+        byte[] entityContent = EntityUtils.toByteArray(entity);
+
+        return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
+    }
+
+    void processDataMessage(HttpResponse response, Long dataKey,
+            DataMessage dataMessage) throws IOException,
+            UnsupportedEncodingException {
+        increaseVersion(dataMessage);
 
         try {
             guardConflictWithLocalDataVersion(dataKey, dataMessage);
@@ -111,17 +120,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    private boolean emptyRequest(HttpRequest request) {
-        return !(request instanceof HttpEntityEnclosingRequest);
-    }
-
-    DataMessage decodeProtocolMessage(HttpEntity entity) throws IOException {
-        byte[] entityContent = EntityUtils.toByteArray(entity);
-
-        return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
-    }
-
-    void increaseVersion(DataMessage dataMessage) {
+    private void increaseVersion(DataMessage dataMessage) {
         if (dataMessage.getVersion() == null
                 || dataMessage.getVersion().equals(versionFactory.createNull())) {
             dataMessage.setVersion(versionFactory.create(localNode.getId()));
@@ -131,7 +130,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    void guardConflictWithLocalDataVersion(Long dataKey,
+    private void guardConflictWithLocalDataVersion(Long dataKey,
             DataMessage incomingDataMsg) throws IOException,
             VersionConflictException {
         Data localData = dataBank.getLocally(dataKey);
@@ -149,7 +148,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    int createStatusCode(Long dataKey) throws IOException {
+    private int createStatusCode(Long dataKey) throws IOException {
         int returnStatusCode = HttpStatus.SC_OK;
 
         if (dataBank.getLocally(dataKey) == null)
