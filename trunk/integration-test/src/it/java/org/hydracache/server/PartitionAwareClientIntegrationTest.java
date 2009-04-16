@@ -18,7 +18,6 @@ package org.hydracache.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
