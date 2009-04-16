@@ -32,7 +32,7 @@ Welcome to Hydra Cache
 * What is Hydra Cache
 
         Hydra Cache is an open source implementation of 
-        Amazon's Dynamo {{{http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html}Amazon's Dynamo}} in Java. 
+        {{{http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html}Amazon's Dynamo}} in Java. 
         Since probably no one can explain Dynamo and its benefits better than 
         Werner Vogels, we will just provide the link to his paper Amazon Dynamo 
         here if you are interested. In our own words, the ultimate goal of Hydra Cache 
@@ -44,8 +44,8 @@ Welcome to Hydra Cache
 
 * Wiki
 
-        * User Wiki {{{http://www.hydracache.org/project/wiki/UserWiki}User Wiki}}
+        * {{{http://www.hydracache.org/project/wiki/UserWiki}User Wiki}}
 
-        * Developer Wiki {{{http://www.hydracache.org/project/wiki/DeveloperWiki}Developer Wiki}}
+        * {{{http://www.hydracache.org/project/wiki/DeveloperWiki}Developer Wiki}}
 
 
