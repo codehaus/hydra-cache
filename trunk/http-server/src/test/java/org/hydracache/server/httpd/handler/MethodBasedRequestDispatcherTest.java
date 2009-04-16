@@ -20,6 +20,8 @@ import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -53,29 +55,10 @@ public class MethodBasedRequestDispatcherTest {
             .mock(UnsupportedHttpMethodHandler.class);
 
     @Test
-    public void testDispatchPutMethod() throws HttpException, IOException {
+    public void ensureErrorHandlingIsCorrect() throws Exception {
+        addGetHandleFailureExp();
 
-        context.checking(new Expectations() {
-            {
-                one(putHandler).handle(request, response, httpContext);
-            }
-        });
-
-        MethodBasedRequestDispatcher dispatcher = createDispatcher();
-
-        dispatcher.dispatch(request, response, httpContext, "PUT");
-
-        context.assertIsSatisfied();
-    }
-
-    @Test
-    public void testDispatchGetMethod() throws HttpException, IOException {
-
-        context.checking(new Expectations() {
-            {
-                one(getHandler).handle(request, response, httpContext);
-            }
-        });
+        addGenerateErrorResponseExp();
 
         MethodBasedRequestDispatcher dispatcher = createDispatcher();
 
@@ -84,21 +67,81 @@ public class MethodBasedRequestDispatcherTest {
         context.assertIsSatisfied();
     }
 
-    @Test
-    public void testDispatchPostMethod() throws HttpException, IOException {
-
+    private void addGetHandleFailureExp() throws HttpException, IOException {
         context.checking(new Expectations() {
             {
-                one(unsupportedHttpMethodHandler).handle(request, response,
-                        httpContext);
+                one(getHandler).handle(request, response, httpContext);
+                will(throwException(new RuntimeException("Something wrong")));
             }
         });
+    }
+
+    private void addGenerateErrorResponseExp() {
+        context.checking(new Expectations() {
+            {
+                one(response)
+                        .setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                one(response).setEntity(with(any(StringEntity.class)));
+            }
+        });
+    }
+
+    @Test
+    public void testDispatchPutMethod() throws HttpException, IOException {
+        addSuccessHandlePutExp();
+
+        MethodBasedRequestDispatcher dispatcher = createDispatcher();
+
+        dispatcher.dispatch(request, response, httpContext, "PUT");
+
+        context.assertIsSatisfied();
+    }
+
+    private void addSuccessHandlePutExp() throws HttpException, IOException {
+        context.checking(new Expectations() {
+            {
+                one(putHandler).handle(request, response, httpContext);
+            }
+        });
+    }
+
+    @Test
+    public void testDispatchGetMethod() throws HttpException, IOException {
+        addSuccessHandleGetExp();
+
+        MethodBasedRequestDispatcher dispatcher = createDispatcher();
+
+        dispatcher.dispatch(request, response, httpContext, "GET");
+
+        context.assertIsSatisfied();
+    }
+
+    private void addSuccessHandleGetExp() throws HttpException, IOException {
+        context.checking(new Expectations() {
+            {
+                one(getHandler).handle(request, response, httpContext);
+            }
+        });
+    }
+
+    @Test
+    public void testDispatchPostMethod() throws HttpException, IOException {
+        addSuccessHandleUnknownExp();
 
         MethodBasedRequestDispatcher dispatcher = createDispatcher();
 
         dispatcher.dispatch(request, response, httpContext, "POST");
 
         context.assertIsSatisfied();
+    }
+
+    private void addSuccessHandleUnknownExp() throws HttpException, IOException {
+        context.checking(new Expectations() {
+            {
+                one(unsupportedHttpMethodHandler).handle(request, response,
+                        httpContext);
+            }
+        });
     }
 
     private MethodBasedRequestDispatcher createDispatcher() {
