@@ -17,11 +17,6 @@
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-		    <artifactId>harmony</artifactId>
-		    <version>${pom.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
 		    <artifactId>common</artifactId>
 		    <version>${pom.version}</version>
 		</dependency>

@@ -44,7 +44,6 @@ import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
-import org.hydracache.server.harmony.core.Substance;
 
 /**
  * Manages a partition of nodes and uses an implementation of HydraCacheClient
