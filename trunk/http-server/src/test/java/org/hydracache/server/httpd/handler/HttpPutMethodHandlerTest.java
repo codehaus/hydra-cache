@@ -123,7 +123,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     @Test
     public void ensureStatusOkIsReturnedForUpdate() throws Exception {
         {
-            addExistingDataReturnedFromLocalGetExp(handler.dataBank);
+            addSuccessfulLocalGetExp(handler.dataBank);
             addSuccessLocalPutExp(handler.dataBank);
         }
 

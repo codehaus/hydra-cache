@@ -47,7 +47,8 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
 public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     private static Logger log = Logger.getLogger(HttpGetMethodHandler.class);
 
-    private Map<String, HttpServiceAction> serviceActionMap;
+    private Map<String, HttpServiceAction> serviceActionMap = Collections
+            .emptyMap();
 
     /**
      * Constructor
@@ -79,7 +80,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         super.handle(request, response, context);
-        
+
         String requestContext = extractRequestString(request);
 
         if (serviceActionMap.containsKey(requestContext)) {
@@ -102,8 +103,8 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         }
 
         ByteArrayEntity body = generateEntityForData(data);
-
         response.setEntity(body);
+        response.setStatusCode(HttpStatus.SC_OK);
     }
 
     private void handleNotFound(HttpResponse response) {

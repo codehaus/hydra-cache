@@ -123,7 +123,7 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addExistingDataReturnedFromLocalGetExp(
+    protected void addSuccessfulLocalGetExp(
             final HarmonyDataBank dataBank) throws IOException {
         context.checking(new Expectations() {
             {

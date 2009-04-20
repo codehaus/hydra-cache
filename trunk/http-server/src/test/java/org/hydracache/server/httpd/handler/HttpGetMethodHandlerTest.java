@@ -11,6 +11,8 @@ import org.apache.http.RequestLine;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.server.data.storage.Data;
+import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jmock.Expectations;
 import org.junit.Test;
@@ -59,7 +61,7 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         handler.setServiceActions(actions);
 
         {
-            addGetRequestLineExp(request);
+            addGetRequestLineExp(request, "/mock/");
         }
 
         handler.handle(request, response, httpContext);
@@ -83,18 +85,50 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         });
     }
 
-    private void addGetRequestLineExp(final HttpRequest request) {
+    private void addGetRequestLineExp(final HttpRequest request,
+            final String requestContext) {
         context.checking(new Expectations() {
             {
-                one(request).getRequestLine();
+                atLeast(1).of(request).getRequestLine();
                 final RequestLine requestLine = context.mock(RequestLine.class);
                 context.checking(new Expectations() {
                     {
-                        one(requestLine).getUri();
-                        will(returnValue("/mock/"));
+                        atLeast(1).of(requestLine).getUri();
+                        will(returnValue(requestContext));
                     }
                 });
                 will(returnValue(requestLine));
+            }
+        });
+    }
+
+    @Test
+    public void ensureHandleGetDataCorrectly() throws HttpException,
+            IOException {
+        {
+            addGetRequestLineExp(request, "/testKey/");
+        }
+
+        {
+            addSuccessfulReliableGetExp(dataBank);
+        }
+
+        {
+            addSetBinaryDataEntityExp(response);
+            addSetOkStatusCodeExp(response);
+        }
+
+        handler.handle(request, response, httpContext);
+    }
+
+    private void addSuccessfulReliableGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
+        context.checking(new Expectations() {
+            {
+                one(dataBank).get(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId));
+                will(returnValue(data));
             }
         });
     }
