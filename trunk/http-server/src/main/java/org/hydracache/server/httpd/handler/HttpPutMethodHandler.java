@@ -81,7 +81,13 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        super.handle(request, response, context);
+        if (emptyRequest(request)) {
+            log.warn("Empty request[" + request + "] received and ignored");
+            return;
+        }
+
+        if (keyIsBlank(request))
+            return;
 
         Long dataKey = extractDataKeyHash(request);
 

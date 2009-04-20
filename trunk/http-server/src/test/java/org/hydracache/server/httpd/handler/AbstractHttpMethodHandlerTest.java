@@ -3,10 +3,14 @@ package org.hydracache.server.httpd.handler;
 import java.io.IOException;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.RequestLine;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
@@ -29,6 +33,8 @@ public class AbstractHttpMethodHandlerTest {
     protected Long testKey = 1234L;
     protected Identity sourceId = new Identity(70);
     protected Identity localId = new Identity(71);
+    protected HttpRequest request;
+    protected HttpContext httpContext;
         
 
     public AbstractHttpMethodHandlerTest() {
@@ -139,6 +145,61 @@ public class AbstractHttpMethodHandlerTest {
         context.checking(new Expectations() {
             {
                 one(response).setStatusCode(HttpStatus.SC_OK);
+            }
+        });
+    }
+
+    protected void addExecuteExp(final HttpServiceAction mockAction) throws HttpException,
+            IOException {
+                context.checking(new Expectations() {
+                    {
+                        one(mockAction).execute(with(any(HttpResponse.class)));
+                    }
+                });
+            }
+
+    protected void addGetNameExp(final HttpServiceAction mockAction) {
+        context.checking(new Expectations() {
+            {
+                one(mockAction).getName();
+                will(returnValue("mock"));
+            }
+        });
+    }
+
+    protected void addGetRequestLineExp(final HttpRequest request, final String requestContext) {
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(request).getRequestLine();
+                final RequestLine requestLine = context.mock(RequestLine.class);
+                context.checking(new Expectations() {
+                    {
+                        atLeast(1).of(requestLine).getUri();
+                        will(returnValue(requestContext));
+                    }
+                });
+                will(returnValue(requestLine));
+            }
+        });
+    }
+
+    protected void addSuccessfulReliableGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
+                context.checking(new Expectations() {
+                    {
+                        one(dataBank).get(with(any(Long.class)));
+                        Data data = new Data();
+                        data.setVersion(new IncrementVersionFactory().create(sourceId));
+                        will(returnValue(data));
+                    }
+                });
+            }
+
+    protected void addNotFoundReliableGetExp(final HarmonyDataBank dataBank) throws IOException {
+        context.checking(new Expectations() {
+            {
+                one(dataBank).get(with(any(Long.class)));
+                will(returnValue(null));
             }
         });
     }

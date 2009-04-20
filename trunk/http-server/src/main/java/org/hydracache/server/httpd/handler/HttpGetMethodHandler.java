@@ -79,7 +79,8 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        super.handle(request, response, context);
+        if (keyIsBlank(request))
+            return;
 
         String requestContext = extractRequestString(request);
 

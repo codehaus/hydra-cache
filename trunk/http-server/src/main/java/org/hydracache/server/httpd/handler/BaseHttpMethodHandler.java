@@ -22,13 +22,9 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.log4j.Logger;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
@@ -45,8 +41,6 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  */
 public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
-    private static Logger log = Logger.getLogger(BaseHttpMethodHandler.class);
-
     protected HarmonyDataBank dataBank;
 
     protected HashFunction hashFunction;
@@ -61,30 +55,11 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         this.messageEncoder = messageEncoder;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.apache.http.protocol.HttpRequestHandler#handle(org.apache.http.
-     * HttpRequest, org.apache.http.HttpResponse,
-     * org.apache.http.protocol.HttpContext)
-     */
-    @Override
-    public void handle(HttpRequest request, HttpResponse response,
-            HttpContext context) throws HttpException, IOException {
-        if (emptyRequest(request)) {
-            log.warn("Empty request[" + request + "] received and ignored");
-            return;
-        }
-
-        if (keyIsBlank(request))
-            return;
-    }
-
-    private boolean emptyRequest(HttpRequest request) {
+    protected boolean emptyRequest(HttpRequest request) {
         return !(request instanceof HttpEntityEnclosingRequest);
     }
 
-    private boolean keyIsBlank(HttpRequest request) {
+    protected boolean keyIsBlank(HttpRequest request) {
         return StringUtils.isBlank(extractRequestString(request));
     }
 
