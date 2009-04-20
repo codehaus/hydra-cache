@@ -15,16 +15,16 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import java.io.IOException;
+
+import org.apache.http.HttpException;
+import org.hydracache.io.Buffer;
 import org.hydracache.io.Marshaller;
-import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
-import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
-import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jgroups.stack.IpAddress;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ import org.junit.Test;
  * 
  */
 public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
-    HttpPutMethodHandler handler;
+    private HttpPutMethodHandler handler;
 
     @Override
     public void initialize() {
@@ -46,12 +46,6 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     private HttpPutMethodHandler createHandler(
             final VersionFactory versionFactory,
             final Marshaller<Version> versionMarshaller) {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
-
-        DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
-                new MessageMarshallerFactory(versionFactoryMarshaller));
-        DefaultProtocolDecoder messageDecoder = new DefaultProtocolDecoder(
-                new MessageMarshallerFactory(versionMarshaller));
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(
                 versionFactory, dataBank, hashFunction, messageEncoder,
@@ -64,8 +58,13 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     public void ensureLocalVersionConflictDetectionIgnoresNull()
             throws Exception {
         {
-            addNullReturnedFromLocalGetExp(handler.dataBank);
-            addSuccessLocalPutExp(handler.dataBank);
+            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
+            addGetEntityExp(createValidNewMessageInBytes());
+        }
+
+        {
+            addNullReturnedFromLocalGetExp(dataBank);
+            addSuccessLocalPutExp(dataBank);
         }
 
         {
@@ -73,22 +72,33 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
             addSetBinaryDataEntityExp(response);
         }
 
-        DataMessage validNewDataMessage = createValidNewDataMessage();
-
-        handler.processDataMessage(response, testKey, validNewDataMessage);
+        handler.handle(request, response, httpContext);
     }
 
-    private DataMessage createValidNewDataMessage() {
+    private byte[] createValidNewMessageInBytes() throws IOException {
         DataMessage incomingDataMsg = new DataMessage();
         incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
-        return incomingDataMsg;
+        DataMessage message = incomingDataMsg;
+        return encodeMessage(message);
+    }
+
+    private byte[] encodeMessage(DataMessage message) throws IOException {
+        Buffer buffer = Buffer.allocate();
+        messageEncoder.encode(message, buffer.asDataOutpuStream());
+        byte[] bytes = buffer.toByteArray();
+        return bytes;
     }
 
     @Test
     public void ensureLocalVersionConflictDetection() throws Exception {
         {
-            addConflictLocalGetExp(handler.dataBank);
+            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
+            addGetEntityExp(createValidNewMessageInBytes());
+        }
+
+        {
+            addConflictLocalGetExp(dataBank);
         }
 
         {
@@ -96,17 +106,20 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
             addSetStringMessageEntityExp(response);
         }
 
-        DataMessage validNewDataMessage = createValidNewDataMessage();
-
-        handler.processDataMessage(response, testKey, validNewDataMessage);
+        handler.handle(request, response, httpContext);
     }
 
     @Test
     public void ensureNewVersionIsCreatedIfGivenVersionIsNull()
             throws Exception {
         {
-            addNullReturnedFromLocalGetExp(handler.dataBank);
-            addSuccessLocalPutExp(handler.dataBank);
+            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
+            addGetEntityExp(createNullVersionMessageInBytes());
+        }
+
+        {
+            addNullReturnedFromLocalGetExp(dataBank);
+            addSuccessLocalPutExp(dataBank);
         }
 
         {
@@ -114,17 +127,28 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
             addSetBinaryDataEntityExp(response);
         }
 
-        DataMessage nullVersionDataMessage = createValidNewDataMessage();
-        nullVersionDataMessage.setVersion(null);
+        handler.handle(request, response, httpContext);
+    }
 
-        handler.processDataMessage(response, testKey, nullVersionDataMessage);
+    private byte[] createNullVersionMessageInBytes() throws IOException {
+        DataMessage incomingDataMsg = new DataMessage();
+        incomingDataMsg.setBlob(generateRandomBytes());
+        incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
+        DataMessage message = incomingDataMsg;
+        message.setVersion(versionFactoryMarshaller.createNull());
+        return encodeMessage(message);
     }
 
     @Test
     public void ensureStatusOkIsReturnedForUpdate() throws Exception {
         {
-            addSuccessfulLocalGetExp(handler.dataBank);
-            addSuccessLocalPutExp(handler.dataBank);
+            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
+            addGetEntityExp(createValidUpdateDataMessageInBytes());
+        }
+
+        {
+            addSuccessfulLocalGetExp(dataBank);
+            addSuccessLocalPutExp(dataBank);
         }
 
         {
@@ -132,17 +156,25 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
             addSetBinaryDataEntityExp(response);
         }
 
-        DataMessage validUpdateDataMessage = createValidUpdateDataMessage();
-
-        handler.processDataMessage(response, testKey, validUpdateDataMessage);
+        handler.handle(request, response, httpContext);
     }
 
-    private DataMessage createValidUpdateDataMessage() {
+    private byte[] createValidUpdateDataMessageInBytes() throws IOException {
         DataMessage incomingDataMsg = new DataMessage();
         incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory()
                 .create(localId).incrementFor(localId));
-        return incomingDataMsg;
+        DataMessage message = incomingDataMsg;
+        return encodeMessage(message);
+    }
+
+    @Test
+    public void ensureBlankKeyIsRejected() throws HttpException, IOException {
+        {
+            addGetRequestLineExp(request, "/");
+        }
+
+        handler.handle(request, response, httpContext);
     }
 
 }

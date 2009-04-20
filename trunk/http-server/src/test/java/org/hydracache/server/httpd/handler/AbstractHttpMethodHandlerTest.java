@@ -3,6 +3,8 @@ package org.hydracache.server.httpd.handler;
 import java.io.IOException;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -13,6 +15,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -26,16 +31,19 @@ import org.junit.Before;
 
 public class AbstractHttpMethodHandlerTest {
 
+    protected static final String TEST_KEY_REQUEST_CTX = "/testKey";
     protected Mockery context;
     protected HttpResponse response;
     protected IncrementVersionFactory versionFactoryMarshaller;
     protected HashFunction hashFunction = new KetamaBasedHashFunction();
+    protected HarmonyDataBank dataBank;
     protected Long testKey = 1234L;
     protected Identity sourceId = new Identity(70);
     protected Identity localId = new Identity(71);
-    protected HttpRequest request;
+    protected HttpEntityEnclosingRequest request;
     protected HttpContext httpContext;
-        
+    protected DefaultProtocolEncoder messageEncoder;
+    protected DefaultProtocolDecoder messageDecoder;
 
     public AbstractHttpMethodHandlerTest() {
         super();
@@ -50,10 +58,18 @@ public class AbstractHttpMethodHandlerTest {
         };
 
         response = context.mock(HttpResponse.class);
+        request = context.mock(HttpEntityEnclosingRequest.class);
+        httpContext = context.mock(HttpContext.class);
+        dataBank = context.mock(HarmonyDataBank.class);
 
         versionFactoryMarshaller = new IncrementVersionFactory();
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
+
+        messageEncoder = new DefaultProtocolEncoder(
+                new MessageMarshallerFactory(versionFactoryMarshaller));
+        messageDecoder = new DefaultProtocolDecoder(
+                new MessageMarshallerFactory(versionFactoryMarshaller));
     }
 
     @After
@@ -65,7 +81,7 @@ public class AbstractHttpMethodHandlerTest {
             throws IOException {
         context.checking(new Expectations() {
             {
-                atLeast(1).of(dataBank).getLocally(with(testKey));
+                atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
                 will(returnValue(null));
             }
         });
@@ -129,8 +145,8 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addSuccessfulLocalGetExp(
-            final HarmonyDataBank dataBank) throws IOException {
+    protected void addSuccessfulLocalGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
         context.checking(new Expectations() {
             {
                 atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
@@ -149,14 +165,14 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addExecuteExp(final HttpServiceAction mockAction) throws HttpException,
-            IOException {
-                context.checking(new Expectations() {
-                    {
-                        one(mockAction).execute(with(any(HttpResponse.class)));
-                    }
-                });
+    protected void addExecuteExp(final HttpServiceAction mockAction)
+            throws HttpException, IOException {
+        context.checking(new Expectations() {
+            {
+                one(mockAction).execute(with(any(HttpResponse.class)));
             }
+        });
+    }
 
     protected void addGetNameExp(final HttpServiceAction mockAction) {
         context.checking(new Expectations() {
@@ -167,7 +183,8 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addGetRequestLineExp(final HttpRequest request, final String requestContext) {
+    protected void addGetRequestLineExp(final HttpRequest request,
+            final String requestContext) {
         context.checking(new Expectations() {
             {
                 atLeast(1).of(request).getRequestLine();
@@ -185,21 +202,32 @@ public class AbstractHttpMethodHandlerTest {
 
     protected void addSuccessfulReliableGetExp(final HarmonyDataBank dataBank)
             throws IOException {
-                context.checking(new Expectations() {
-                    {
-                        one(dataBank).get(with(any(Long.class)));
-                        Data data = new Data();
-                        data.setVersion(new IncrementVersionFactory().create(sourceId));
-                        will(returnValue(data));
-                    }
-                });
+        context.checking(new Expectations() {
+            {
+                one(dataBank).get(with(any(Long.class)));
+                Data data = new Data();
+                data.setVersion(new IncrementVersionFactory().create(sourceId));
+                will(returnValue(data));
             }
+        });
+    }
 
-    protected void addNotFoundReliableGetExp(final HarmonyDataBank dataBank) throws IOException {
+    protected void addNotFoundReliableGetExp(final HarmonyDataBank dataBank)
+            throws IOException {
         context.checking(new Expectations() {
             {
                 one(dataBank).get(with(any(Long.class)));
                 will(returnValue(null));
+            }
+        });
+    }
+
+    protected void addGetEntityExp(final byte[] entityBytes) throws IOException {
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(request).getEntity();
+                HttpEntity entity = new ByteArrayEntity(entityBytes);
+                will(returnValue(entity));
             }
         });
     }

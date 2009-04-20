@@ -4,29 +4,20 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.protocol.HttpContext;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
-import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jmock.Expectations;
 import org.junit.Test;
 
 public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     private HttpGetMethodHandler handler;
 
-    private HarmonyDataBank dataBank;
-
     @Override
     public void initialize() {
         super.initialize();
-
-        dataBank = context.mock(HarmonyDataBank.class);
-        request = context.mock(HttpEntityEnclosingRequest.class);
-        httpContext = context.mock(HttpContext.class);
 
         createHandler();
     }
