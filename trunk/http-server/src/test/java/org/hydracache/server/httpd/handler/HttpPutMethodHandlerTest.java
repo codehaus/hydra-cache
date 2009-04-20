@@ -15,69 +15,29 @@
  */
 package org.hydracache.server.httpd.handler;
 
-import java.io.IOException;
-
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.StringEntity;
-import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.DataMessage;
-import org.hydracache.server.Identity;
-import org.hydracache.server.IdentityMarshaller;
-import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jgroups.stack.IpAddress;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.lib.legacy.ClassImposteriser;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * @author nzhu
  * 
  */
-public class HttpPutMethodHandlerTest {
-    private Mockery context;
+public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
+    HttpPutMethodHandler handler;
 
-    private HttpResponse response;
-
-    private IncrementVersionFactory versionFactoryMarshaller;
-
-    private HashFunction hashFunction = new KetamaBasedHashFunction();
-
-    private HttpPutMethodHandler handler;
-
-    private Long testKey = 1234L;
-
-    private Identity sourceId = new Identity(70);
-    private Identity localId = new Identity(71);
-
-    @Before
+    @Override
     public void initialize() {
-        context = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
-
-        response = context.mock(HttpResponse.class);
-
-        versionFactoryMarshaller = new IncrementVersionFactory();
-        versionFactoryMarshaller
-                .setIdentityMarshaller(new IdentityMarshaller());
+        super.initialize();
 
         handler = createHandler(versionFactoryMarshaller,
                 versionFactoryMarshaller);
@@ -100,11 +60,6 @@ public class HttpPutMethodHandlerTest {
         return handler;
     }
 
-    @After
-    public void after() {
-        context.assertIsSatisfied();
-    }
-
     @Test
     public void ensureLocalVersionConflictDetectionIgnoresNull()
             throws Exception {
@@ -123,50 +78,11 @@ public class HttpPutMethodHandlerTest {
         handler.processDataMessage(response, testKey, validNewDataMessage);
     }
 
-    private void addNullReturnedFromLocalGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(dataBank).getLocally(with(testKey));
-                will(returnValue(null));
-            }
-        });
-    }
-
-    private void addSuccessLocalPutExp(final HarmonyDataBank dataBank)
-            throws Exception {
-        context.checking(new Expectations() {
-            {
-                one(dataBank).put(with(any(Data.class)));
-            }
-        });
-    }
-
-    private void addSetCreatedStatusCodeExp(final HttpResponse response) {
-        context.checking(new Expectations() {
-            {
-                one(response).setStatusCode(HttpStatus.SC_CREATED);
-            }
-        });
-    }
-
-    private void addSetBinaryDataEntityExp(final HttpResponse response) {
-        context.checking(new Expectations() {
-            {
-                one(response).setEntity(with(any(ByteArrayEntity.class)));
-            }
-        });
-    }
-
     private DataMessage createValidNewDataMessage() {
         DataMessage incomingDataMsg = new DataMessage();
         incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
         return incomingDataMsg;
-    }
-
-    private byte[] generateRandomBytes() {
-        return RandomStringUtils.random(10).getBytes();
     }
 
     @Test
@@ -183,35 +99,6 @@ public class HttpPutMethodHandlerTest {
         DataMessage validNewDataMessage = createValidNewDataMessage();
 
         handler.processDataMessage(response, testKey, validNewDataMessage);
-    }
-
-    private void addConflictLocalGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
-        context.checking(new Expectations() {
-            {
-                one(dataBank).getLocally(with(any(Long.class)));
-                Data data = new Data();
-                data.setVersion(new IncrementVersionFactory().create(sourceId)
-                        .incrementFor(localId));
-                will(returnValue(data));
-            }
-        });
-    }
-
-    private void addSetConflictStatusCodeExp(final HttpResponse response) {
-        context.checking(new Expectations() {
-            {
-                one(response).setStatusCode(HttpStatus.SC_CONFLICT);
-            }
-        });
-    }
-
-    private void addSetStringMessageEntityExp(final HttpResponse response) {
-        context.checking(new Expectations() {
-            {
-                one(response).setEntity(with(any(StringEntity.class)));
-            }
-        });
     }
 
     @Test
@@ -250,32 +137,12 @@ public class HttpPutMethodHandlerTest {
         handler.processDataMessage(response, testKey, validUpdateDataMessage);
     }
 
-    private void addExistingDataReturnedFromLocalGetExp(
-            final HarmonyDataBank dataBank) throws IOException {
-        context.checking(new Expectations() {
-            {
-                atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
-                Data data = new Data();
-                data.setVersion(new IncrementVersionFactory().create(sourceId));
-                will(returnValue(data));
-            }
-        });
-    }
-
     private DataMessage createValidUpdateDataMessage() {
         DataMessage incomingDataMsg = new DataMessage();
         incomingDataMsg.setBlob(generateRandomBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory()
                 .create(localId).incrementFor(localId));
         return incomingDataMsg;
-    }
-
-    private void addSetOkStatusCodeExp(final HttpResponse response) {
-        context.checking(new Expectations() {
-            {
-                one(response).setStatusCode(HttpStatus.SC_OK);
-            }
-        });
     }
 
 }

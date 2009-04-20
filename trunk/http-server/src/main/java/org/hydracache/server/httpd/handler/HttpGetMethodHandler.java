@@ -19,8 +19,11 @@ import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONT
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -44,11 +47,7 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
 public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     private static Logger log = Logger.getLogger(HttpGetMethodHandler.class);
 
-    private HttpGetAction printRegistryAction;
-
-    private HttpGetAction printStorageInfoAction;
-
-    private HttpGetAction storageDumpAction;
+    private Map<String, HttpServiceAction> serviceActionMap;
 
     /**
      * Constructor
@@ -59,16 +58,14 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         super(dataBank, hashFunction, messageEncoder);
     }
 
-    public void setPrintRegistryAction(HttpGetAction getRegistryHandler) {
-        this.printRegistryAction = getRegistryHandler;
-    }
+    public synchronized void setServiceActions(Set<HttpServiceAction> actions) {
+        Map<String, HttpServiceAction> tmpActionMap = new HashMap<String, HttpServiceAction>();
 
-    public void setPrintStorageInfoAction(HttpGetAction printStorageInfoAction) {
-        this.printStorageInfoAction = printStorageInfoAction;
-    }
+        for (HttpServiceAction httpServiceAction : actions) {
+            tmpActionMap.put(httpServiceAction.getName(), httpServiceAction);
+        }
 
-    public void setStorageDumpAction(HttpGetAction storageDumpAction) {
-        this.storageDumpAction = storageDumpAction;
+        serviceActionMap = Collections.unmodifiableMap(tmpActionMap);
     }
 
     /*
@@ -81,24 +78,20 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
+        super.handle(request, response, context);
+        
         String requestContext = extractRequestString(request);
 
-        if (printRegistryAction.getName().equals(requestContext)) {
-            printRegistryAction.execute(response);
-        } else if (printStorageInfoAction.getName().equals(requestContext)) {
-            printStorageInfoAction.execute(response);
-        } else if (storageDumpAction.getName().equals(requestContext)) {
-            storageDumpAction.execute(response);
+        if (serviceActionMap.containsKey(requestContext)) {
+            HttpServiceAction action = serviceActionMap.get(requestContext);
+            action.execute(response);
         } else {
             handleGetData(request, response);
         }
     }
 
-    void handleGetData(HttpRequest request, HttpResponse response)
+    private void handleGetData(HttpRequest request, HttpResponse response)
             throws IOException {
-        if (StringUtils.isBlank(extractRequestString(request)))
-            return;
-
         Long dataKey = extractDataKeyHash(request);
 
         Data data = dataBank.get(dataKey);

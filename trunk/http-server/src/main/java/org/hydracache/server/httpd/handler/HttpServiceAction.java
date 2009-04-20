@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 
-public interface HttpGetAction {
+public interface HttpServiceAction {
 
     public abstract String getName();
 

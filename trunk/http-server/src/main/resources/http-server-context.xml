@@ -61,10 +61,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="harmonyDataBank" />
         <constructor-arg ref="hashFunction" />
         <constructor-arg ref="protocolEncoder" />
-
-        <property name="printRegistryAction" ref="printRegistryAction" />
-        <property name="printStorageInfoAction" ref="printStorageInfoAction" />
-        <property name="storageDumpAction" ref="storageDumpAction" />
+        
+        <property name="serviceActions">
+            <set>
+               <ref bean="printRegistryAction"/>
+               <ref bean="printStorageInfoAction"/>
+               <ref bean="storageDumpAction"/>
+            </set>
+        </property>
     </bean>
 
     <!-- Http Put Method Handlers -->

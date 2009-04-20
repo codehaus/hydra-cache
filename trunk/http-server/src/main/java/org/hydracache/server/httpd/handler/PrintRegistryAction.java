@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * @author nick.zhu
  * 
  */
-public class PrintRegistryAction implements HttpGetAction {
+public class PrintRegistryAction implements HttpServiceAction {
     private static Logger log = Logger.getLogger(PrintRegistryAction.class);
 
     private MembershipRegistry membershipRegistry;

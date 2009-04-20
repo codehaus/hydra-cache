@@ -76,7 +76,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
             return;
         }
 
-        if (keyNotFound(request))
+        if (keyIsBlank(request))
             return;
     }
 
@@ -84,7 +84,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return !(request instanceof HttpEntityEnclosingRequest);
     }
 
-    private boolean keyNotFound(HttpRequest request) {
+    private boolean keyIsBlank(HttpRequest request) {
         return StringUtils.isBlank(extractRequestString(request));
     }
 

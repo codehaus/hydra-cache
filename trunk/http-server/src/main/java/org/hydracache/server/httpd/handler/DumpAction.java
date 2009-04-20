@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * @author nick.zhu
  * 
  */
-public class DumpAction implements HttpGetAction {
+public class DumpAction implements HttpServiceAction {
     private static Logger log = Logger.getLogger(DumpAction.class);
 
     private DataBank internalDataBank;

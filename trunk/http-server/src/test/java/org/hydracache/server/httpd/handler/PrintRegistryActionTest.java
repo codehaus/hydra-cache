@@ -31,7 +31,7 @@ public class PrintRegistryActionTest {
             }
         });
 
-        HttpGetAction command = new PrintRegistryAction(membershipRegistry);
+        HttpServiceAction command = new PrintRegistryAction(membershipRegistry);
         command.execute(response);
 
         context.assertIsSatisfied();

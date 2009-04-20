@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * @author nick.zhu
  * 
  */
-public class PrintStorageInfoAction implements HttpGetAction {
+public class PrintStorageInfoAction implements HttpServiceAction {
     private static Logger log = Logger.getLogger(PrintStorageInfoAction.class);
 
     private DataBank internalDataBank;
