@@ -65,7 +65,10 @@ public class DataMessage {
     }
 
     public void setBlob(byte[] blob) {
-        this.blob = blob.clone();
+        if (blob == null)
+            this.blob = new byte[0];
+        else
+            this.blob = blob.clone();
     }
 
     public short getMessageType() {
