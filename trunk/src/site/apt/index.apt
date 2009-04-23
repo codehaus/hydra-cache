@@ -35,10 +35,10 @@ Welcome to Hydra Cache
         {{{http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html}Amazon's Dynamo}} in Java. 
         Since probably no one can explain Dynamo and its benefits better than 
         Werner Vogels, we will just provide the link to his paper Amazon Dynamo 
-        here if you are interested. In our own words, the ultimate goal of Hydra Cache 
-        is to build a distributed, decentralized and generic data storage/cache 
-        system that, in theory, at least can provide an infinite amount of high 
-        performance and reliable memory for any enterprise application, big or small. 
+        here if you are interested. In our own words, the ultimate goal of Hydra Cache is to build a 
+        distributed, decentralized and generic data storage/cache system that, in theory at least, 
+        can provide vast amount of high performance and reliable distributed memory 
+        for any enterprise application, big or small. 
         Just as the Lernaean Hydra of Greek mythology was nearly impossible to kill, 
         so will be the case for your application. 
 
