@@ -21,13 +21,13 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
+import org.hydracache.protocol.control.message.ControlMessage;
 import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.data.resolver.ArbitraryResolver;
-import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.Space;
@@ -65,13 +65,41 @@ public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
     private Collection<ResponseMessage> responses;
 
     @Test
+    public void ensureUnknowControlMessageDoesNotCauseException()
+            throws Exception {
+        int expectedNumOfResps = 3;
+
+        final Space space = context.mock(Space.class);
+
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
+
+        final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
+                space, membershipRegistry, dataBank, new ArbitraryResolver(),
+                expectedNumOfResps);
+
+        final ControlMessage request = new ControlMessage(NEIGHBOR_SOURCE_ID) {
+            private static final long serialVersionUID = 1L;
+        };
+
+        receiver.receiveFor(request);
+
+        context.assertIsSatisfied();
+    }
+
+    @Test
     public void responseMsgShouldBeMappedToRequest() throws Exception {
         int expectedNumOfResps = 3;
 
+        final Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+        }
+
+        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
+
         final MultiplexMessageReceiver receiver = new MultiplexMessageReceiver(
-                mockSpaceToRespond(context), membershipRegistry,
-                mockDataBankToGetAndPut(context, TestDataGenerator
-                        .createRandomData()), new ArbitraryResolver(),
+                space, membershipRegistry, dataBank, new ArbitraryResolver(),
                 expectedNumOfResps);
 
         final PutOperation request = new PutOperation(NEIGHBOR_SOURCE_ID,
@@ -91,6 +119,8 @@ public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
         assertNotNull("Resonse should not be null", responses);
         assertEquals("Response size is incorrect", expectedNumOfResps,
                 responses.size());
+
+        context.assertIsSatisfied();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -131,8 +161,9 @@ public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
         context.assertIsSatisfied();
     }
 
-    private static void receiveResponse(final MultiplexMessageReceiver receiver,
-            final PutOperation request) throws Exception {
+    private static void receiveResponse(
+            final MultiplexMessageReceiver receiver, final PutOperation request)
+            throws Exception {
         ResponseMessage response = new PutOperationResponse(NEIGHBOR_SOURCE_ID,
                 request.getId());
         Message responseMsg = new Message();
@@ -140,26 +171,6 @@ public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
         responseMsg.setObject(response);
 
         receiver.receive(responseMsg);
-    }
-
-    private static Space mockSpaceToRespond(Mockery context) throws Exception {
-        final Space space = context.mock(Space.class);
-        {
-            addGetPositiveSubstanceSetExp(context, space);
-            addGetLocalNodeExp(context, space);
-            addBroadcastResponseExp(context, space);
-        }
-        return space;
-    }
-
-    private static HarmonyDataBank mockDataBankToGetAndPut(Mockery context,
-            Data testData) throws Exception {
-        final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
-        {
-            addLocalPutExp(context, dataBank);
-            addLocalGetExp(context, dataBank, testData);
-        }
-        return dataBank;
     }
 
 }

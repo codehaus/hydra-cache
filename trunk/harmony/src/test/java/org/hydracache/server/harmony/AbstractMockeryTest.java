@@ -38,14 +38,14 @@ public class AbstractMockeryTest {
             final Space space) throws Exception {
         context.checking(new Expectations() {
             {
-                atLeast(0).of(space).findSubstancesForLocalNode();
+                atMost(1).of(space).findSubstancesForLocalNode();
 
                 final SubstanceSet substanceSet = context
                         .mock(SubstanceSet.class);
 
                 context.checking(new Expectations() {
                     {
-                        atLeast(0).of(substanceSet).isNeighbor(
+                        atMost(1).of(substanceSet).isNeighbor(
                                 with(any(Identity.class)));
                         will(returnValue(true));
                     }

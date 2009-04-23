@@ -16,6 +16,9 @@
 package org.hydracache.server.harmony.jgroups;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.Validate;
@@ -61,13 +64,7 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
 
     private final int expectedResponses;
 
-    private final ControlMessageHandler putOperationHandler;
-
-    private final ControlMessageHandler getOperationHandler;
-
-    private final ControlMessageHandler responseHandler;
-
-    private final HeartBeatHandler heartBeatHandler;
+    private final Map<Class<?>, ControlMessageHandler> messageHandlerMap;
 
     public MultiplexMessageReceiver(Space space,
             JgroupsMembershipRegistry membershipRegistry,
@@ -77,12 +74,28 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
         this.membershipListener = new JgroupsMembershipListener(
                 membershipRegistry);
         this.expectedResponses = expectedResponses;
-        this.putOperationHandler = new PutOperationHandler(space,
-                membershipRegistry, harmonyDataBank, conflictResolver);
-        this.getOperationHandler = new GetOperationHandler(space,
-                membershipRegistry, harmonyDataBank);
-        this.responseHandler = new ResponseHandler(requestRegistry);
-        this.heartBeatHandler = new HeartBeatHandler(membershipRegistry);
+
+        Map<Class<?>, ControlMessageHandler> tmpHandlerMap = contructControlMessageHandlerMap(
+                space, membershipRegistry, harmonyDataBank, conflictResolver);
+
+        messageHandlerMap = Collections.unmodifiableMap(tmpHandlerMap);
+    }
+
+    private Map<Class<?>, ControlMessageHandler> contructControlMessageHandlerMap(
+            Space space, JgroupsMembershipRegistry membershipRegistry,
+            HarmonyDataBank harmonyDataBank, ConflictResolver conflictResolver) {
+        Map<Class<?>, ControlMessageHandler> tmpHandlerMap = new HashMap<Class<?>, ControlMessageHandler>();
+
+        tmpHandlerMap.put(GetOperation.class, new GetOperationHandler(space,
+                membershipRegistry, harmonyDataBank));
+        tmpHandlerMap.put(ResponseMessage.class, new ResponseHandler(
+                requestRegistry));
+        tmpHandlerMap.put(PutOperation.class, new PutOperationHandler(space,
+                membershipRegistry, harmonyDataBank, conflictResolver));
+        tmpHandlerMap.put(HeartBeat.class, new HeartBeatHandler(
+                membershipRegistry));
+
+        return tmpHandlerMap;
     }
 
     /*
@@ -111,28 +124,23 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
             return;
 
         try {
-            if (controlMessage instanceof ResponseMessage) {
-                responseHandler.handle(controlMessage);
-                return;
+            ControlMessageHandler handler = null;
+            
+            // consider the message handler map is relatively small
+            // this simple implementation is probably sufficiently fast
+            for (Class<?> clazz : messageHandlerMap.keySet()) {
+                if (clazz.isInstance(controlMessage)) {
+                    handler = messageHandlerMap.get(clazz);
+                    break;
+                }
             }
 
-            if (controlMessage instanceof GetOperation) {
-                getOperationHandler.handle(controlMessage);
-                return;
+            if (handler != null) {
+                handler.handle(controlMessage);
+            } else {
+                log.warn("Ignoring unsupported control message received: "
+                        + controlMessage);
             }
-
-            if (controlMessage instanceof PutOperation) {
-                putOperationHandler.handle(controlMessage);
-                return;
-            }
-
-            if (controlMessage instanceof HeartBeat) {
-                heartBeatHandler.handle(controlMessage);
-                return;
-            }
-
-            log.warn("Ignoring unsupported control message received: "
-                    + controlMessage);
         } catch (Exception ex) {
             log.error("Failed to handle message: " + controlMessage, ex);
         }
