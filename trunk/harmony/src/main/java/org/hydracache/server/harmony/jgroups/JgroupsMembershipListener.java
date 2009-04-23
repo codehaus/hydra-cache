@@ -23,7 +23,15 @@ public class JgroupsMembershipListener implements MembershipListener {
      */
     @Override
     public void block() {
-        log.debug("Block message received");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jgroups.MembershipListener#viewAccepted(org.jgroups.View)
+     */
+    @Override
+    public void viewAccepted(View newView) {
     }
 
     /*
@@ -36,17 +44,6 @@ public class JgroupsMembershipListener implements MembershipListener {
         log.info("New suspect member [" + suspectedMember + "] received");
 
         membershipRegistry.deregisterByJgroupAddress(suspectedMember);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jgroups.MembershipListener#viewAccepted(org.jgroups.View)
-     */
-    @Override
-    public void viewAccepted(View newView) {
-        if (log.isDebugEnabled())
-            log.debug("New view receive: " + newView);
     }
 
 }
