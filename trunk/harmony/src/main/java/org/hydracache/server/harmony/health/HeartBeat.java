@@ -1,5 +1,6 @@
-package org.hydracache.protocol.control.message;
+package org.hydracache.server.harmony.health;
 
+import org.hydracache.protocol.control.message.RequestMessage;
 import org.hydracache.server.harmony.core.Node;
 
 public class HeartBeat extends RequestMessage {

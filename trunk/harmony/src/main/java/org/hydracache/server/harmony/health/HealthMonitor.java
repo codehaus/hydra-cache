@@ -1,4 +1,4 @@
-package org.hydracache.server.harmony.core;
+package org.hydracache.server.harmony.health;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
-import org.hydracache.protocol.control.message.HeartBeat;
+import org.hydracache.server.harmony.core.Space;
 import org.springframework.context.Lifecycle;
 
 public class HealthMonitor implements Lifecycle {

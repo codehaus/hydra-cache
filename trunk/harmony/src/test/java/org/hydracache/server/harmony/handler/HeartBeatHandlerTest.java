@@ -3,9 +3,9 @@ package org.hydracache.server.harmony.handler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.core.Node;
+import org.hydracache.server.harmony.health.HeartBeat;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.jgroups.JgroupsMembershipRegistry;
 import org.jgroups.stack.IpAddress;

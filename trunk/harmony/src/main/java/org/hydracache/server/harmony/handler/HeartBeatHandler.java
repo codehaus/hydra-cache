@@ -2,7 +2,7 @@ package org.hydracache.server.harmony.handler;
 
 import org.apache.commons.lang.Validate;
 import org.hydracache.protocol.control.message.ControlMessage;
-import org.hydracache.protocol.control.message.HeartBeat;
+import org.hydracache.server.harmony.health.HeartBeat;
 import org.hydracache.server.harmony.membership.MembershipRegistry;
 
 public class HeartBeatHandler implements ControlMessageHandler {

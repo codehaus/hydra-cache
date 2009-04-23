@@ -1,10 +1,12 @@
-package org.hydracache.server.harmony.core;
+package org.hydracache.server.harmony.health;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.server.Identity;
+import org.hydracache.server.harmony.core.Node;
+import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.health.HealthMonitor;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.jgroups.stack.IpAddress;
 import org.jmock.Expectations;

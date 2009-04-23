@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.concurrent.Future;
 
 import org.hydracache.protocol.control.message.ControlMessage;
-import org.hydracache.protocol.control.message.HeartBeat;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.PutOperationResponse;
 import org.hydracache.protocol.control.message.ResponseMessage;
@@ -31,6 +30,7 @@ import org.hydracache.server.data.resolver.ArbitraryResolver;
 import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.Space;
+import org.hydracache.server.harmony.health.HeartBeat;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jgroups.Message;

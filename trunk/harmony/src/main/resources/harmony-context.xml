@@ -75,7 +75,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg value="${hop.N}" />
     </bean>
     
-    <bean id="healthMonitor" class="org.hydracache.server.harmony.core.HealthMonitor">
+    <bean id="healthMonitor" class="org.hydracache.server.harmony.health.HealthMonitor">
         <constructor-arg ref="space" />
         <constructor-arg value="${hop.heartBeatInterval}" />
         <constructor-arg>
