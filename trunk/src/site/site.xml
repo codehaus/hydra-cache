@@ -11,9 +11,9 @@
 
         <body>
                 <links>
-                        <item name="HydraCache.org" href="http://www.hydracache.org/"/>
-                        <item name="User Wiki" href="http://hydracache.org/project/wiki/UserWiki"/>
-                        <item name="Developer Wiki" href="http://hydracache.org/project/wiki/DeveloperWiki"/>
+                        <item name="HydraCache.org" href="http://www.hydracache.org"/>
+                        <item name="User Wiki" href="http://www.hydracache.org/project/wiki/UserWiki"/>
+                        <item name="Developer Wiki" href="http://www.hydracache.org/project/wiki/DeveloperWiki"/>
                         <item name="Codehaus Project Page" href="http://xircles.codehaus.org/projects/hydra-cache"/>
                 </links>
                 
