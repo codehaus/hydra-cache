@@ -135,7 +135,7 @@ public class AbstractMockeryTest {
         });
     }
 
-    protected static void addGetNullExp(final Mockery context, final Data data,
+    protected static void addEmptyReliableGetExp(final Mockery context, final Data data,
             final Space space) throws Exception {
         context.checking(new Expectations() {
             {

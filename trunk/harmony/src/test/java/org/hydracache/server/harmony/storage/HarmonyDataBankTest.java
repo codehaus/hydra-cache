@@ -28,6 +28,8 @@ import org.hydracache.server.harmony.AbstractMockeryTest;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.test.TestDataGenerator;
 import org.jmock.Mockery;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,16 +38,26 @@ import org.junit.Test;
  */
 public class HarmonyDataBankTest extends AbstractMockeryTest {
 
-    private Mockery context = new Mockery();
+    private Mockery context;
 
     private ConflictResolver conflictResolver = new ArbitraryResolver();
 
     private DataBank localDataBank = new EhcacheDataBank(conflictResolver);
     
+    @Before
+    public void setup(){
+        context = new Mockery();
+    }
+    
+    @After
+    public void teardown(){
+        context.assertIsSatisfied();
+    }
+
     @Test
     public void ensureNegativeWorRCanBeHandledAsOne() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         Space space = context.mock(Space.class);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
@@ -53,19 +65,17 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         dataBank.setExpectedWrites(-5);
         dataBank.setExpectedReads(-5);
-        
+
         dataBank.put(data);
 
         assertEquals("Data is incorrect with R, W=-5 put and get operations",
                 data, dataBank.get(data.getKeyHash()));
-        
-        context.assertIsSatisfied();
     }
-    
+
     @Test
     public void ensureZeroWorRCanBeHandledAsOne() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         Space space = context.mock(Space.class);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
@@ -73,38 +83,34 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         dataBank.setExpectedWrites(0);
         dataBank.setExpectedReads(0);
-        
+
         dataBank.put(data);
 
         assertEquals("Data is incorrect with R, W=0 put and get operations",
                 data, dataBank.get(data.getKeyHash()));
-        
-        context.assertIsSatisfied();
     }
-    
+
     @Test
     public void ensureDataBankCanBeConfiguredToWriteLocally() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         Space space = context.mock(Space.class);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
                 conflictResolver, space);
 
         dataBank.setExpectedWrites(1);
-        
+
         dataBank.put(data);
 
-        assertEquals("Data is incorrect with W=1 put and get operations",
-                data, dataBank.getLocally(data.getKeyHash()));
-        
-        context.assertIsSatisfied();
+        assertEquals("Data is incorrect with W=1 put and get operations", data,
+                dataBank.getLocally(data.getKeyHash()));
     }
 
     @Test
     public void ensureDataBankCanBeConfiguredToReadLocally() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         Space space = context.mock(Space.class);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
@@ -113,16 +119,14 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         dataBank.putLocally(data);
         dataBank.setExpectedReads(1);
 
-        assertEquals("Data is incorrect with R=1 put and get operations",
-                data, dataBank.get(data.getKeyHash()));
-        
-        context.assertIsSatisfied();
+        assertEquals("Data is incorrect with R=1 put and get operations", data,
+                dataBank.get(data.getKeyHash()));
     }
 
     @Test
     public void ensurePassThroughLocalPutAndGet() throws Exception {
         final Data data = TestDataGenerator.createRandomData();
-        
+
         Space space = context.mock(Space.class);
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
@@ -142,13 +146,33 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         {
             addGetLocalNodeExp(context, space);
-            addGetNullExp(context, data, space);
+            addEmptyReliableGetExp(context, data, space);
         }
 
         HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
                 conflictResolver, space);
 
         assertNull("Should return null", dataBank.get(1000L));
+    }
+
+    @Test
+    public void ensureEmptyLocalBankShouldBroadcaseWhenRIs1() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+            addSuccessReliableGetExp(context, data, space);
+        }
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+        dataBank.setExpectedReads(1);
+
+        Data receivedData = dataBank.get(testHashKey);
+
+        assertEquals("Data returned by GET is incorrect", data, receivedData);
     }
 
     @Test(expected = ReliableDataStorageException.class)
@@ -189,8 +213,6 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         assertEquals("Data returned by GET is incorrect", data, receivedData);
 
-        context.assertIsSatisfied();
-
         assertEquals(
                 "Data bank should have updated its local cache after a reliable GET",
                 receivedData, dataBank.getLocally(receivedData.getKeyHash()));
@@ -214,8 +236,6 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         assertEquals("Data should exist in local bank", data, localDataBank
                 .get(data.getKeyHash()));
-
-        context.assertIsSatisfied();
     }
 
     @Test(expected = ReliableDataStorageException.class)
