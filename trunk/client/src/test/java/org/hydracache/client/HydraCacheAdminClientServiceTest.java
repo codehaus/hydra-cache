@@ -20,30 +20,35 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.client.transport.Transport;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
+import org.hydracache.server.harmony.core.SubstancePartition;
 import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * @author Tan Quach
  * @since 1.0
  */
 public class HydraCacheAdminClientServiceTest {
-    private HydraCacheAdminClientService service;
+    private HydraCacheAdminClient service;
     private Mockery context;
     private Transport transport;
 
     @Before
     public void beforeTestMethods() throws Exception {
         this.transport = this.context.mock(Transport.class);
-        this.service = new HydraCacheAdminClientService(transport);
+        this.service = new PartitionAwareClient(new SubstancePartition(new KetamaBasedHashFunction(), Collections.emptyList()));
     }
     
     @Test
     public void shouldReturnEmptyListWhenCurrentPartitionIsNull() throws Exception {
-        List<Identity> nodes = this.service.listNodes(null);
+        List<Identity> nodes = this.service.listNodes();
         assertNotNull(nodes);
         assertTrue(nodes.isEmpty());
     }
