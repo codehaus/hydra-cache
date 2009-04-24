@@ -30,7 +30,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </property>
         <property name="url" value="jdbc:hsqldb:mem:npath" />
         <property name="username" value="sa" />
-        <property name="password" value="hydra" />
+        <property name="password" value="" />
     </bean>
 
     <!-- Session factory for Test Kit -->
