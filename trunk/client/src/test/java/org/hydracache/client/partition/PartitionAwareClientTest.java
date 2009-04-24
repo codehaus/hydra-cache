@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hydracache.client;
+package org.hydracache.client.partition;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.List;
 
+import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.client.transport.Transport;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
@@ -35,13 +38,15 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author Tan Quach
  * @since 1.0
  */
-public class HydraCacheAdminClientServiceTest {
+public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
     private Mockery context;
     private Transport transport;
 
     @Before
     public void beforeTestMethods() throws Exception {
+        this.context = new Mockery(); 
+       
         this.transport = this.context.mock(Transport.class);
         this.service = new PartitionAwareClient(new SubstancePartition(new KetamaBasedHashFunction(), Collections.emptyList()));
     }
