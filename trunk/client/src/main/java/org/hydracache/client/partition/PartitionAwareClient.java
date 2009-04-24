@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -48,9 +49,6 @@ import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
-import org.hydracache.server.harmony.core.Substance;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Manages a partition of nodes and uses an implementation of HydraCacheClient

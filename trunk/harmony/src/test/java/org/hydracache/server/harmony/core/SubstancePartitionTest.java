@@ -23,6 +23,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
+import org.hydracache.server.harmony.util.TestUtils;
 import org.jgroups.stack.IpAddress;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +47,12 @@ public class SubstancePartitionTest {
 
     @Before
     public void setup() throws Exception {
-        nodeA = new JGroupsNode(new Identity(80), new IpAddress(800));
-        nodeB = new JGroupsNode(new Identity(81), new IpAddress(810));
-        nodeC = new JGroupsNode(new Identity(82), new IpAddress(820));
+        nodeA = new JGroupsNode(new Identity(TestUtils.getStableLocalAddress(),
+                80), new IpAddress(800));
+        nodeB = new JGroupsNode(new Identity(TestUtils.getStableLocalAddress(),
+                81), new IpAddress(810));
+        nodeC = new JGroupsNode(new Identity(TestUtils.getStableLocalAddress(),
+                82), new IpAddress(820));
 
         serverIds = Arrays.asList(new Identity[] { nodeA.getId(),
                 nodeB.getId(), nodeC.getId() });
