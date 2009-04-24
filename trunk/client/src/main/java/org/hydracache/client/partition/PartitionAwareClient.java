@@ -19,12 +19,16 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
+import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.HydraCacheClient;
 import org.hydracache.client.transport.ConflictStatusHandler;
 import org.hydracache.client.transport.DefaultResponseMessageHandler;
@@ -44,6 +48,9 @@ import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.harmony.core.Substance;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Manages a partition of nodes and uses an implementation of HydraCacheClient
@@ -52,7 +59,7 @@ import org.hydracache.server.data.versioning.Version;
  * @author Tan Quach
  * @since 1.0
  */
-public class PartitionAwareClient implements HydraCacheClient, PartitionUpdatesListener {
+public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminClient, Observer {
     private static Logger log = Logger.getLogger(PartitionAwareClient.class);
 
     private static final String PUT = "put";
@@ -85,6 +92,10 @@ public class PartitionAwareClient implements HydraCacheClient, PartitionUpdatesL
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
         protocolEncoder = new DefaultProtocolEncoder(new MessageMarshallerFactory(versionFactory));
         protocolDecoder = new DefaultProtocolDecoder(new MessageMarshallerFactory(versionFactory));
+        
+        // Register listeners for partition updates
+        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(this, this);
+        poller.start();
     }
 
     /*
@@ -136,13 +147,29 @@ public class PartitionAwareClient implements HydraCacheClient, PartitionUpdatesL
     }
 
     /* (non-Javadoc)
-     * @see org.hydracache.client.http.PartitionUpdatesListener#update(java.lang.Object)
+     * @see org.hydracache.client.HydraCacheAdminClient#listNodes()
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public void update(Object updateEvent) {
-        // this.nodePartition = updateEvent
+    public List<Identity> listNodes() {
+        log.info("Retrieving list of nodes.");
+        // Pick a random node to connect to
+//        Identity identity = nodePartition.get(rand);
+//        transport.establishConnection(hostName, port)
+        return Collections.emptyList();
     }
 
+    /* (non-Javadoc)
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        log.info("Updating node partition");
+        // Update the partition
+//        this.nodePartition.removeAll();
+//        this.nodePartition.addAll(partition);
+    }
+    
     /**
      * @param key
      * @param data

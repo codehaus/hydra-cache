@@ -46,5 +46,11 @@ public interface Transport {
      */
     void cleanUpConnection();
 
+    /**
+     * Register an appropriate response message handler. 
+     * 
+     * @param statusCode The status code to react to for this handler
+     * @param handler Performs any checks or actions upon receiving this status code
+     */
     void registerHandler(Integer statusCode, ResponseMessageHandler handler);
 }

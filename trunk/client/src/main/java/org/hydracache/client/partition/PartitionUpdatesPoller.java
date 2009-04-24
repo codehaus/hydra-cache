@@ -15,6 +15,12 @@
  */
 package org.hydracache.client.partition;
 
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+import org.hydracache.client.HydraCacheAdminClient;
+import org.hydracache.server.Identity;
 
 /**
  * Periodically polls the server for updates to the server partition nodes.
@@ -24,12 +30,37 @@ package org.hydracache.client.partition;
  */
 public class PartitionUpdatesPoller extends Thread {
 
-    /* (non-Javadoc)
+    private HydraCacheAdminClient adminClient;
+    private Observable obs;
+
+    /**
+     * Provide a reference to an admin client and at least one observer.
+     * 
+     * @param adminClient The admin client to perform the refresh
+     * @param listener The observer required to be notified upon update
+     * @param listeners Any other observers interested 
+     */
+    public PartitionUpdatesPoller(HydraCacheAdminClient adminClient, Observer listener, Observer... listeners) {
+        this.adminClient = adminClient;
+        
+        this.obs = new Observable();
+        this.obs.addObserver(listener);
+        
+        if (listeners != null)
+            for (Observer observer : listeners) {
+                this.obs.addObserver(observer);
+            }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Thread#run()
      */
     @Override
     public void run() {
-//        client.refreshNodeList()
+        List<Identity> list = adminClient.listNodes();
+        obs.notifyObservers(list);
     }
 
 }

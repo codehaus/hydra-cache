@@ -15,12 +15,21 @@
  */
 package org.hydracache.client.transport;
 
-import java.io.InputStream;
-
 /**
+ * Encapsulates the logic needed to deal with the response handling from
+ * transport requests.
+ * 
  * @author Tan Quach
  * @since 1.0
  */
 public interface ResponseMessageHandler {
+    /**
+     * Performs any actions based on the the response body and response code.
+     * 
+     * @param responseCode An HTTP response code
+     * @param responseBody The data contained in the response
+     * @return A custom message data structure properly constructed 
+     * @throws Exception If there is a problem with the response.
+     */
     public ResponseMessage accept(int responseCode, byte[] responseBody) throws Exception;
 }
