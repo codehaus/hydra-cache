@@ -10,6 +10,33 @@
     <name>Hydra Test Kit</name>
     <description>Hydra Cache performance and stability test kit</description>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/assembly</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>
+                            ${pom.basedir}/src/main/assembly/descriptor.xml
+                        </descriptor>
+                    </descriptors>
+                    <finalName>hydra-test-kit-${version}</finalName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- INTERNAL DEPENDENCIES -->
         <dependency>
