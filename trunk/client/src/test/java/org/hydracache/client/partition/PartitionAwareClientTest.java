@@ -18,21 +18,15 @@ package org.hydracache.client.partition;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.List;
 
 import org.hydracache.client.HydraCacheAdminClient;
-import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.client.transport.Transport;
-import org.hydracache.data.hashing.KetamaBasedHashFunction;
+import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.Identity;
-import org.hydracache.server.harmony.core.SubstancePartition;
 import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * @author Tan Quach
@@ -42,13 +36,16 @@ public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
     private Mockery context;
     private Transport transport;
+    private NodePartition<Identity> partition;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void beforeTestMethods() throws Exception {
         this.context = new Mockery(); 
+        this.partition = this.context.mock(NodePartition.class);
        
         this.transport = this.context.mock(Transport.class);
-        this.service = new PartitionAwareClient(new SubstancePartition(new KetamaBasedHashFunction(), Collections.emptyList()));
+        this.service = new PartitionAwareClient(partition);
     }
     
     @Test
