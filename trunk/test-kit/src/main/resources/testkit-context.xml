@@ -40,7 +40,11 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="dataSource" />
         </property>
         <property name="annotatedClasses">
-            <list></list>
+            <list>
+                <value>
+                    org.hydracache.testkit.model.TestPod
+                </value>
+            </list>
         </property>
         <property name="hibernateProperties">
             <props>
