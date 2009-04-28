@@ -1,5 +1,7 @@
 package org.hydracache.testkit.model;
 
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTemplate;
@@ -21,6 +23,11 @@ public class TestPodDao {
 
     public TestPod get(long id) {
         return (TestPod) hibernateTemplate.get(TestPod.class, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<TestPod> findAll() {
+        return hibernateTemplate.loadAll(TestPod.class);
     }
 
 }
