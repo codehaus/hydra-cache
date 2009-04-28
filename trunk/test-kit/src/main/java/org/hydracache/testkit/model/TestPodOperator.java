@@ -8,7 +8,7 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class TestPodDao {
+public class TestPodOperator {
 
     private HibernateTemplate hibernateTemplate;
 

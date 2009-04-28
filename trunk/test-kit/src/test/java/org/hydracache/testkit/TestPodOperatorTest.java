@@ -7,14 +7,14 @@ import java.util.Collection;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.hydracache.testkit.model.TestPod;
-import org.hydracache.testkit.model.TestPodDao;
+import org.hydracache.testkit.model.TestPodOperator;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TestPodDaoTest extends AbstractSpringTestCase {
+public class TestPodOperatorTest extends AbstractSpringTestCase {
 
     @Autowired
-    private TestPodDao testPodDao;
+    private TestPodOperator testPodDao;
 
     @Test
     public void ensureCreationIsCorrect() {
