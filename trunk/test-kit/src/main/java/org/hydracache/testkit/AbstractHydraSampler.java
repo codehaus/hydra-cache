@@ -27,8 +27,6 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
 
     private static final String IP = "ip";
 
-    protected static final int SAMPLE_SIZE = 1000;
-
     private static final String SEED_SERVER_LIST = "seedServerList";
 
     protected static final String LOCALHOST = "localhost";

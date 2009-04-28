@@ -1,5 +1,7 @@
 package org.hydracache.testkit.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Version;
@@ -9,7 +11,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 @Entity
-public class TestPod {
+public class TestPod implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     private long id;
 
