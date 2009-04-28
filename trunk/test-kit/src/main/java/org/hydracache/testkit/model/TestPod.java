@@ -1,8 +1,6 @@
 package org.hydracache.testkit.model;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
@@ -13,13 +11,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @Entity
 public class TestPod {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     private String description;
     private boolean enabled;
-    private double volume;
-    private double weight;
+    private int numberOfActivation;
 
     @Version
     private int optLock;
@@ -48,20 +44,12 @@ public class TestPod {
         this.enabled = enabled;
     }
 
-    public double getVolume() {
-        return volume;
+    public int getNumberOfActivation() {
+        return numberOfActivation;
     }
 
-    public void setVolume(double volume) {
-        this.volume = volume;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(double weight) {
-        this.weight = weight;
+    public void setNumberOfActivation(int numberOfActivation) {
+        this.numberOfActivation = numberOfActivation;
     }
 
     public int getOptLock() {
