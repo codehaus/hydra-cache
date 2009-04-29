@@ -21,13 +21,13 @@ import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
-import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,8 @@ import org.junit.Test;
  * 
  */
 public class BasicPutAndGetIntegrationTest {
-    private static Logger log = Logger.getLogger(BasicPutAndGetIntegrationTest.class);
+    private static Logger log = Logger
+            .getLogger(BasicPutAndGetIntegrationTest.class);
 
     private static final int PORT_NUMBER = 8080;
 
@@ -67,7 +68,7 @@ public class BasicPutAndGetIntegrationTest {
 
         stopwatch.start();
 
-        assertPutAndGet();
+        assertPutAndGet(createRandomKey());
 
         stopwatch.stop();
 
@@ -83,8 +84,10 @@ public class BasicPutAndGetIntegrationTest {
 
         int numberOfTests = 100;
 
+        String testKey = createRandomKey();
+
         for (int i = 0; i < numberOfTests; i++) {
-            assertPutAndGet();
+            assertPutAndGet(testKey);
         }
 
         stopwatch.stop();
@@ -93,26 +96,15 @@ public class BasicPutAndGetIntegrationTest {
                 + numberOfTests + " put and get pairs");
     }
 
-    private void assertPutAndGet() throws Exception {
-        String randomKey = createRandomKey();
+    private void assertPutAndGet(String testKey) throws Exception {
+        String data = RandomStringUtils.randomAlphanumeric(RandomUtils
+                .nextInt(500));
 
-        Data data = createRandomDataSample(randomKey);
+        client.put(testKey, data);
 
-        client.put(randomKey, data);
-
-        Object retrievedData = client.get(randomKey);
+        Object retrievedData = client.get(testKey);
 
         assertEquals("Retrieved data is incorrect", data, retrievedData);
-    }
-
-    private Data createRandomDataSample(String randomKey) {
-        Data data = new Data();
-
-        data.setKeyHash((long) randomKey.hashCode());
-        data.setVersion(versionFactory.create(serverId));
-        data.setContent(RandomStringUtils.randomAlphanumeric(200).getBytes());
-
-        return data;
     }
 
     private String createRandomKey() {
