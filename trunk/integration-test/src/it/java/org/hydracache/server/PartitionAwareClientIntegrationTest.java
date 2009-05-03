@@ -51,22 +51,16 @@ public class PartitionAwareClientIntegrationTest extends
 
     private PartitionAwareClient client;
 
-    private NodePartition<Identity> partition;
-
     private Map<String, String> localDataStorage;
 
     @Before
     public void setup() throws Exception {
         versionFactory.setIdentityMarshaller(new IdentityMarshaller());
-
-        partition = new ConsistentHashNodePartition<Identity>(
-                new KetamaBasedHashFunction(), Arrays.asList(
-                        new Identity(InetAddress.getByName(SERVER_NAME), 8080),
-                        new Identity(InetAddress.getByName(SERVER_NAME), 8081),
-                        new Identity(InetAddress.getByName(SERVER_NAME), 8082),
-                        new Identity(InetAddress.getByName(SERVER_NAME), 8083)));
-
-        client = new PartitionAwareClient(partition);
+        client = new PartitionAwareClient(Arrays.asList(
+                new Identity(InetAddress.getByName(SERVER_NAME), 8080),
+                new Identity(InetAddress.getByName(SERVER_NAME), 8081),
+                new Identity(InetAddress.getByName(SERVER_NAME), 8082),
+                new Identity(InetAddress.getByName(SERVER_NAME), 8083)));
 
         localDataStorage = new HashMap<String, String>();
     }

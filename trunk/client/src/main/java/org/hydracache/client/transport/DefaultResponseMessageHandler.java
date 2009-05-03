@@ -32,7 +32,7 @@ public class DefaultResponseMessageHandler implements ResponseMessageHandler {
         if (responseCode == HttpStatus.SC_OK ||
                 responseCode == HttpStatus.SC_CREATED)
         {
-            responseMessage = new ResponseMessage();
+            responseMessage = new ResponseMessage(true);
             responseMessage.setResponseBody(responseBody);
         }
         return responseMessage;

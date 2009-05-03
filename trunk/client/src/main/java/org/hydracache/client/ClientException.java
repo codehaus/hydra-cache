@@ -15,23 +15,28 @@
  */
 package org.hydracache.client;
 
-import java.util.List;
-
-import org.hydracache.server.Identity;
-
 /**
- * Manages administration calls to the server.
+ * Specific runtime exception class for client side errors.
  * 
  * @author Tan Quach
  * @since 1.0
  */
-public interface HydraCacheAdminClient {
+public class ClientException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
-    /**
-     * Retrieve a list of all known nodes in the space.
-     * 
-     * @return a list of Identity objects identifying all known nodes in the cache.
-     * @throws Exception 
-     */
-    List<Identity> listNodes() throws Exception;
+    public ClientException() {
+        super();
+    }
+
+    public ClientException(String arg0, Throwable arg1) {
+        super(arg0, arg1);
+    }
+
+    public ClientException(String arg0) {
+        super(arg0);
+    }
+
+    public ClientException(Throwable arg0) {
+        super(arg0);
+    }
 }

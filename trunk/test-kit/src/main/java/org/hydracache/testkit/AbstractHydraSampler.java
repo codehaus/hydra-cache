@@ -81,16 +81,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
     }
 
     protected PartitionAwareClient createHydraClient() {
-        IncrementVersionFactory versionFactory = new IncrementVersionFactory();
-
-        versionFactory.setIdentityMarshaller(new IdentityMarshaller());
-
-        NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
-                new KetamaBasedHashFunction(), seedServerIds);
-
-        PartitionAwareClient client = new PartitionAwareClient(partition);
-
-        return client;
+        return new PartitionAwareClient(seedServerIds);
     }
 
     @Override

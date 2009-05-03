@@ -56,10 +56,7 @@ public class BasicPutAndGetIntegrationTest {
 
         serverId = new Identity(InetAddress.getByName(SERVER_NAME), PORT_NUMBER);
 
-        NodePartition<Identity> partition = new ConsistentHashNodePartition<Identity>(
-                new KetamaBasedHashFunction(), Arrays.asList(serverId));
-
-        client = new PartitionAwareClient(partition);
+        client = new PartitionAwareClient(Arrays.asList(serverId));
     }
 
     @Test

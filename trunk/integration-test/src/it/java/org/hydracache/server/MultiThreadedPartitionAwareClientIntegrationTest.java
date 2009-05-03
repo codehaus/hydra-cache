@@ -74,23 +74,18 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
         private final CountDownLatch doneLatch;
         private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
         private PartitionAwareClient client;
-        private NodePartition<Identity> partition;
 
         private TesterThread(CountDownLatch doneLatch) throws Exception {
             this.doneLatch = doneLatch;
 
             versionFactory.setIdentityMarshaller(new IdentityMarshaller());
-
-            partition = new ConsistentHashNodePartition<Identity>(
-                    new KetamaBasedHashFunction(), Arrays.asList(new Identity(
-                            InetAddress.getByName(SERVER_NAME), 8080),
-                            new Identity(InetAddress.getByName(SERVER_NAME),
-                                    8081), new Identity(InetAddress
-                                    .getByName(SERVER_NAME), 8082),
-                            new Identity(InetAddress.getByName(SERVER_NAME),
-                                    8083)));
-
-            client = new PartitionAwareClient(partition);
+            client = new PartitionAwareClient(Arrays.asList(new Identity(
+                    InetAddress.getByName(SERVER_NAME), 8080),
+                    new Identity(InetAddress.getByName(SERVER_NAME),
+                            8081), new Identity(InetAddress
+                            .getByName(SERVER_NAME), 8082),
+                    new Identity(InetAddress.getByName(SERVER_NAME),
+                            8083)));
         }
 
         @Override

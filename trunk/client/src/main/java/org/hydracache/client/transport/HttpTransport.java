@@ -28,7 +28,6 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-import org.apache.log4j.Logger;
 import org.hydracache.io.Buffer;
 
 /**
@@ -40,8 +39,6 @@ import org.hydracache.io.Buffer;
  */
 public class HttpTransport implements Transport
 {
-    private static final Logger log = Logger.getLogger(HttpTransport.class);
-    
     private HttpClient httpClient;
     
     private final Map<Integer, ResponseMessageHandler> handlers = new HashMap<Integer, ResponseMessageHandler>();

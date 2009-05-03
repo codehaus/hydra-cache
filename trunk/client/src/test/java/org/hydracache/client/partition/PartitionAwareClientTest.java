@@ -15,16 +15,19 @@
  */
 package org.hydracache.client.partition;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.hydracache.client.HydraCacheAdminClient;
-import org.hydracache.client.transport.Transport;
-import org.hydracache.data.partitioning.NodePartition;
+import org.hydracache.client.transport.NullTransport;
+import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.server.Identity;
 import org.jmock.Mockery;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,23 +38,29 @@ import org.junit.Test;
 public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
     private Mockery context;
-    private Transport transport;
-    private NodePartition<Identity> partition;
+    private NullTransport transport;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void beforeTestMethods() throws Exception {
         this.context = new Mockery(); 
-        this.partition = this.context.mock(NodePartition.class);
-       
-        this.transport = this.context.mock(Transport.class);
-        this.service = new PartitionAwareClient(partition);
+        this.transport = new NullTransport();
+
+        this.service = new PartitionAwareClient(Arrays.asList(new Identity(8080)), this.transport);
+    }
+    
+    @After
+    public void afterTestMethods() throws Exception {
+        this.transport.setResponseMessage(null);
     }
     
     @Test
     public void shouldReturnEmptyListWhenCurrentPartitionIsNull() throws Exception {
+        ResponseMessage responseMessage = new ResponseMessage(true);
+        responseMessage.setResponseBody("[{\"port\":8080,\"ip\":\"127.0.0.1\"}]".getBytes());
+        this.transport.setResponseMessage(responseMessage);
+        
         List<Identity> nodes = this.service.listNodes();
         assertNotNull(nodes);
-        assertTrue(nodes.isEmpty());
+        assertFalse(nodes.isEmpty());
     }
 }

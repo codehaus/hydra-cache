@@ -21,6 +21,11 @@ package org.hydracache.client.transport;
  */
 public class ResponseMessage {
     private byte[] responseBody;
+    private boolean successful;
+
+    public ResponseMessage(boolean successful) {
+        this.successful = successful;
+    }
 
     public byte[] getResponseBody() {
         return responseBody;
@@ -28,6 +33,14 @@ public class ResponseMessage {
 
     public void setResponseBody(byte[] responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public void setSuccessful(boolean successful) {
+        this.successful = successful;
+    }
+    
+    public boolean isSuccessful() {
+        return successful;
     }
 
 }

@@ -31,6 +31,12 @@
             <artifactId>commons-httpclient</artifactId>
         </dependency>
 		
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        
         <!-- COMMON DEPENDENCIES -->
         <dependency>
             <groupId>log4j</groupId>

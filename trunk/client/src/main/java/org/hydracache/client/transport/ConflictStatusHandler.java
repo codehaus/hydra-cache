@@ -15,8 +15,6 @@
  */
 package org.hydracache.client.transport;
 
-import java.io.InputStream;
-
 import org.apache.commons.httpclient.HttpStatus;
 import org.hydracache.server.data.versioning.VersionConflictException;
 

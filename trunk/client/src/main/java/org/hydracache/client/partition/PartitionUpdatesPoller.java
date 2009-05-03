@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.apache.log4j.Logger;
 import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.server.Identity;
 
@@ -30,8 +31,10 @@ import org.hydracache.server.Identity;
  */
 public class PartitionUpdatesPoller extends Thread {
 
+    private static final Logger logger = Logger.getLogger(PartitionUpdatesPoller.class);
     private HydraCacheAdminClient adminClient;
     private Observable obs;
+    private final long interval;
 
     /**
      * Provide a reference to an admin client and at least one observer.
@@ -40,7 +43,8 @@ public class PartitionUpdatesPoller extends Thread {
      * @param listener The observer required to be notified upon update
      * @param listeners Any other observers interested 
      */
-    public PartitionUpdatesPoller(HydraCacheAdminClient adminClient, Observer listener, Observer... listeners) {
+    public PartitionUpdatesPoller(long interval, HydraCacheAdminClient adminClient, Observer listener, Observer... listeners) {
+        this.interval = interval;
         this.adminClient = adminClient;
         
         this.obs = new Observable();
@@ -51,7 +55,7 @@ public class PartitionUpdatesPoller extends Thread {
                 this.obs.addObserver(observer);
             }
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -59,8 +63,20 @@ public class PartitionUpdatesPoller extends Thread {
      */
     @Override
     public void run() {
-        List<Identity> list = adminClient.listNodes();
-        obs.notifyObservers(list);
+        List<Identity> list;
+        while(true) {
+            try {
+                logger.info("Updating node list.");
+                list = adminClient.listNodes();
+                
+                logger.info("Registry: " + list);
+                obs.notifyObservers(list);
+                
+                Thread.sleep(interval);
+            } catch (Exception e) {
+                logger.error(e);
+            }
+        }
     }
 
 }
