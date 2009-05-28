@@ -20,13 +20,16 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.SerializationUtils;
@@ -80,8 +83,7 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
     private IncrementVersionFactory versionFactory;
     private Transport transport;
 
-    // FIXME: use a weak but thread safe map here to avoid memory leak
-    ConcurrentMap<String, Version> versionMap;
+    Map<String, Version> versionMap = Collections.synchronizedMap(new WeakHashMap<String, Version>());
 
     private List<Identity> seedServerIds;
 
@@ -124,13 +126,11 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
     public synchronized Object get(final String key) throws Exception {
         Identity identity = nodePartition.get(key);
 
-        transport.establishConnection(identity.getAddress().getHostName(), identity.getPort());
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(GET);
         requestMessage.setPath(key);
 
-        ResponseMessage responseMessage = transport.sendRequest(requestMessage);
-        transport.cleanUpConnection();
+        ResponseMessage responseMessage = sendMessage(identity, requestMessage);
          
         Object object = null;
         if (responseMessage != null) {
@@ -158,9 +158,7 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         requestMessage.setPath(key);
         requestMessage.setRequestData(buffer);
         
-        transport.establishConnection(identity.getAddress().getHostName(), identity.getPort());
-        ResponseMessage responseMessage = transport.sendRequest(requestMessage);
-        transport.cleanUpConnection();
+        ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         assert responseMessage != null && responseMessage.isSuccessful();
     }
@@ -235,6 +233,20 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         Buffer buffer = Buffer.allocate();
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
         return buffer;
+    }
+
+    /**
+     * @param identity
+     * @param requestMessage
+     * @return
+     * @throws Exception
+     */
+    private ResponseMessage sendMessage(Identity identity, RequestMessage requestMessage)
+            throws Exception {
+        transport.establishConnection(identity.getAddress().getHostName(), identity.getPort());
+        ResponseMessage responseMessage = transport.sendRequest(requestMessage);
+        transport.cleanUpConnection();
+        return responseMessage;
     }
 
     // FIXME: implement weak map to avoid memory leak
