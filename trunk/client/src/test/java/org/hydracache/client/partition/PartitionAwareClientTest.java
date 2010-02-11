@@ -16,8 +16,6 @@
 package org.hydracache.client.partition;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +24,6 @@ import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.transport.NullTransport;
 import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.server.Identity;
-import org.jmock.Mockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,12 +34,10 @@ import org.junit.Test;
  */
 public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
-    private Mockery context;
     private NullTransport transport;
 
     @Before
     public void beforeTestMethods() throws Exception {
-        this.context = new Mockery(); 
         this.transport = new NullTransport();
 
         this.service = new PartitionAwareClient(Arrays.asList(new Identity(8080)), this.transport);

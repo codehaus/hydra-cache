@@ -31,6 +31,7 @@ import org.junit.Test;
  */
 public class IdentityMarshallerTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldBeAbleToWriteObject() throws Exception {
         IdentityMarshaller marshaller = new IdentityMarshaller();
@@ -45,6 +46,7 @@ public class IdentityMarshallerTest {
                 buffer.toByteArray().length > 0);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldBeAbleToReadObject() throws Exception {
         IdentityMarshaller marshaller = new IdentityMarshaller();
