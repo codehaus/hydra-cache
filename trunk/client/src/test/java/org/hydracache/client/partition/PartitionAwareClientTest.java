@@ -15,18 +15,28 @@
  */
 package org.hydracache.client.partition;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.transport.NullTransport;
+import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
+import org.hydracache.client.transport.Transport;
+import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.Identity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author Tan Quach
@@ -36,26 +46,58 @@ public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
     private NullTransport transport;
 
+    @Mock
+    private Transport mockTransport;
+
     @Before
     public void beforeTestMethods() throws Exception {
-        this.transport = new NullTransport();
-
-        this.service = new PartitionAwareClient(Arrays.asList(new Identity(8080)), this.transport);
+        MockitoAnnotations.initMocks(this);
     }
-    
+
     @After
     public void afterTestMethods() throws Exception {
-        this.transport.setResponseMessage(null);
     }
-    
+
     @Test
-    public void shouldReturnEmptyListWhenCurrentPartitionIsNull() throws Exception {
+    public void shouldReturnEmptyListWhenCurrentPartitionIsNull()
+            throws Exception {
+        this.transport = new NullTransport();
+        this.service = new PartitionAwareClient(Arrays
+                .asList(new Identity(8080)), this.transport);
+
         ResponseMessage responseMessage = new ResponseMessage(true);
-        responseMessage.setResponseBody("[{\"port\":8080,\"ip\":\"127.0.0.1\"}]".getBytes());
+        responseMessage
+                .setResponseBody("[{\"port\":8080,\"ip\":\"127.0.0.1\"}]"
+                        .getBytes());
         this.transport.setResponseMessage(responseMessage);
-        
+
         List<Identity> nodes = this.service.listNodes();
         assertNotNull(nodes);
         assertFalse(nodes.isEmpty());
+
+        this.transport.setResponseMessage(null);
+    }
+
+    @Test
+    public void ensureNodeIsRemovedIfFailToSendMessage() throws Exception {
+        Identity node = new Identity(8080);
+
+        when(mockTransport.sendRequest(any(RequestMessage.class))).thenThrow(
+                new RuntimeException());
+
+        PartitionAwareClient client = new PartitionAwareClient(Arrays
+                .asList(node), mockTransport);
+
+        NodePartition<Identity> partition = client.getNodePartition();
+
+        assertTrue("Partition should contain the ID", partition.contains(node));
+
+        try {
+            client.put("key", "value");
+            fail("Should have thrown exception");
+        } catch (Exception e) {
+            assertFalse("Partition should not contain the ID any more",
+                    partition.contains(node));
+        }
     }
 }

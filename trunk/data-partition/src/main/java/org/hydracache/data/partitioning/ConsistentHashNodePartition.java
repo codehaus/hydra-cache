@@ -127,6 +127,22 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
     /*
      * (non-Javadoc)
      * 
+     * @see
+     * org.hydracache.data.partitioning.NodePartition#contains(java.lang.Object)
+     */
+    @Override
+    public boolean contains(T node) {
+        readLock.lock();
+        try {
+            return circle.containsValue(node);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.hydracache.data.partitioning.NodeCircle#remove(java.lang.Object)
      */
     public void remove(T node) {

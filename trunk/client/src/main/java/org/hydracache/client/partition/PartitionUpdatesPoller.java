@@ -39,23 +39,28 @@ public class PartitionUpdatesPoller extends Thread {
     /**
      * Provide a reference to an admin client and at least one observer.
      * 
-     * @param adminClient The admin client to perform the refresh
-     * @param listener The observer required to be notified upon update
-     * @param listeners Any other observers interested 
+     * @param adminClient
+     *            The admin client to perform the refresh
+     * @param listener
+     *            The observer required to be notified upon update
+     * @param listeners
+     *            Any other observers interested
      */
-    public PartitionUpdatesPoller(long interval, HydraCacheAdminClient adminClient, Observer listener, Observer... listeners) {
+    public PartitionUpdatesPoller(long interval,
+            HydraCacheAdminClient adminClient, Observer listener,
+            Observer... listeners) {
         this.interval = interval;
         this.adminClient = adminClient;
-        
+
         this.obs = new Observable();
         this.obs.addObserver(listener);
-        
+
         if (listeners != null)
             for (Observer observer : listeners) {
                 this.obs.addObserver(observer);
             }
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -64,17 +69,21 @@ public class PartitionUpdatesPoller extends Thread {
     @Override
     public void run() {
         List<Identity> list;
-        while(true) {
+        while (true) {
             try {
                 logger.info("Updating node list.");
                 list = adminClient.listNodes();
-                
+
                 logger.info("Registry: " + list);
                 obs.notifyObservers(list);
-                
-                Thread.sleep(interval);
             } catch (Exception e) {
                 logger.error(e);
+            } finally {
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException iex) {
+                    // do nothing
+                }
             }
         }
     }

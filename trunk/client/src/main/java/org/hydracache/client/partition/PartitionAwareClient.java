@@ -116,6 +116,10 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         poller.start();
     }
     
+    NodePartition<Identity> getNodePartition() {
+        return nodePartition;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -243,9 +247,26 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
     private ResponseMessage sendMessage(Identity identity, RequestMessage requestMessage)
             throws Exception {
         transport.establishConnection(identity.getAddress().getHostName(), identity.getPort());
-        ResponseMessage responseMessage = transport.sendRequest(requestMessage);
-        transport.cleanUpConnection();
+        ResponseMessage responseMessage = null;
+        
+        try {
+            responseMessage = transport.sendRequest(requestMessage);
+        } catch (Exception e) {
+            log.warn("Failed to send message to node["+identity+"]");
+            
+            deactivateNode(identity);
+            
+            throw e;
+        }finally{
+            transport.cleanUpConnection();
+        }
+        
         return responseMessage;
+    }
+
+    private void deactivateNode(Identity identity) {
+        log.info("Removing inaccessible node["+identity+"]");
+        nodePartition.remove(identity);
     }
 
     // FIXME: implement weak map to avoid memory leak

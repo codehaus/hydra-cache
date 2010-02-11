@@ -15,8 +15,9 @@
  */
 package org.hydracache.data.partitioning;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,46 +39,49 @@ import org.junit.Test;
  */
 public class ConsistentHashNodePartitionTest {
 
-    private List<ServerNode> serverNodes;
     private HashFunction hashFunction;
+    private final ServerNode A = new ServerNode(1);
+    private final ServerNode B = new ServerNode(10);
+    private final ServerNode C = new ServerNode(50);
 
     @Before
     public void setUp() {
         hashFunction = new KetamaBasedHashFunction();
-        serverNodes = new LinkedList<ServerNode>();
     }
 
     @Test
     public void shouldReturnNullIfNoServerNodes() throws Exception {
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
-                hashFunction, serverNodes);
+                hashFunction, new LinkedList<ServerNode>());
+
         ServerNode serverNode = circle.get("4");
+
         Assert.assertNull(serverNode);
     }
 
     @Test
     public void shouldReturnServerNode() {
         final ServerNode A = new ServerNode(1);
-        serverNodes.add(A);
+
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
-                hashFunction, serverNodes);
+                hashFunction, Arrays.asList(A));
 
         Assert.assertEquals(A, circle.get("1"));
     }
 
     @Test
+    public void testContainsMethod() {
+        ConsistentHashNodePartition<ServerNode> circle = givenStandardTestCircle();
+
+        assertTrue("Circle should contain the node", circle.contains(A));
+        assertTrue("Circle should contain the node", circle.contains(B));
+        assertTrue("Circle should contain the node", circle.contains(C));
+        assertFalse("Circle should not contain the node", circle.contains(new ServerNode(20)));
+    }
+
+    @Test
     public void shouldAlwaysReturnSameNode() {
-        final ServerNode A = new ServerNode(1);
-        final ServerNode B = new ServerNode(10);
-        final ServerNode C = new ServerNode(50);
-
-        // Create a circle of 2 replicas
-        serverNodes.add(A);
-        serverNodes.add(B);
-        serverNodes.add(C);
-
-        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
-                hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = givenStandardTestCircle();
 
         // First we verify that the node we get is closest to server node B.
         String data1 = "10";
@@ -89,17 +93,7 @@ public class ConsistentHashNodePartitionTest {
 
     @Test
     public void shouldSendToNearestNeighbourIfNodeIsRemoved() throws Exception {
-        final ServerNode A = new ServerNode(1);
-        final ServerNode B = new ServerNode(10);
-        final ServerNode C = new ServerNode(50);
-
-        // Create a circle of 2 replicas
-        serverNodes.add(A);
-        serverNodes.add(B);
-        serverNodes.add(C);
-
-        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
-                hashFunction, serverNodes);
+        ConsistentHashNodePartition<ServerNode> circle = givenStandardTestCircle();
 
         // First we verify that the node we get is closest to server node B.
         String data1 = "10";
@@ -111,9 +105,15 @@ public class ConsistentHashNodePartitionTest {
         // neighbour.
     }
 
+    private ConsistentHashNodePartition<ServerNode> givenStandardTestCircle() {
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, Arrays.asList(A, B, C));
+        return circle;
+    }
+
     @Test
     public void ensureUniformDistribution() {
-        int sampleSize = 100000;
+        int sampleSize = 10000;
 
         final ServerNode A = new ServerNode(1);
         final ServerNode B = new ServerNode(2);
@@ -130,10 +130,7 @@ public class ConsistentHashNodePartitionTest {
 
     private ConsistentHashNodePartition<ServerNode> givenCloselyPlacedNodesWithLargeReplicas(
             final ServerNode A, final ServerNode B, final ServerNode C) {
-        // Create a circle of 3 closely placed nodes
-        serverNodes.add(A);
-        serverNodes.add(B);
-        serverNodes.add(C);
+        List<ServerNode> serverNodes = Arrays.asList(A, B, C);
 
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
                 hashFunction, serverNodes, 20);
@@ -179,15 +176,15 @@ public class ConsistentHashNodePartitionTest {
     }
 
     private final class ServerNode {
-        private int loc;
+        private int id;
 
         public ServerNode(int loc) {
-            this.loc = loc;
+            this.id = loc;
         }
 
         @Override
         public int hashCode() {
-            return loc;
+            return id;
         }
 
         /*
@@ -204,7 +201,7 @@ public class ConsistentHashNodePartitionTest {
             if (getClass() != obj.getClass())
                 return false;
             ServerNode other = (ServerNode) obj;
-            if (loc != other.loc)
+            if (id != other.id)
                 return false;
             return true;
         }

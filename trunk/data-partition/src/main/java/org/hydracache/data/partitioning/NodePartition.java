@@ -41,8 +41,11 @@ package org.hydracache.data.partitioning;
  * </p>
  * </blockquote>
  * 
- * @see <a href="http://allthingsdistributed.com/2007/10/amazons_dynamo.html">Werner Vogel on Amazon's Dynamo</a>
- * @see <a href="http://www8.org/w8-papers/2a-webserver/caching/paper2.html">Web Caching with Consistent Hashing</a>
+ * @see <a
+ *      href="http://allthingsdistributed.com/2007/10/amazons_dynamo.html">Werner
+ *      Vogel on Amazon's Dynamo</a>
+ * @see <a href="http://www8.org/w8-papers/2a-webserver/caching/paper2.html">Web
+ *      Caching with Consistent Hashing</a>
  * @author Tan Quach
  * @since 1.0
  */
@@ -77,4 +80,14 @@ public interface NodePartition<T> {
      *         going in a "clockwise" direction.
      */
     public T get(String key);
+
+    /**
+     * Test to see if the given node has been already represented in the
+     * partition or not
+     * 
+     * @param node
+     *            node to be tested
+     * @return true or false
+     */
+    public boolean contains(T node);
 }
