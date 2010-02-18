@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.partitioning.NodePartition;
+import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
 
 /**

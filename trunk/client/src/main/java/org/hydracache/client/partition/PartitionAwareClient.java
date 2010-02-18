@@ -70,6 +70,7 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
     private static Logger log = Logger.getLogger(PartitionAwareClient.class);
 
     private static final String PUT = "put";
+    
     private static final String GET = "get";
 
     private static final String IP = "ip";

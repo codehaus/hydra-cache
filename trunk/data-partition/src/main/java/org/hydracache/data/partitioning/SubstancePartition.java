@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hydracache.server.harmony.core;
+package org.hydracache.data.partitioning;
 
 import java.util.Collection;
 
 import org.hydracache.data.hashing.HashFunction;
-import org.hydracache.data.partitioning.ConsistentHashNodePartition;
-import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.server.Identity;
 
 /**

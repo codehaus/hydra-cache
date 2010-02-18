@@ -11,6 +11,10 @@
     <name>Hydra Server Data Partitioning Library</name>
     <description>Hydra Cache consistent hash based data partition library</description>
     <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
 
         <!-- COMMONS LIB -->
         <dependency>

@@ -35,7 +35,7 @@ public interface Transport {
     /**
      * Send the request over the wire using the transport. Specific
      * implementations should handle all details of response codes.
-     * @param requestMessage TODO
+     * @param requestMessage
      * @return The response from the request
      * @throws Exception
      */
