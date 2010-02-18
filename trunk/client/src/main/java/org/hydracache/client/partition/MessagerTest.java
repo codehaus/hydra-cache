@@ -32,38 +32,59 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import static org.junit.Assert.*;
 
 public class MessagerTest {
     @Mock
     private Transport transport;
-    
+
+    private int testPort = 8000;
+    private Identity targetNode = new Identity(testPort);
+    private RequestMessage message = new RequestMessage();
+    private Messager messenger;
+
     @Before
-    public void setupBeforeTestMethod(){
+    public void setupBeforeTestMethod() {
         MockitoAnnotations.initMocks(this);
+
+        messenger = new Messager(transport);
     }
 
     @Test
     public void ensureMessageCanDeliver() throws Exception {
-        int testPort = 8000;
-        
-        Identity targetNode = new Identity(testPort);
-        RequestMessage message = new RequestMessage();
-
-        Messager messenger = new Messager(transport);
-
         ResponseMessage expectedResponseMsg = new ResponseMessage(true);
-        
-        // stub
+
+        // stub successful send 
         when(transport.sendRequest(message)).thenReturn(expectedResponseMsg);
 
         SubstancePartition nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), Arrays.asList(targetNode));
 
         messenger.sendMessage(targetNode, nodePartition, message);
-        
+
         verify(transport).establishConnection(anyString(), eq(testPort));
         verify(transport).sendRequest(message);
         verify(transport).cleanUpConnection();
+    }
+
+    @Test
+    public void ensureNodeIsRemovedAfterExceptionIsCaught() throws Exception {
+        // stub exception
+        when(transport.sendRequest(message)).thenThrow(new RuntimeException());
+
+        SubstancePartition nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), Arrays.asList(targetNode));
+
+        try {
+            messenger.sendMessage(targetNode, nodePartition, message);
+            fail("Should have failed");
+        } catch (Exception ex) {
+            assertFalse("Target node should have removed from the partition", nodePartition.contains(targetNode));
+            
+            verify(transport).establishConnection(anyString(), eq(testPort));
+            verify(transport).sendRequest(message);
+            verify(transport).cleanUpConnection();
+        }
     }
 
 }
