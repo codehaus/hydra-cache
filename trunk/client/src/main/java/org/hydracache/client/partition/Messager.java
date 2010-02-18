@@ -15,7 +15,10 @@
  */
 package org.hydracache.client.partition;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.log4j.Logger;
+import org.hydracache.client.transport.ConflictStatusHandler;
+import org.hydracache.client.transport.DefaultResponseMessageHandler;
 import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
@@ -28,8 +31,18 @@ public class Messager {
     private Transport transport;
 
     public Messager(Transport transport) {
-        super();
         this.transport = transport;
+        
+        registerDefaultHandlers();
+    }
+    
+    private void registerDefaultHandlers() {
+        transport.registerHandler(HttpStatus.SC_CONFLICT,
+                new ConflictStatusHandler());
+        transport.registerHandler(HttpStatus.SC_OK,
+                new DefaultResponseMessageHandler());
+        transport.registerHandler(HttpStatus.SC_CREATED,
+                new DefaultResponseMessageHandler());
     }
 
     public ResponseMessage sendMessage(Identity target,

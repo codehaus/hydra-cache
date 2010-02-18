@@ -57,7 +57,6 @@ public class MessagerTest {
     public void ensureMessageCanDeliver() throws Exception {
         ResponseMessage expectedResponseMsg = new ResponseMessage(true);
 
-        // stub successful send
         stubSuccessfulSend(expectedResponseMsg);
 
         SubstancePartition nodePartition = new SubstancePartition(

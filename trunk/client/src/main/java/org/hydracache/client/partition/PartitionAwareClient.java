@@ -30,21 +30,18 @@ import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.client.ClientException;
 import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.HydraCacheClient;
-import org.hydracache.client.transport.ConflictStatusHandler;
-import org.hydracache.client.transport.DefaultResponseMessageHandler;
 import org.hydracache.client.transport.HttpTransport;
 import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
-import org.hydracache.data.partitioning.ConsistentHashNodePartition;
 import org.hydracache.data.partitioning.NodePartition;
+import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
@@ -66,24 +63,26 @@ import org.json.JSONObject;
  * @author Tan Quach
  * @since 1.0
  */
-public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminClient, Observer {
+public class PartitionAwareClient implements HydraCacheClient,
+        HydraCacheAdminClient, Observer {
     private static Logger log = Logger.getLogger(PartitionAwareClient.class);
 
     private static final String PUT = "put";
-    
+
     private static final String GET = "get";
 
     private static final String IP = "ip";
 
     private static final String PORT = "port";
 
-    private NodePartition<Identity> nodePartition;
+    private SubstancePartition nodePartition;
     private ProtocolEncoder<DataMessage> protocolEncoder;
     private ProtocolDecoder<DataMessage> protocolDecoder;
     private IncrementVersionFactory versionFactory;
-    private Transport transport;
+    private Messager messager;
 
-    Map<String, Version> versionMap = Collections.synchronizedMap(new WeakHashMap<String, Version>());
+    private Map<String, Version> versionMap = Collections
+            .synchronizedMap(new WeakHashMap<String, Version>());
 
     private List<Identity> seedServerIds;
 
@@ -97,26 +96,28 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         this(seedServerIds, new HttpTransport());
     }
 
-    public PartitionAwareClient(List<Identity> seedServerIds, Transport transport) {
+    public PartitionAwareClient(List<Identity> seedServerIds,
+            Transport transport) {
         this.seedServerIds = seedServerIds;
-        this.transport = transport;
-        
-        this.nodePartition = new ConsistentHashNodePartition<Identity>(
+        this.messager = new Messager(transport);
+
+        this.nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), seedServerIds);
-        
+
         versionMap = new ConcurrentHashMap<String, Version>();
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
-        protocolEncoder = new DefaultProtocolEncoder(new MessageMarshallerFactory(versionFactory));
-        protocolDecoder = new DefaultProtocolDecoder(new MessageMarshallerFactory(versionFactory));
+        protocolEncoder = new DefaultProtocolEncoder(
+                new MessageMarshallerFactory(versionFactory));
+        protocolDecoder = new DefaultProtocolDecoder(
+                new MessageMarshallerFactory(versionFactory));
 
-        registerDefaultHandlers();
-        
         // Register listeners for partition updates
         // TODO Make the interval configurable
-        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(180000, this, this);
+        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(180000,
+                this, this);
         poller.start();
     }
-    
+
     NodePartition<Identity> getNodePartition() {
         return nodePartition;
     }
@@ -135,10 +136,12 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         requestMessage.setPath(key);
 
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
-         
+
         Object object = null;
         if (responseMessage != null) {
-            DataMessage dataMessage = protocolDecoder.decode(new DataInputStream(new ByteArrayInputStream(responseMessage.getResponseBody())));
+            DataMessage dataMessage = protocolDecoder
+                    .decode(new DataInputStream(new ByteArrayInputStream(
+                            responseMessage.getResponseBody())));
             updateVersion(key, dataMessage);
             object = SerializationUtils.deserialize(dataMessage.getBlob());
         }
@@ -161,19 +164,21 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         requestMessage.setMethod(PUT);
         requestMessage.setPath(key);
         requestMessage.setRequestData(buffer);
-        
+
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         assert responseMessage != null && responseMessage.isSuccessful();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.hydracache.client.HydraCacheAdminClient#listNodes()
      */
     @Override
     public synchronized List<Identity> listNodes() throws Exception {
         log.info("Retrieving list of nodes.");
-        
+
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(GET);
         requestMessage.setPath("registry");
@@ -183,13 +188,14 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         int nextInt = rnd.nextInt(seedServerIds.size());
         Identity identity = seedServerIds.get(nextInt);
 
-        transport.establishConnection(identity.getAddress().getHostAddress(), identity.getPort());
-        ResponseMessage responseMessage = transport.sendRequest(requestMessage);
+        ResponseMessage responseMessage = messager.sendMessage(identity,
+                nodePartition, requestMessage);
+
         if (responseMessage == null)
             throw new ClientException("Failed to retrieve node registry.");
-        
+
         List<Identity> identities = new LinkedList<Identity>();
-        
+
         String registry = new String(responseMessage.getResponseBody());
         log.debug("Received registry: " + registry);
         JSONArray seedServerArray = new JSONArray(registry);
@@ -202,7 +208,9 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         return identities;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     @SuppressWarnings("unchecked")
@@ -212,28 +220,29 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
         List<Identity> servers = (List<Identity>) arg;
 
         this.seedServerIds = servers;
-        
+
         // Update the partition
-        this.nodePartition = new ConsistentHashNodePartition<Identity>(
+        this.nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), servers);
     }
-    
+
     /**
      * @param key
      * @param data
      * @return
      * @throws IOException
      */
-    private Buffer serializeData(String key, Serializable data) throws IOException {
+    private Buffer serializeData(String key, Serializable data)
+            throws IOException {
         DataMessage dataMessage = new DataMessage();
         dataMessage.setBlob(SerializationUtils.serialize(data));
         Version version = versionMap.get(key);
-        
+
         if (version == null)
             version = versionFactory.createNull();
-        
+
         dataMessage.setVersion(version);
-        
+
         Buffer buffer = Buffer.allocate();
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
         return buffer;
@@ -245,39 +254,13 @@ public class PartitionAwareClient implements HydraCacheClient, HydraCacheAdminCl
      * @return
      * @throws Exception
      */
-    private ResponseMessage sendMessage(Identity identity, RequestMessage requestMessage)
-            throws Exception {
-        transport.establishConnection(identity.getAddress().getHostName(), identity.getPort());
-        ResponseMessage responseMessage = null;
-        
-        try {
-            responseMessage = transport.sendRequest(requestMessage);
-        } catch (Exception e) {
-            log.warn("Failed to send message to node["+identity+"]");
-            
-            deactivateNode(identity);
-            
-            throw e;
-        }finally{
-            transport.cleanUpConnection();
-        }
-        
-        return responseMessage;
-    }
-
-    private void deactivateNode(Identity identity) {
-        log.info("Removing inaccessible node["+identity+"]");
-        nodePartition.remove(identity);
+    private ResponseMessage sendMessage(Identity identity,
+            RequestMessage requestMessage) throws Exception {
+        return messager.sendMessage(identity, nodePartition, requestMessage);
     }
 
     // FIXME: implement weak map to avoid memory leak
     private void updateVersion(String key, DataMessage dataMessage) {
         versionMap.put(key, dataMessage.getVersion());
-    }
-
-    private void registerDefaultHandlers() {
-        transport.registerHandler(HttpStatus.SC_CONFLICT, new ConflictStatusHandler());
-        transport.registerHandler(HttpStatus.SC_OK, new DefaultResponseMessageHandler());
-        transport.registerHandler(HttpStatus.SC_CREATED, new DefaultResponseMessageHandler());
     }
 }
