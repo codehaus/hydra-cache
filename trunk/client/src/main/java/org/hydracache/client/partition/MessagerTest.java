@@ -15,8 +15,12 @@
  */
 package org.hydracache.client.partition;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.junit.Assert.*;
 
 public class MessagerTest {
     @Mock
@@ -54,8 +57,8 @@ public class MessagerTest {
     public void ensureMessageCanDeliver() throws Exception {
         ResponseMessage expectedResponseMsg = new ResponseMessage(true);
 
-        // stub successful send 
-        when(transport.sendRequest(message)).thenReturn(expectedResponseMsg);
+        // stub successful send
+        stubSuccessfulSend(expectedResponseMsg);
 
         SubstancePartition nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), Arrays.asList(targetNode));
@@ -67,10 +70,14 @@ public class MessagerTest {
         verify(transport).cleanUpConnection();
     }
 
+    private void stubSuccessfulSend(ResponseMessage expectedResponseMsg)
+            throws Exception {
+        when(transport.sendRequest(message)).thenReturn(expectedResponseMsg);
+    }
+
     @Test
     public void ensureNodeIsRemovedAfterExceptionIsCaught() throws Exception {
-        // stub exception
-        when(transport.sendRequest(message)).thenThrow(new RuntimeException());
+        stubFailedSend();
 
         SubstancePartition nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), Arrays.asList(targetNode));
@@ -79,12 +86,48 @@ public class MessagerTest {
             messenger.sendMessage(targetNode, nodePartition, message);
             fail("Should have failed");
         } catch (Exception ex) {
-            assertFalse("Target node should have removed from the partition", nodePartition.contains(targetNode));
-            
+            assertFalse("Target node should have removed from the partition",
+                    nodePartition.contains(targetNode));
+
             verify(transport).establishConnection(anyString(), eq(testPort));
             verify(transport).sendRequest(message);
             verify(transport).cleanUpConnection();
         }
+    }
+
+    private void stubFailedSend() throws Exception {
+        when(transport.sendRequest(message)).thenThrow(new RuntimeException());
+    }
+
+    @Test
+    public void ensureSecondNodeIsRetriedAfterFailure() throws Exception {
+        Identity secondNode = new Identity(8008);
+        ResponseMessage expectedResponseMsg = new ResponseMessage(true);
+
+        stubUnsuccessfulConnect();
+        stubSuccessfulSend(expectedResponseMsg);
+
+        SubstancePartition nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), Arrays.asList(targetNode,
+                        secondNode));
+
+        ResponseMessage responseMsg = messenger.sendMessage(targetNode,
+                nodePartition, message);
+
+        assertEquals("Response message is incorrect", expectedResponseMsg, responseMsg);
+
+        assertFalse("Target node should have removed from the partition",
+                nodePartition.contains(targetNode));
+
+        verify(transport).establishConnection(anyString(), eq(testPort));
+        verify(transport).establishConnection(anyString(), eq(8008));
+        verify(transport).sendRequest(message);
+        verify(transport, times(2)).cleanUpConnection();
+    }
+
+    private void stubUnsuccessfulConnect() {
+        when(transport.establishConnection(anyString(), eq(testPort)))
+                .thenThrow(new RuntimeException());
     }
 
 }

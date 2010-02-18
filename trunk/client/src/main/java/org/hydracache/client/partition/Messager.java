@@ -32,27 +32,43 @@ public class Messager {
         this.transport = transport;
     }
 
-    public ResponseMessage sendMessage(Identity targetNode,
+    public ResponseMessage sendMessage(Identity target,
             SubstancePartition nodePartition, RequestMessage requestMessage)
             throws Exception {
-        transport.establishConnection(targetNode.getAddress().getHostName(),
-                targetNode.getPort());
-
-        ResponseMessage responseMessage = null;
+        boolean retry = true;
+        Identity currentTarget = target;
 
         try {
-            responseMessage = transport.sendRequest(requestMessage);
-        } catch (Exception e) {
-            log.warn("Failed to send message to node[" + targetNode + "]");
+            ResponseMessage responseMsg = send(nodePartition, requestMessage,
+                    currentTarget);
+            return responseMsg;
+        } catch (Exception ex) {
+            if(retry){
+                currentTarget = nodePartition.next(target);
+                ResponseMessage responseMsg = send(nodePartition, requestMessage,
+                        currentTarget);
+                return responseMsg;
+            }else{
+                throw ex;
+            }
+        }
+    }
 
-            deactivateNode(nodePartition, targetNode);
+    private ResponseMessage send(SubstancePartition nodePartition,
+            RequestMessage requestMessage, Identity currentTarget)
+            throws Exception {
+        try {
+            transport.establishConnection(currentTarget.getAddress()
+                    .getHostName(), currentTarget.getPort());
 
-            throw e;
+            return transport.sendRequest(requestMessage);
+        } catch (Exception ex) {
+            log.warn("Failed to send message to node[" + currentTarget + "]");
+            deactivateNode(nodePartition, currentTarget);
+            throw ex;
         } finally {
             transport.cleanUpConnection();
         }
-
-        return responseMessage;
     }
 
     private void deactivateNode(SubstancePartition nodePartition,
