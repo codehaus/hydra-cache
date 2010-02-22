@@ -75,17 +75,6 @@ public class HarmonyDataBank implements DataBank {
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.server.data.storage.DataBank#get(java.lang.Long)
-     */
-    @Override
-    @Deprecated
-    public Data get(Long keyHash) throws IOException {
-        return get(DEFAULT_CACHE_CONTEXT_NAME, keyHash);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see org.hydracache.server.data.storage.DataBank#get(java.lang.String,
      * java.lang.Long)
      */
@@ -195,19 +184,6 @@ public class HarmonyDataBank implements DataBank {
     @Override
     public Collection<Data> getAll() throws IOException {
         return localDataBank.getAll();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hydracache.server.data.storage.DataBank#put(org.hydracache.server
-     * .data.storage.Data)
-     */
-    @Override
-    @Deprecated
-    public void put(Data data) throws IOException, VersionConflictException {
-        put(DEFAULT_CACHE_CONTEXT_NAME, data);
     }
 
     /*

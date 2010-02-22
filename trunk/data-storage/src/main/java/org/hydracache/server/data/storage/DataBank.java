@@ -30,15 +30,6 @@ public interface DataBank {
     String DEFAULT_CACHE_CONTEXT_NAME = "__hydra-default__";
 
     /**
-     * Put the given data into the bank storage
-     * 
-     * @param data
-     *            data
-     */
-    @Deprecated
-    void put(Data data) throws IOException, VersionConflictException;
-
-    /**
      * Ptt the given data into the bank storage and associate it with the
      * specified context
      * 
@@ -49,16 +40,6 @@ public interface DataBank {
      */
     void put(String context, Data data) throws IOException,
             VersionConflictException;
-
-    /**
-     * Retrieve data using the given key hash
-     * 
-     * @param keyHash
-     *            key
-     * @return data instance
-     */
-    @Deprecated
-    Data get(Long keyHash) throws IOException;
 
     /**
      * Retrieve data using the given key hash

@@ -87,17 +87,6 @@ public class EhcacheDataBank implements DataBank {
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.server.data.storage.DataBank#get(java.lang.Long)
-     */
-    @Deprecated
-    @Override
-    public Data get(final Long keyHash) throws IOException {
-        return get(DEFAULT_CACHE_CONTEXT_NAME, keyHash);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see org.hydracache.server.data.storage.DataBank#get(java.lang.String,
      * java.lang.Long)
      */
@@ -158,20 +147,6 @@ public class EhcacheDataBank implements DataBank {
         }
 
         return results;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.hydracache.server.data.storage.DataBank#put(org.hydracache.server
-     * .data.storage.Data)
-     */
-    @Deprecated
-    @Override
-    public void put(final Data newData) throws IOException,
-            VersionConflictException {
-        put(DEFAULT_CACHE_CONTEXT_NAME, newData);
     }
 
     /*
