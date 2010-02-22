@@ -78,44 +78,57 @@ public class HarmonyDataBank implements DataBank {
      * @see org.hydracache.server.data.storage.DataBank#get(java.lang.Long)
      */
     @Override
+    @Deprecated
     public Data get(Long keyHash) throws IOException {
+        return get(DEFAULT_CACHE_CONTEXT_NAME, keyHash);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.data.storage.DataBank#get(java.lang.String,
+     * java.lang.Long)
+     */
+    @Override
+    public Data get(String context, Long keyHash) throws IOException {
         int expectedReads = this.expectedReads;
 
-        if (hasLocalCopy(keyHash))
+        if (hasLocalCopy(context, keyHash))
             expectedReads--;
 
         Collection<ResponseMessage> responses = Collections.emptyList();
 
         if (requireReliableGet(expectedReads)) {
             GetOperation getOperation = new GetOperation(space.getLocalNode()
-                    .getId(), keyHash);
+                    .getId(), context, keyHash);
 
             responses = space.broadcast(getOperation);
         }
 
-        if (dataNotFound(keyHash, responses))
+        if (dataNotFound(context, keyHash, responses))
             return null;
 
         ensureReliableGet(responses, expectedReads);
 
-        Data latestData = getLatestData(keyHash, responses);
+        Data latestData = getLatestData(context, keyHash, responses);
 
-        putLocally(latestData);
+        putLocally(context, latestData);
 
         return latestData;
     }
 
-    private boolean hasLocalCopy(Long keyHash) throws IOException {
-        return getLocally(keyHash) != null;
+    private boolean hasLocalCopy(String context, Long keyHash)
+            throws IOException {
+        return getLocally(context, keyHash) != null;
     }
 
     private boolean requireReliableGet(int expectedReads) {
         return expectedReads > 0;
     }
 
-    private boolean dataNotFound(Long keyHash,
+    private boolean dataNotFound(String context, Long keyHash,
             Collection<ResponseMessage> responses) throws IOException {
-        Data localData = localDataBank.get(keyHash);
+        Data localData = localDataBank.get(context, keyHash);
         return responses.isEmpty() && localData == null;
     }
 
@@ -134,15 +147,15 @@ public class HarmonyDataBank implements DataBank {
         return responses == null || responses.size() < expectedReads;
     }
 
-    private Data getLatestData(Long keyHash,
+    private Data getLatestData(String context, Long keyHash,
             Collection<ResponseMessage> responses) throws IOException {
-        Collection<Data> getOperationDataResults = listAllGetResults(keyHash,
-                responses);
+        Collection<Data> getOperationDataResults = listAllGetResults(context,
+                keyHash, responses);
 
         return consolidateGetResults(getOperationDataResults);
     }
 
-    private Collection<Data> listAllGetResults(Long keyHash,
+    private Collection<Data> listAllGetResults(String context, Long keyHash,
             Collection<ResponseMessage> responses) throws IOException {
         Collection<Data> getOperationDataResults = new HashSet<Data>();
 
@@ -159,8 +172,8 @@ public class HarmonyDataBank implements DataBank {
                 getOperationDataResults.add(getResponse.getResult());
         }
 
-        if (localDataBank.get(keyHash) != null)
-            getOperationDataResults.add(localDataBank.get(keyHash));
+        if (localDataBank.get(context, keyHash) != null)
+            getOperationDataResults.add(localDataBank.get(context, keyHash));
 
         return getOperationDataResults;
     }
@@ -180,7 +193,7 @@ public class HarmonyDataBank implements DataBank {
      * @see org.hydracache.server.data.storage.DataBank#getAll()
      */
     @Override
-    public Collection<Data> getAll() {
+    public Collection<Data> getAll() throws IOException {
         return localDataBank.getAll();
     }
 
@@ -192,10 +205,23 @@ public class HarmonyDataBank implements DataBank {
      * .data.storage.Data)
      */
     @Override
+    @Deprecated
     public void put(Data data) throws IOException, VersionConflictException {
+        put(DEFAULT_CACHE_CONTEXT_NAME, data);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.data.storage.DataBank#put(java.lang.String,
+     * org.hydracache.server.data.storage.Data)
+     */
+    @Override
+    public void put(String context, Data data) throws IOException,
+            VersionConflictException {
         if (reliablePutRequired()) {
             PutOperation putOperation = new PutOperation(space.getLocalNode()
-                    .getId(), data);
+                    .getId(), context, data);
 
             Collection<ResponseMessage> responses = space
                     .broadcast(putOperation);
@@ -203,7 +229,7 @@ public class HarmonyDataBank implements DataBank {
             ensureReliablePut(responses);
         }
 
-        putLocally(data);
+        putLocally(context, data);
     }
 
     private boolean reliablePutRequired() {
@@ -237,16 +263,16 @@ public class HarmonyDataBank implements DataBank {
         return helps == null || helps.size() < expectedWrites;
     }
 
-    public void putLocally(Data data) throws IOException {
+    public void putLocally(String context, Data data) throws IOException {
         try {
-            localDataBank.put(data);
+            localDataBank.put(context, data);
         } catch (VersionConflictException e) {
             throw new IOException(e);
         }
     }
 
-    public Data getLocally(Long keyHash) throws IOException {
-        return localDataBank.get(keyHash);
+    public Data getLocally(String context, Long keyHash) throws IOException {
+        return localDataBank.get(context, keyHash);
     }
 
 }

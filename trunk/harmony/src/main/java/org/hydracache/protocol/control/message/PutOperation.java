@@ -27,14 +27,20 @@ import org.hydracache.server.data.storage.Data;
  */
 public class PutOperation extends RequestMessage {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private Data data;
 
-    public PutOperation(Identity source, Data data) {
+    private String context;
+
+    public PutOperation(Identity source, String context, Data data) {
         super(source);
-        
+        this.context = context;
         this.data = data;
+    }
+
+    public String getContext() {
+        return context;
     }
 
     public Data getData() {

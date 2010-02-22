@@ -90,11 +90,12 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             return;
 
         Long dataKey = extractDataKeyHash(request);
+        String storageContext = extractRequestContext(request);
 
         DataMessage dataMessage = decodeProtocolMessage(((HttpEntityEnclosingRequest) request)
                 .getEntity());
 
-        processDataMessage(response, dataKey, dataMessage);
+        processDataMessage(response, storageContext, dataKey, dataMessage);
     }
 
     private DataMessage decodeProtocolMessage(HttpEntity entity)
@@ -104,17 +105,17 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         return ProtocolUtils.decodeProtocolMessage(decoder, entityContent);
     }
 
-    void processDataMessage(HttpResponse response, Long dataKey,
+    void processDataMessage(HttpResponse response, String storageContext, Long dataKey,
             DataMessage dataMessage) throws IOException,
             UnsupportedEncodingException {
         increaseVersion(dataMessage);
 
         try {
-            guardConflictWithLocalDataVersion(dataKey, dataMessage);
+            guardConflictWithLocalDataVersion(storageContext, dataKey, dataMessage);
 
-            int statusCode = createStatusCode(dataKey);
+            int statusCode = createStatusCode(storageContext, dataKey);
 
-            Data data = doPut(response, dataKey, dataMessage);
+            Data data = doPut(response, storageContext, dataKey, dataMessage);
 
             response.setStatusCode(statusCode);
 
@@ -136,10 +137,10 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    private void guardConflictWithLocalDataVersion(Long dataKey,
+    private void guardConflictWithLocalDataVersion(String storageContext, Long dataKey,
             DataMessage incomingDataMsg) throws IOException,
             VersionConflictException {
-        Data localData = dataBank.getLocally(dataKey);
+        Data localData = dataBank.getLocally(storageContext, dataKey);
 
         if (localData != null) {
             Version existingVersion = localData.getVersion();
@@ -154,22 +155,22 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    private int createStatusCode(Long dataKey) throws IOException {
+    private int createStatusCode(String storageContext, Long dataKey) throws IOException {
         int returnStatusCode = HttpStatus.SC_OK;
 
-        if (dataBank.getLocally(dataKey) == null)
+        if (dataBank.getLocally(storageContext, dataKey) == null)
             returnStatusCode = HttpStatus.SC_CREATED;
 
         return returnStatusCode;
     }
 
-    private Data doPut(HttpResponse response, Long dataKey,
+    private Data doPut(HttpResponse response, String storageContext, Long dataKey,
             DataMessage dataMessage) throws IOException,
             VersionConflictException {
         Data data = new Data(dataKey, dataMessage.getVersion(), dataMessage
                 .getBlob());
 
-        dataBank.put(data);
+        dataBank.put(storageContext, data);
 
         return data;
     }

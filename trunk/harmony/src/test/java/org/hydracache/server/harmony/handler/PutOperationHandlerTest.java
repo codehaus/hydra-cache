@@ -40,6 +40,8 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
+    
+    private static String storageContext = "testContext";
 
     @Test
     public void ensureVersionConflictTriggersRejection() throws Exception {
@@ -54,7 +56,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
         Data testData = TestDataGenerator.createRandomData();
 
-        PutOperation putOperation = new PutOperation(sourceId, testData);
+        PutOperation putOperation = new PutOperation(sourceId, storageContext, testData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -64,7 +66,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
         {
             addLocalGetExp(context, dataBank, TestDataGenerator
-                    .createRandomData());
+                    .createRandomData(), storageContext);
         }
         return dataBank;
     }
@@ -94,7 +96,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
                 mockDataBankToPutBrandNewData(context, testData),
                 new ArbitraryResolver());
 
-        PutOperation putOperation = new PutOperation(sourceId, testData);
+        PutOperation putOperation = new PutOperation(sourceId, storageContext, testData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -104,8 +106,8 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             Mockery context, Data testData) throws Exception {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
         {
-            addLocalPutExp(context, dataBank);
-            addLocalGetNothingExp(context, dataBank);
+            addLocalPutExp(context, dataBank, storageContext);
+            addLocalGetNothingExp(context, dataBank, storageContext);
         }
         return dataBank;
     }
@@ -140,7 +142,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
         Data newData = generateValidNewData(existingData);
 
-        PutOperation putOperation = new PutOperation(sourceId, newData);
+        PutOperation putOperation = new PutOperation(sourceId, storageContext, newData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -162,7 +164,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
 
         Data newData = generateValidNewData(existingData);
 
-        PutOperation putOperation = new PutOperation(sourceId, newData);
+        PutOperation putOperation = new PutOperation(sourceId, storageContext, newData);
         handler.handle(putOperation);
 
         context.assertIsSatisfied();
@@ -194,7 +196,7 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
         ControlMessageHandler handler = new PutOperationHandler(space,
                 memberRegistry, doNothingDatabank, new ArbitraryResolver());
 
-        handler.handle(new PutOperation(sourceId, TestDataGenerator
+        handler.handle(new PutOperation(sourceId, storageContext, TestDataGenerator
                 .createRandomData()));
 
         context.assertIsSatisfied();
@@ -214,8 +216,8 @@ public class PutOperationHandlerTest extends AbstractMockeryTest {
             Data testData) throws Exception {
         final HarmonyDataBank dataBank = context.mock(HarmonyDataBank.class);
         {
-            addLocalPutExp(context, dataBank);
-            addLocalGetExp(context, dataBank, testData);
+            addLocalPutExp(context, dataBank, storageContext);
+            addLocalGetExp(context, dataBank, testData, storageContext);
         }
         return dataBank;
     }

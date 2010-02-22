@@ -37,8 +37,8 @@ public class DumpActionTest {
 
         DataBank dataBank = new EhcacheDataBank(new ArbitraryResolver());
         
-        dataBank.put(new Data(RandomUtils.nextLong()));
-        dataBank.put(new Data(RandomUtils.nextLong()));
+        dataBank.put("testContext", new Data(RandomUtils.nextLong()));
+        dataBank.put("testContext", new Data(RandomUtils.nextLong()));
 
         DumpAction handler = new DumpAction(dataBank);
 

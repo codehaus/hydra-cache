@@ -41,6 +41,11 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  */
 public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
+    /**
+     * 
+     */
+    private static final String QUESTION_MARK = "?";
+
     protected HarmonyDataBank dataBank;
 
     protected HashFunction hashFunction;
@@ -90,7 +95,37 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
             cleanUri = StringUtils.chop(cleanUri);
         }
 
-        String requestString = StringUtils.substringAfter(cleanUri, SLASH);
+        cleanUri = StringUtils.removeStart(cleanUri, SLASH);
+
+        String requestString = cleanUri;
+
+        if (StringUtils.contains(requestString, SLASH)) {
+            requestString = StringUtils.substringAfter(requestString, SLASH);
+
+            if (StringUtils.contains(requestString, QUESTION_MARK)) {
+                requestString = StringUtils.substringBefore(requestString,
+                        QUESTION_MARK);
+            }
+        }
+
+        return requestString;
+    }
+    
+    protected String extractRequestContext(final HttpRequest request) {
+        return extractRequestContext(getRequestUri(request));
+    }
+    
+    protected String extractRequestContext(final String requestUri) {
+        String requestString = StringUtils.trim(requestUri);
+        
+        requestString = StringUtils.removeStart(requestString, SLASH);
+        requestString = StringUtils.removeEnd(requestString, SLASH);
+        
+        if (StringUtils.contains(requestString, SLASH)) {
+            requestString = StringUtils.substringBefore(requestString, SLASH);
+        }else{
+            requestString = "";
+        }
 
         return requestString;
     }

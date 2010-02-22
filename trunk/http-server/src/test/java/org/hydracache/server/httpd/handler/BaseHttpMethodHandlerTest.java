@@ -58,7 +58,7 @@ public class BaseHttpMethodHandlerTest {
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
     }
-    
+
     @Test
     public void testEmptyRequestShouldBeRejected() throws HttpException,
             IOException {
@@ -88,8 +88,8 @@ public class BaseHttpMethodHandlerTest {
 
         checkKeyExtrationResult(handler, expectedDataKey, uri);
 
-        expectedDataKey = "session/jsession94598429";
-        uri = HttpConstants.SLASH + expectedDataKey + " ";
+        expectedDataKey = "jsession94598429";
+        uri = HttpConstants.SLASH + "session/jsession94598429";
 
         checkKeyExtrationResult(handler, expectedDataKey, uri);
     }
@@ -107,14 +107,96 @@ public class BaseHttpMethodHandlerTest {
     }
 
     @Test
-    public void ensureNamingSpaceIsSupported() {
+    public void ensureContextBasedKeyExtraction() {
         BaseHttpMethodHandler handler = createHandler();
 
-        String expectedDataKey = "session/jsession?487823";
+        String expectedDataKey = "shoppingCart";
 
-        String uri = HttpConstants.SLASH + expectedDataKey;
+        String uri = "/context/shoppingCart";
 
         checkKeyExtrationResult(handler, expectedDataKey, uri);
+    }
+    
+    @Test
+    public void ensureNestedContextBasedKeyExtraction() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedDataKey = "shoppingCart/subCart";
+
+        String uri = "/context/shoppingCart/subCart";
+
+        checkKeyExtrationResult(handler, expectedDataKey, uri);
+    }
+    
+    @Test
+    public void ensureParameterAfterKeyIsIgnored() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedDataKey = "shoppingCart";
+
+        String uri = "/context/shoppingCart?protocol=xml";
+
+        checkKeyExtrationResult(handler, expectedDataKey, uri);
+    }
+    
+    @Test
+    public void ensureKeyExtractionWithEndSlash() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedDataKey = "shoppingCart";
+
+        String uri = "/shoppingCart/";
+
+        checkKeyExtrationResult(handler, expectedDataKey, uri);
+    }
+
+    private void checkKeyExtrationResult(BaseHttpMethodHandler handler,
+            String expectedDataKey, String uri) {
+        assertEquals("Extracted data key is incorrect", expectedDataKey, handler.extractRequestString(uri));
+    }
+    
+    @Test
+    public void ensureContextExtractionReturnBlankIfNa() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedContext = "";
+
+        String uri = "/shoppingCart";
+
+        assertEquals("Extracted data context is incorrect", expectedContext, handler.extractRequestContext(uri));
+    }
+    
+    @Test
+    public void ensureContextExtraction() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedContext = "context";
+
+        String uri = "/context/shoppingCart";
+
+        assertEquals("Extracted data context is incorrect", expectedContext, handler.extractRequestContext(uri));
+    }
+    
+    @Test
+    public void ensureNestedContextExtraction() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedContext = "context";
+
+        String uri = "/context/subContext/shoppingCart";
+
+        assertEquals("Extracted data context is incorrect", expectedContext, handler.extractRequestContext(uri));
+    }
+    
+    @Test
+    public void ensureContextExtractionWithEndSlash() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedContext = "";
+
+        String uri = "/shoppingCart#1/";
+
+        assertEquals("Extracted data context is incorrect", expectedContext, handler.extractRequestContext(uri));
     }
 
     private BaseHttpMethodHandler createHandler() {
@@ -124,13 +206,6 @@ public class BaseHttpMethodHandlerTest {
                 versionFactoryMarshaller);
 
         return handler;
-    }
-
-    private void checkKeyExtrationResult(BaseHttpMethodHandler handler,
-            String expectedDataKey, String uri) {
-        assertEquals("Extracted data key is incorrect", hashFunction
-                .hash(expectedDataKey), handler.extractDataKeyHash(uri)
-                .longValue());
     }
 
     private class StubHandler extends BaseHttpMethodHandler {

@@ -26,10 +26,12 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.resolver.ResolutionResult;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.hydracache.server.data.versioning.Versioned;
 
 /**
@@ -46,14 +48,7 @@ public class EhcacheDataBank implements DataBank {
      */
     public static final String DEFAULT_CACHE_CONF_FILE_NAME = "cache.xml";
 
-    /**
-     * Ehcache name used by this implementation
-     */
-    public static final String CACHE_NAME = "hydra";
-
     private final CacheManager cacheManager;
-
-    private final Cache cache;
 
     private final ConflictResolver conflictResolver;
 
@@ -87,11 +82,6 @@ public class EhcacheDataBank implements DataBank {
             final CacheManager cacheManager) {
         this.cacheManager = cacheManager;
         this.conflictResolver = conflictResolver;
-
-        if (!this.cacheManager.cacheExists(CACHE_NAME))
-            this.cacheManager.addCache(CACHE_NAME);
-
-        cache = this.cacheManager.getCache(CACHE_NAME);
     }
 
     /*
@@ -99,8 +89,27 @@ public class EhcacheDataBank implements DataBank {
      * 
      * @see org.hydracache.server.data.storage.DataBank#get(java.lang.Long)
      */
-    public Data get(final Long keyHash) {
+    @Deprecated
+    @Override
+    public Data get(final Long keyHash) throws IOException {
+        return get(DEFAULT_CACHE_CONTEXT_NAME, keyHash);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.data.storage.DataBank#get(java.lang.String,
+     * java.lang.Long)
+     */
+    @Override
+    public Data get(String context, Long keyHash) throws IOException {
+        if(StringUtils.isBlank(context)){
+            context = DEFAULT_CACHE_CONTEXT_NAME;
+        }
+        
         Validate.isTrue(keyHash != null, "Data key hash can not be null");
+
+        Cache cache = acquireCache(context);
 
         final Element element = cache.get(keyHash);
 
@@ -115,6 +124,15 @@ public class EhcacheDataBank implements DataBank {
         return (Data) data;
     }
 
+    private Cache acquireCache(String cacheName) {
+        if (!cacheManager.cacheExists(cacheName))
+            cacheManager.addCache(cacheName);
+
+        Cache cache = cacheManager.getCache(cacheName);
+
+        return cache;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -122,15 +140,21 @@ public class EhcacheDataBank implements DataBank {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Data> getAll() {
-        List keys = cache.getKeys();
+    public Collection<Data> getAll() throws IOException {
         List<Data> results = new ArrayList<Data>();
+        String[] cacheNames = cacheManager.getCacheNames();
 
-        for (Object eachKey : keys) {
-            if (eachKey instanceof Long)
-                results.add(get((Long) eachKey));
-            else
-                log.warn("Skipping unknown key: " + eachKey);
+        for (int i = 0; i < cacheNames.length; i++) {
+            String cacheName = cacheNames[i];
+            Cache cache = cacheManager.getCache(cacheName);
+            List keys = cache.getKeys();
+
+            for (Object eachKey : keys) {
+                if (eachKey instanceof Long)
+                    results.add(get(cacheName, (Long) eachKey));
+                else
+                    log.warn("Skipping unknown key: " + eachKey);
+            }
         }
 
         return results;
@@ -143,15 +167,36 @@ public class EhcacheDataBank implements DataBank {
      * org.hydracache.server.data.storage.DataBank#put(org.hydracache.server
      * .data.storage.Data)
      */
-    public void put(final Data newData) throws IOException {
-        Validate.notNull(newData, "Data object can not be null");
+    @Deprecated
+    @Override
+    public void put(final Data newData) throws IOException,
+            VersionConflictException {
+        put(DEFAULT_CACHE_CONTEXT_NAME, newData);
+    }
 
-        Data dataToStore = newData;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.data.storage.DataBank#put(java.lang.String,
+     * org.hydracache.server.data.storage.Data)
+     */
+    @Override
+    public void put(String context, Data data) throws IOException,
+            VersionConflictException {
+        if(StringUtils.isBlank(context)){
+            context = DEFAULT_CACHE_CONTEXT_NAME;
+        }
+        
+        Cache cache = acquireCache(context);
 
-        if (dataAlreadyExists(newData)) {
-            final Data oldData = get(newData.getKeyHash());
+        Validate.notNull(data, "Data object can not be null");
 
-            final List<Versioned> conflictList = buildConflictList(newData,
+        Data dataToStore = data;
+
+        if (dataAlreadyExists(context, data)) {
+            final Data oldData = get(context, data.getKeyHash());
+
+            final List<Versioned> conflictList = buildConflictList(data,
                     oldData);
 
             final ResolutionResult resolutionResult = conflictResolver
@@ -160,12 +205,12 @@ public class EhcacheDataBank implements DataBank {
             if (resolutionResult.stillHasConflict())
                 throw new DataConflictException(
                         "Unresolvable version conflict detected for data["
-                                + newData + "]");
+                                + data + "]");
 
             dataToStore = getMostAliveVersion(resolutionResult);
         }
 
-        final Element element = new Element(newData.getKeyHash(), dataToStore);
+        final Element element = new Element(data.getKeyHash(), dataToStore);
 
         cache.put(element);
     }
@@ -180,7 +225,8 @@ public class EhcacheDataBank implements DataBank {
         return Arrays.asList(oldData, newData);
     }
 
-    private boolean dataAlreadyExists(final Data newData) {
-        return get(newData.getKeyHash()) != null;
+    private boolean dataAlreadyExists(final String context, final Data newData)
+            throws IOException {
+        return get(context, newData.getKeyHash()) != null;
     }
 }

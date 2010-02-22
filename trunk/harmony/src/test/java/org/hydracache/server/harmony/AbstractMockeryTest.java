@@ -75,31 +75,31 @@ public class AbstractMockeryTest {
         });
     }
 
-    protected static void addLocalPutExp(Mockery context,
-            final HarmonyDataBank dataBank) throws Exception {
+    protected static void addLocalPutExp(final Mockery context,
+            final HarmonyDataBank dataBank, final String storageContext) throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).putLocally(with(any(Data.class)));
+                one(dataBank).putLocally(with(storageContext), with(any(Data.class)));
             }
         });
     }
 
     protected static void addLocalGetExp(Mockery context,
-            final HarmonyDataBank dataBank, final Data testData)
+            final HarmonyDataBank dataBank, final Data testData, final String storageContext)
             throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).getLocally(with(any(Long.class)));
+                one(dataBank).getLocally(with(storageContext), with(any(Long.class)));
                 will(returnValue(testData));
             }
         });
     }
 
     protected static void addLocalGetNothingExp(Mockery context,
-            final HarmonyDataBank dataBank) throws Exception {
+            final HarmonyDataBank dataBank, final String storageContext) throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).getLocally(with(any(Long.class)));
+                one(dataBank).getLocally(with(storageContext), with(any(Long.class)));
                 will(returnValue(null));
             }
         });

@@ -31,7 +31,8 @@ import org.junit.Before;
 
 public class AbstractHttpMethodHandlerTest {
 
-    protected static final String TEST_KEY_REQUEST_CTX = "/testKey";
+    protected static final String TEST_KEY_REQUEST_CTX = "/testContext/testKey";
+    protected String testStorageContext = "testContext";
     protected Mockery context;
     protected HttpResponse response;
     protected IncrementVersionFactory versionFactoryMarshaller;
@@ -77,21 +78,23 @@ public class AbstractHttpMethodHandlerTest {
         context.assertIsSatisfied();
     }
 
-    protected void addNullReturnedFromLocalGetExp(final HarmonyDataBank dataBank)
+    protected void addNullReturnedFromLocalGetExp(
+            final HarmonyDataBank dataBank, final String storageContext)
             throws IOException {
         context.checking(new Expectations() {
             {
-                atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
+                atLeast(1).of(dataBank).getLocally(with(storageContext),
+                        with(any(Long.class)));
                 will(returnValue(null));
             }
         });
     }
 
-    protected void addSuccessLocalPutExp(final HarmonyDataBank dataBank)
-            throws Exception {
+    protected void addSuccessLocalPutExp(final HarmonyDataBank dataBank,
+            final String storageContext) throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).put(with(any(Data.class)));
+                one(dataBank).put(with(storageContext), with(any(Data.class)));
             }
         });
     }
@@ -116,11 +119,12 @@ public class AbstractHttpMethodHandlerTest {
         return RandomStringUtils.random(10).getBytes();
     }
 
-    protected void addConflictLocalGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
+    protected void addConflictLocalGetExp(final HarmonyDataBank dataBank,
+            final String storageContext) throws IOException {
         context.checking(new Expectations() {
             {
-                one(dataBank).getLocally(with(any(Long.class)));
+                one(dataBank).getLocally(with(storageContext),
+                        with(any(Long.class)));
                 Data data = new Data();
                 data.setVersion(new IncrementVersionFactory().create(sourceId)
                         .incrementFor(localId));
@@ -145,11 +149,12 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addSuccessfulLocalGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
+    protected void addSuccessfulLocalGetExp(final HarmonyDataBank dataBank,
+            final String storageContext) throws IOException {
         context.checking(new Expectations() {
             {
-                atLeast(1).of(dataBank).getLocally(with(any(Long.class)));
+                atLeast(1).of(dataBank).getLocally(with(storageContext),
+                        with(any(Long.class)));
                 Data data = new Data();
                 data.setVersion(new IncrementVersionFactory().create(sourceId));
                 will(returnValue(data));
@@ -200,11 +205,11 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addSuccessfulReliableGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
+    protected void addSuccessfulReliableGetExp(final HarmonyDataBank dataBank,
+            final String storageContext) throws IOException {
         context.checking(new Expectations() {
             {
-                one(dataBank).get(with(any(Long.class)));
+                one(dataBank).get(with(storageContext), with(any(Long.class)));
                 Data data = new Data();
                 data.setVersion(new IncrementVersionFactory().create(sourceId));
                 will(returnValue(data));
@@ -212,11 +217,11 @@ public class AbstractHttpMethodHandlerTest {
         });
     }
 
-    protected void addNotFoundReliableGetExp(final HarmonyDataBank dataBank)
-            throws IOException {
+    protected void addNotFoundReliableGetExp(final HarmonyDataBank dataBank,
+            final String storageContext) throws IOException {
         context.checking(new Expectations() {
             {
-                one(dataBank).get(with(any(Long.class)));
+                one(dataBank).get(with(storageContext), with(any(Long.class)));
                 will(returnValue(null));
             }
         });

@@ -69,11 +69,12 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
 
         PutOperation putOperation = (PutOperation) message;
 
+        String context = putOperation.getContext();
         Data dataToPut = putOperation.getData();
 
         try {
-            Data currentData = consolidateWithLocalData(dataToPut);
-            harmonyDataBank.putLocally(currentData);
+            Data currentData = consolidateWithLocalData(context, dataToPut);
+            harmonyDataBank.putLocally(context, currentData);
             broadcastPutResponse(putOperation);
 
             if (log.isDebugEnabled())
@@ -83,9 +84,9 @@ public class PutOperationHandler extends AbstractControlMessageHandler {
         }
     }
 
-    private Data consolidateWithLocalData(Data dataToPut) throws IOException,
+    private Data consolidateWithLocalData(String context, Data dataToPut) throws IOException,
             VersionConflictException {
-        Data existingData = harmonyDataBank.getLocally(dataToPut.getKeyHash());
+        Data existingData = harmonyDataBank.getLocally(context, dataToPut.getKeyHash());
         Data result = dataToPut;
 
         if (existingData != null) {

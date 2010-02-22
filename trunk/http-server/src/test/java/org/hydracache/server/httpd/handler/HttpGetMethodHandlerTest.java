@@ -56,11 +56,11 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     public void ensureHandleGetDataCorrectly() throws HttpException,
             IOException {
         {
-            addGetRequestLineExp(request, "/testKey/");
+            addGetRequestLineExp(request, "/testContext/testKey/");
         }
 
         {
-            addSuccessfulReliableGetExp(dataBank);
+            addSuccessfulReliableGetExp(dataBank, testStorageContext);
         }
 
         {
@@ -74,11 +74,11 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     @Test
     public void ensureNotFoundGenerates404() throws Exception {
         {
-            addGetRequestLineExp(request, "/testKey/");
+            addGetRequestLineExp(request, "/testContext/testKey/");
         }
 
         {
-            addNotFoundReliableGetExp(dataBank);
+            addNotFoundReliableGetExp(dataBank, testStorageContext);
         }
 
         {

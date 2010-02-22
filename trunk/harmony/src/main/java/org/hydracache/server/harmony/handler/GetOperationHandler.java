@@ -29,8 +29,10 @@ public class GetOperationHandler extends AbstractControlMessageHandler {
     @Override
     protected void doHandle(ControlMessage message) throws Exception {
         GetOperation getRequest = (GetOperation) message;
+        
+        String storageContext = getRequest.getContext();
 
-        Data currentData = harmonyDataBank.getLocally(getRequest.getHashKey());
+        Data currentData = harmonyDataBank.getLocally(storageContext, getRequest.getHashKey());
 
         if (currentData != null) {
             GetOperationResponse response = new GetOperationResponse(space

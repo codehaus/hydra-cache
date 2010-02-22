@@ -30,10 +30,17 @@ public class GetOperation extends RequestMessage {
 
     private Long hashKey;
 
-    public GetOperation(Identity source, Long hashKey) {
+    private String context;
+
+    public GetOperation(Identity source, String context, Long hashKey) {
         super(source);
 
         this.hashKey = hashKey;
+        this.context = context;
+    }
+
+    public String getContext() {
+        return context;
     }
 
     public Long getHashKey() {

@@ -95,8 +95,9 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
     private void handleGetData(HttpRequest request, HttpResponse response)
             throws IOException {
         Long dataKey = extractDataKeyHash(request);
+        String storageContext = extractRequestContext(request);
 
-        Data data = dataBank.get(dataKey);
+        Data data = dataBank.get(storageContext, dataKey);
 
         if (data == null) {
             handleNotFound(response);

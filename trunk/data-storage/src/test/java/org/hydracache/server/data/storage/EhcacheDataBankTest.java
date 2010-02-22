@@ -51,6 +51,8 @@ public class EhcacheDataBankTest {
     private Identity NODE_B;
 
     private CacheManager cacheManager;
+    
+    private String context = "testContext";
 
     @Before
     public void before() throws UnknownHostException {
@@ -63,16 +65,30 @@ public class EhcacheDataBankTest {
     public void after() {
         cacheManager.clearAll();
     }
+    
+    @Test
+    public void testPutAndGetWithDefaultContext() throws Exception {
+        final DataBank dataBank = createDataBank();
+
+        final Data data = generateData(NODE_A);
+        
+        dataBank.put("", data);
+
+        final Data data2 = dataBank.get(DataBank.DEFAULT_CACHE_CONTEXT_NAME, data.getKeyHash());
+
+        assertEquals("Straight get after put retrieved incorrect data", data,
+                data2);
+    }
 
     @Test
     public void testPutAndGetWithStorage() throws Exception {
         final DataBank dataBank = createDataBank();
 
         final Data data = generateData(NODE_A);
+        
+        dataBank.put(context, data);
 
-        dataBank.put(data);
-
-        final Data data2 = dataBank.get(data.getKeyHash());
+        final Data data2 = dataBank.get(context, data.getKeyHash());
 
         assertEquals("Straight get after put retrieved incorrect data", data,
                 data2);
@@ -84,15 +100,15 @@ public class EhcacheDataBankTest {
 
         Data data = generateData(NODE_A);
 
-        dataBank.put(data);
+        dataBank.put(context, data);
 
         final Data newData = generateData(NODE_A);
 
         newData.setVersion(newData.getVersion().incrementFor(NODE_A));
 
-        dataBank.put(newData);
+        dataBank.put(context, newData);
 
-        data = dataBank.get(DEFAULT_KEY_HASH);
+        data = dataBank.get(context, DEFAULT_KEY_HASH);
 
         assertEquals(
                 "Put and get with sequential version increment returned incorrect result",
@@ -103,7 +119,7 @@ public class EhcacheDataBankTest {
     public void testGetNonexistantData() throws Exception {
         final DataBank dataBank = createDataBank();
 
-        final Data data = dataBank.get(NON_EXISTANT_KEY_HASH);
+        final Data data = dataBank.get(context, NON_EXISTANT_KEY_HASH);
 
         assertTrue("Null should be returned", data == null);
     }
@@ -114,11 +130,11 @@ public class EhcacheDataBankTest {
 
         final Data data = generateData(NODE_A);
 
-        dataBank.put(data);
+        dataBank.put(context, data);
 
         final Data data2 = generateData(NODE_B);
 
-        dataBank.put(data2);
+        dataBank.put(context, data2);
     }
 
     @Test
@@ -126,7 +142,7 @@ public class EhcacheDataBankTest {
         final DataBank dataBank = createDataBank();
 
         Data data = generateData(NODE_A);
-        dataBank.put(data);
+        dataBank.put(context, data);
 
         Collection<Data> allData = dataBank.getAll();
 

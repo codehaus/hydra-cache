@@ -20,8 +20,8 @@ public class PrintStorageInfoActionTest {
 
         DataBank dataBank = new EhcacheDataBank(new ArbitraryResolver());
         
-        dataBank.put(new Data(RandomUtils.nextLong()));
-        dataBank.put(new Data(RandomUtils.nextLong()));
+        dataBank.put("testContext", new Data(RandomUtils.nextLong()));
+        dataBank.put("testContext", new Data(RandomUtils.nextLong()));
 
         PrintStorageInfoAction handler = new PrintStorageInfoAction(dataBank);
 

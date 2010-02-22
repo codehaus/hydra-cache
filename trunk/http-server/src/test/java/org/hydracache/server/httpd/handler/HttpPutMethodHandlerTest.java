@@ -63,8 +63,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         }
 
         {
-            addNullReturnedFromLocalGetExp(dataBank);
-            addSuccessLocalPutExp(dataBank);
+            addNullReturnedFromLocalGetExp(dataBank, testStorageContext);
+            addSuccessLocalPutExp(dataBank, testStorageContext);
         }
 
         {
@@ -98,7 +98,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         }
 
         {
-            addConflictLocalGetExp(dataBank);
+            addConflictLocalGetExp(dataBank, testStorageContext);
         }
 
         {
@@ -118,8 +118,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         }
 
         {
-            addNullReturnedFromLocalGetExp(dataBank);
-            addSuccessLocalPutExp(dataBank);
+            addNullReturnedFromLocalGetExp(dataBank, testStorageContext);
+            addSuccessLocalPutExp(dataBank, testStorageContext);
         }
 
         {
@@ -147,8 +147,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         }
 
         {
-            addSuccessfulLocalGetExp(dataBank);
-            addSuccessLocalPutExp(dataBank);
+            addSuccessfulLocalGetExp(dataBank, testStorageContext);
+            addSuccessLocalPutExp(dataBank, testStorageContext);
         }
 
         {

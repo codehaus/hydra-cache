@@ -16,6 +16,8 @@ public class GetOperationHandlerTest extends AbstractMockeryTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }
     };
+    
+    private String storageContext = "testContext";
 
     @Test
     public void ensureGetReturnsAndBroadcastLocalData() throws Exception {
@@ -23,7 +25,7 @@ public class GetOperationHandlerTest extends AbstractMockeryTest {
 
         {
             addLocalGetExp(context, dataBank, TestDataGenerator
-                    .createRandomData());
+                    .createRandomData(), storageContext);
         }
 
         final Space space = context.mock(Space.class);
@@ -39,7 +41,7 @@ public class GetOperationHandlerTest extends AbstractMockeryTest {
 
         GetOperationHandler handler = new GetOperationHandler(space, memberRegistry, dataBank);
 
-        GetOperation getOperation = new GetOperation(sourceId, testHashKey);
+        GetOperation getOperation = new GetOperation(sourceId, storageContext, testHashKey);
 
         handler.handle(getOperation);
 

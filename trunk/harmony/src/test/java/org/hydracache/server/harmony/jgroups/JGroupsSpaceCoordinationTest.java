@@ -96,7 +96,7 @@ public class JGroupsSpaceCoordinationTest {
                 new KetamaBasedHashFunction(), SUBSTANCE_SIZE);
         space.setMultiplexRecevier(multiplexMessageReceiver);
 
-        final PutOperation putOperation = new PutOperation(serverId, new Data());
+        final PutOperation putOperation = new PutOperation(serverId, "testContext", new Data());
 
         responses = space.broadcast(putOperation);
 

@@ -27,6 +27,7 @@ import org.hydracache.server.data.versioning.VersionConflictException;
  * 
  */
 public interface DataBank {
+    String DEFAULT_CACHE_CONTEXT_NAME = "__hydra-default__";
 
     /**
      * Put the given data into the bank storage
@@ -34,7 +35,20 @@ public interface DataBank {
      * @param data
      *            data
      */
+    @Deprecated
     void put(Data data) throws IOException, VersionConflictException;
+
+    /**
+     * Ptt the given data into the bank storage and associate it with the
+     * specified context
+     * 
+     * @param context
+     *            storage context
+     * @param data
+     *            data
+     */
+    void put(String context, Data data) throws IOException,
+            VersionConflictException;
 
     /**
      * Retrieve data using the given key hash
@@ -43,8 +57,25 @@ public interface DataBank {
      *            key
      * @return data instance
      */
+    @Deprecated
     Data get(Long keyHash) throws IOException;
 
-    Collection<Data> getAll();
+    /**
+     * Retrieve data using the given key hash
+     * 
+     * @param context
+     *            storage context
+     * @param keyHash
+     *            key
+     * @return data instance
+     */
+    Data get(String context, Long keyHash) throws IOException;
+
+    /**
+     * Get all data contained in this data bank from all storage contexts
+     * 
+     * @return all data in this storage bank
+     */
+    Collection<Data> getAll() throws IOException;
 
 }

@@ -103,7 +103,7 @@ public class MultiplexMessageReceiverTest extends AbstractMockeryTest {
                 expectedNumOfResps);
 
         final PutOperation request = new PutOperation(NEIGHBOR_SOURCE_ID,
-                TestDataGenerator.createRandomData());
+                "testContext", TestDataGenerator.createRandomData());
 
         Future<Collection<ResponseMessage>> responseFuture = receiver
                 .receiveFor(request);
