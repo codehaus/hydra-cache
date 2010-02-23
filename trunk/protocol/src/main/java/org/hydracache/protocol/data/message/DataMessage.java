@@ -15,6 +15,8 @@
  */
 package org.hydracache.protocol.data.message;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -27,7 +29,9 @@ import org.hydracache.server.data.versioning.Version;
  * @author nzhu
  * 
  */
-public class DataMessage {
+public class DataMessage implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final short BLOB_DATA_MESSAGE_TYPE = 100;
 

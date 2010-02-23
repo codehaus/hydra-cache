@@ -32,7 +32,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  */
 public class Identity implements Serializable, Comparable<Identity> {
     public static final Identity NULL_IDENTITY = getNullIdentity();
-    
+
     private static final long serialVersionUID = 1L;
 
     private final InetAddress address;
@@ -42,7 +42,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     private transient String stringValue;
 
     private transient int hashCode;
-    
+
     public Identity(final InetAddress address, final short port) {
         Validate.notNull(address, "Address can not be null");
 
@@ -67,7 +67,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     public Identity(final int port) {
         this((short) port);
     }
-    
+
     public InetAddress getAddress() {
         return address;
     }
@@ -75,7 +75,7 @@ public class Identity implements Serializable, Comparable<Identity> {
     public short getPort() {
         return port;
     }
-    
+
     @Override
     public String toString() {
         if (stringValue == null)
