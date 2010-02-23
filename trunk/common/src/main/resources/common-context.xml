@@ -36,4 +36,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </bean>
 
     <bean id="identityMarshaller" class="org.hydracache.server.IdentityMarshaller" />
+    
+    <bean id="identityXmlMarshaller" class="org.hydracache.server.IdentityXmlMarshaller" />
 </beans>

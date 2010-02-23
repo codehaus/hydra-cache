@@ -20,6 +20,9 @@ import java.io.StringReader;
 import java.net.Inet4Address;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.hydracache.io.XmlMarshaller;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -31,13 +34,24 @@ import org.jdom.output.XMLOutputter;
  * @author nzhu
  * 
  */
-public class IdentityXmlMarshaller {
+public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
+    private static Logger log = Logger.getLogger(IdentityXmlMarshaller.class);
 
     private static final String PORT_ATTRIBUTE_NAME = "port";
     private static final String ADDRESS_ATTRIBUTE_NAME = "address";
     private static final String ID_ELEMENT_NAME = "identity";
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hydracache.server.XmlMarshaller#writeObject(org.hydracache.server
+     * .Identity)
+     */
     public String writeObject(Identity id) throws IOException {
+        if (id == null)
+            return "<" + ID_ELEMENT_NAME + "/>";
+
         Element idElement = new Element(ID_ELEMENT_NAME);
 
         idElement.setAttribute(new Attribute(ADDRESS_ATTRIBUTE_NAME, Base64
@@ -50,22 +64,38 @@ public class IdentityXmlMarshaller {
         return outputer.outputString(idElement);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.XmlMarshaller#readObject(java.lang.String)
+     */
     public Identity readObject(String xml) throws IOException {
         try {
+            if (StringUtils.isBlank(xml))
+                return Identity.NULL_IDENTITY;
+
             SAXBuilder builder = new SAXBuilder();
 
             Document doc = builder.build(new StringReader(xml));
 
             Element idElement = doc.getRootElement();
 
-            byte[] address = Base64.decodeBase64(idElement
-                    .getAttributeValue(ADDRESS_ATTRIBUTE_NAME));
-            short port = Short.valueOf(idElement
-                    .getAttributeValue(PORT_ATTRIBUTE_NAME));
+            String addressAttributeValue = idElement
+                    .getAttributeValue(ADDRESS_ATTRIBUTE_NAME);
+            String portAttributeValue = idElement
+                    .getAttributeValue(PORT_ATTRIBUTE_NAME);
+
+            if (StringUtils.isBlank(addressAttributeValue)
+                    || StringUtils.isBlank(portAttributeValue))
+                return Identity.NULL_IDENTITY;
+
+            byte[] address = Base64.decodeBase64(addressAttributeValue);
+            short port = Short.valueOf(portAttributeValue);
 
             return new Identity(Inet4Address.getByAddress(address), port);
         } catch (JDOMException jdex) {
-            throw new IOException("Failed to read object", jdex);
+            log.error("Failed to parse input xml", jdex);
+            return Identity.NULL_IDENTITY;
         }
     }
 

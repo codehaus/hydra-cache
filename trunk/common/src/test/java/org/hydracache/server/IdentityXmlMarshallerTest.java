@@ -48,4 +48,39 @@ public class IdentityXmlMarshallerTest {
         assertEquals("Id is incorrect", id, newId);
     }
 
+    @Test
+    public void ensureIdentityCanEncodeNull() throws IOException {
+        String xml = marshaller.writeObject(null);
+
+        assertEquals("Incorrect output", "<identity/>", xml);
+    }
+
+    @Test
+    public void ensureIdentityCanDecodeNull() throws IOException {
+        Identity newId = marshaller.readObject(null);
+
+        assertEquals("Incorrect id", Identity.NULL_IDENTITY, newId);
+    }
+
+    @Test
+    public void ensureIdentityCanDecodeBlank() throws IOException {
+        Identity newId = marshaller.readObject(" <identity /> ");
+
+        assertEquals("Incorrect id", Identity.NULL_IDENTITY, newId);
+    }
+
+    @Test
+    public void ensureIdentityCanDecodeBlankXml() throws IOException {
+        Identity newId = marshaller.readObject(" <identity /> ");
+
+        assertEquals("Incorrect id", Identity.NULL_IDENTITY, newId);
+    }
+
+    @Test
+    public void ensureIdentityCanDecodeInvalidXml() throws IOException {
+        Identity newId = marshaller.readObject(" < identity > ");
+
+        assertEquals("Incorrect id", Identity.NULL_IDENTITY, newId);
+    }
+
 }
