@@ -18,6 +18,8 @@ package org.hydracache.server.data.versioning;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.hydracache.io.XmlMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityXmlMarshaller;
@@ -32,17 +34,22 @@ import org.jdom.output.XMLOutputter;
  * 
  */
 public class VersionXmlMarshaller implements XmlMarshaller<Version> {
+    private static Logger log = Logger.getLogger(VersionXmlMarshaller.class);
 
     private static final String VALUE_ELEMENT_NAME = "value";
 
     private static final String INCREMENT_ELEMENT_NAME = "increment";
 
     private static final String VERSION_ELEMENT_NAME = "version";
-    
+
     private IdentityXmlMarshaller identityXmlMarshaller;
 
-    public VersionXmlMarshaller(IdentityXmlMarshaller identityXmlMarshaller) {
+    private VersionFactory versionFactory;
+
+    public VersionXmlMarshaller(IdentityXmlMarshaller identityXmlMarshaller,
+            VersionFactory versionFactory) {
         this.identityXmlMarshaller = identityXmlMarshaller;
+        this.versionFactory = versionFactory;
     }
 
     /*
@@ -52,8 +59,12 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
      */
     @Override
     public Version readObject(String xml) throws IOException {
+        if (StringUtils.isBlank(xml))
+            return versionFactory.createNull();
+
+        SAXBuilder builder = new SAXBuilder();
+
         try {
-            SAXBuilder builder = new SAXBuilder();
             Document doc = builder.build(new StringReader(xml));
             Element versionElement = doc.getRootElement();
 
@@ -71,7 +82,8 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
 
             return new Increment(nodeId, value);
         } catch (JDOMException e) {
-            throw new IOException("Failed to parse input xml", e);
+            log.error("Failed to parse input xml", e);
+            return versionFactory.createNull();
         }
     }
 

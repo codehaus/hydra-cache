@@ -36,7 +36,7 @@ public class VersionXmlMarshallerTest {
     Identity nodeId = new Identity(8080);
 
     VersionXmlMarshaller marshaller = new VersionXmlMarshaller(
-            identityXmlMarshaller);
+            identityXmlMarshaller, incrementVersionFactory);
 
     @Test
     public void ensureEncodeXmlForIncrement() throws Exception {
@@ -71,6 +71,27 @@ public class VersionXmlMarshallerTest {
         Version newVersion = marshaller.readObject(xml);
 
         assertEquals("Incorrect object read result", version, newVersion);
+    }
+    
+    @Test
+    public void ensureDecodeXmlHandlesNull() throws Exception{
+        Version newVersion = marshaller.readObject(null);
+
+        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+    }
+    
+    @Test
+    public void ensureDecodeXmlHandlesBlank() throws Exception{
+        Version newVersion = marshaller.readObject(" ");
+
+        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+    }
+    
+    @Test
+    public void ensureDecodeXmlHandlesInvalidXml() throws Exception{
+        Version newVersion = marshaller.readObject(" <somethingElse> />");
+
+        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
     }
 
 }
