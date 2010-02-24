@@ -15,6 +15,7 @@
  */
 package org.hydracache.server.data.versioning;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -34,12 +35,12 @@ public class VersionXmlMarshallerTest {
 
     Identity nodeId = new Identity(8080);
 
-    @Test
-    public void ensureXmlSerialization() throws Exception {
-        Version version = incrementVersionFactory.create(nodeId);
+    VersionXmlMarshaller marshaller = new VersionXmlMarshaller(
+            identityXmlMarshaller);
 
-        VersionXmlMarshaller marshaller = new VersionXmlMarshaller(
-                identityXmlMarshaller);
+    @Test
+    public void ensureEncodeXmlForIncrement() throws Exception {
+        Version version = incrementVersionFactory.create(nodeId);
 
         String xml = new XMLOutputter().outputString(marshaller
                 .writeObject(version));
@@ -50,6 +51,18 @@ public class VersionXmlMarshallerTest {
         assertTrue("Incorrect output", xml.contains("<value"));
         assertTrue("Incorrect output", xml.contains("<identity"));
         assertTrue("Incorrect output", xml.endsWith("</version>"));
+    }
+
+    @Test
+    public void ensureDecodeXmlForIncrement() throws Exception {
+        Version version = incrementVersionFactory.create(nodeId);
+
+        String xml = new XMLOutputter().outputString(marshaller
+                .writeObject(version));
+
+        Version newVersion = marshaller.readObject(xml);
+
+        assertEquals("Incorrect object read result", version, newVersion);
     }
 
 }

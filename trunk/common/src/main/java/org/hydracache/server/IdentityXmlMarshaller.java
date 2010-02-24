@@ -36,9 +36,9 @@ import org.jdom.input.SAXBuilder;
 public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
     private static Logger log = Logger.getLogger(IdentityXmlMarshaller.class);
 
-    private static final String PORT_ATTRIBUTE_NAME = "port";
-    private static final String ADDRESS_ATTRIBUTE_NAME = "address";
-    private static final String ID_ELEMENT_NAME = "identity";
+    public static final String PORT_ATTRIBUTE_NAME = "port";
+    public static final String ADDRESS_ATTRIBUTE_NAME = "address";
+    public static final String ID_ELEMENT_NAME = "identity";
 
     /*
      * (non-Javadoc)

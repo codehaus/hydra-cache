@@ -16,10 +16,15 @@
 package org.hydracache.server.data.versioning;
 
 import java.io.IOException;
+import java.io.StringReader;
 
 import org.hydracache.io.XmlMarshaller;
+import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityXmlMarshaller;
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 /**
@@ -41,8 +46,26 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
      */
     @Override
     public Version readObject(String xml) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            SAXBuilder builder = new SAXBuilder();
+            Document doc = builder.build(new StringReader(xml));
+            Element versionElement = doc.getRootElement();
+
+            Element incrementElement = versionElement.getChild("increment");
+
+            Element nodeIdElement = incrementElement
+                    .getChild(IdentityXmlMarshaller.ID_ELEMENT_NAME);
+
+            Identity nodeId = identityXmlMarshaller
+                    .readObject(new XMLOutputter().outputString(nodeIdElement));
+
+            long value = Long.valueOf(incrementElement.getChild("value")
+                    .getValue());
+
+            return new Increment(nodeId, value);
+        } catch (JDOMException e) {
+            throw new IOException("Failed to parse input xml", e);
+        }
     }
 
     /*
@@ -58,9 +81,8 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
 
         Element incrementElement = new Element("increment");
 
-        incrementElement.addContent(new Element("nodeId")
-                .addContent(identityXmlMarshaller.writeObject(increment
-                        .getNodeId())));
+        incrementElement.addContent(identityXmlMarshaller.writeObject(increment
+                .getNodeId()));
 
         Element valueElement = new Element("value").addContent(String
                 .valueOf(increment.getValue()));
@@ -71,5 +93,4 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
 
         return versionElement;
     }
-
 }
