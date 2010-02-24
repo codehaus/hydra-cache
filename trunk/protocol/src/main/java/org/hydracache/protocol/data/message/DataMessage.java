@@ -52,8 +52,20 @@ public class DataMessage implements Serializable {
      *            data to be wrapped
      */
     public DataMessage(Data data) {
-        this.version = data.getVersion();
-        this.blob = data.getContent();
+        this(data.getVersion(), data.getContent());
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param version
+     *            version
+     * @param blob
+     *            binary data
+     */
+    public DataMessage(Version version, byte[] blob) {
+        this.version = version;
+        this.blob = blob;
     }
 
     public Version getVersion() {

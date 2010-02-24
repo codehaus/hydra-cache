@@ -35,11 +35,11 @@ import org.jdom.output.XMLOutputter;
 public class VersionXmlMarshaller implements XmlMarshaller<Version> {
     private static Logger log = Logger.getLogger(VersionXmlMarshaller.class);
 
-    private static final String VALUE_ELEMENT_NAME = "value";
+    public static final String VALUE_ELEMENT_NAME = "value";
 
-    private static final String INCREMENT_ELEMENT_NAME = "increment";
+    public static final String INCREMENT_ELEMENT_NAME = "increment";
 
-    private static final String VERSION_ELEMENT_NAME = "version";
+    public static final String VERSION_ELEMENT_NAME = "version";
 
     private IdentityXmlMarshaller identityXmlMarshaller;
 
