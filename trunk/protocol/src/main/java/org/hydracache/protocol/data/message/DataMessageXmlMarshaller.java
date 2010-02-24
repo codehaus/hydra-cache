@@ -51,13 +51,15 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
         try {
             Document doc = builder.build(new StringReader(xml));
             Element messageElement = doc.getRootElement();
-            
+
             Element dataElement = messageElement.getChild("data");
             byte[] data = Base64.decodeBase64(dataElement.getValue());
-            
-            Element versionElement = messageElement.getChild(VersionXmlMarshaller.VERSION_ELEMENT_NAME);
-            Version version = versionXmlMarshaller.readObject(new XMLOutputter().outputString(versionElement));            
-            
+
+            Element versionElement = messageElement
+                    .getChild(VersionXmlMarshaller.VERSION_ELEMENT_NAME);
+            Version version = versionXmlMarshaller
+                    .readObject(new XMLOutputter().outputString(versionElement));
+
             return new DataMessage(version, data);
         } catch (Exception ex) {
             throw new IOException("Failed to read from xml", ex);
@@ -70,13 +72,16 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
      * @see org.hydracache.io.XmlMarshaller#writeObject(java.lang.Object)
      */
     @Override
-    public Element writeObject(DataMessage id) throws IOException {
+    public Element writeObject(DataMessage dataMessage) throws IOException {
+        if (dataMessage == null)
+            return new Element("message");
+
         Element messageElement = new Element("message");
 
         messageElement.addContent(new Element("data").addContent(Base64
-                .encodeBase64String(id.getBlob())));
+                .encodeBase64String(dataMessage.getBlob())));
 
-        Element versionElement = versionXmlMarshaller.writeObject(id
+        Element versionElement = versionXmlMarshaller.writeObject(dataMessage
                 .getVersion());
 
         messageElement.addContent(versionElement);

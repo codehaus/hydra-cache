@@ -15,6 +15,10 @@
  */
 package org.hydracache.protocol.data.message;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
 import org.hydracache.server.Identity;
@@ -24,10 +28,8 @@ import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.hydracache.server.data.versioning.VersionXmlMarshaller;
-import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * @author nzhu
@@ -56,6 +58,14 @@ public class DataMessageXmlMarshallerTest {
         assertTrue("Missing child element", xml.contains("<data"));
         assertTrue("Missing child element", xml.contains("<version"));
     }
+    
+    @Test
+    public void ensureXmlEcodingHanldesNull() throws Exception{
+        String xml = new XMLOutputter().outputString(marshaller
+                .writeObject(null));
+        
+        assertEquals("Xml output is incorrect", "<message />", xml);
+    }
 
     @Test
     public void ensureXmlDecode() throws Exception {
@@ -68,6 +78,21 @@ public class DataMessageXmlMarshallerTest {
         DataMessage restoredMsg = marshaller.readObject(xml);
 
         assertEquals("Decoded message object is incorrect", dataMsg, restoredMsg);
+    }
+    
+    @Test(expected=IOException.class)
+    public void ensureXmlDecodingHandlesNull() throws Exception{
+        marshaller.readObject(null);
+    }
+    
+    @Test(expected=IOException.class)
+    public void ensureXmlDecodingHandlesBlank() throws Exception{
+        marshaller.readObject("");
+    }
+    
+    @Test(expected=IOException.class)
+    public void ensureXmlDecodingHandlesInvalidXml() throws Exception{
+        marshaller.readObject(" invalid xml <>");
     }
 
 }
