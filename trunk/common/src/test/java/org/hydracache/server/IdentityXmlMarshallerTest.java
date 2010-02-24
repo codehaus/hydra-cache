@@ -72,7 +72,7 @@ public class IdentityXmlMarshallerTest {
 
     @Test
     public void ensureIdentityCanDecodeBlank() throws IOException {
-        Identity newId = marshaller.readObject(" <identity /> ");
+        Identity newId = marshaller.readObject(" ");
 
         assertEquals("Incorrect id", Identity.NULL_IDENTITY, newId);
     }

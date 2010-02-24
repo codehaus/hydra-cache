@@ -88,6 +88,13 @@ public class VersionXmlMarshallerTest {
     }
     
     @Test
+    public void ensureDecodeXmlHandlesBlankXml() throws Exception{
+        Version newVersion = marshaller.readObject("<version/>");
+
+        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+    }
+    
+    @Test
     public void ensureDecodeXmlHandlesInvalidXml() throws Exception{
         Version newVersion = marshaller.readObject(" <somethingElse> />");
 

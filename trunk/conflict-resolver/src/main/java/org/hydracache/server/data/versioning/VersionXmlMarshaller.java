@@ -25,7 +25,6 @@ import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityXmlMarshaller;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
@@ -81,7 +80,7 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
                     VALUE_ELEMENT_NAME).getValue());
 
             return new Increment(nodeId, value);
-        } catch (JDOMException e) {
+        } catch (Exception e) {
             log.error("Failed to parse input xml", e);
             return versionFactory.createNull();
         }

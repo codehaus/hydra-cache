@@ -26,7 +26,6 @@ import org.hydracache.io.XmlMarshaller;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 /**
@@ -90,7 +89,7 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
             short port = Short.valueOf(portAttributeValue);
 
             return new Identity(Inet4Address.getByAddress(address), port);
-        } catch (JDOMException jdex) {
+        } catch (Exception jdex) {
             log.error("Failed to parse input xml", jdex);
             return Identity.NULL_IDENTITY;
         }
