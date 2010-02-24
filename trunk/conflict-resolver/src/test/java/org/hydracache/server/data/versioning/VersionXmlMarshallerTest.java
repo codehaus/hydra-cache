@@ -54,6 +54,14 @@ public class VersionXmlMarshallerTest {
     }
 
     @Test
+    public void ensureEncodeXmlHandlesNull() throws Exception {
+        String xml = new XMLOutputter().outputString(marshaller
+                .writeObject(null));
+
+        assertEquals("<version />", xml);
+    }
+
+    @Test
     public void ensureDecodeXmlForIncrement() throws Exception {
         Version version = incrementVersionFactory.create(nodeId);
 

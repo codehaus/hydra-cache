@@ -33,6 +33,12 @@ import org.jdom.output.XMLOutputter;
  */
 public class VersionXmlMarshaller implements XmlMarshaller<Version> {
 
+    private static final String VALUE_ELEMENT_NAME = "value";
+
+    private static final String INCREMENT_ELEMENT_NAME = "increment";
+
+    private static final String VERSION_ELEMENT_NAME = "version";
+    
     private IdentityXmlMarshaller identityXmlMarshaller;
 
     public VersionXmlMarshaller(IdentityXmlMarshaller identityXmlMarshaller) {
@@ -51,7 +57,8 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
             Document doc = builder.build(new StringReader(xml));
             Element versionElement = doc.getRootElement();
 
-            Element incrementElement = versionElement.getChild("increment");
+            Element incrementElement = versionElement
+                    .getChild(INCREMENT_ELEMENT_NAME);
 
             Element nodeIdElement = incrementElement
                     .getChild(IdentityXmlMarshaller.ID_ELEMENT_NAME);
@@ -59,8 +66,8 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
             Identity nodeId = identityXmlMarshaller
                     .readObject(new XMLOutputter().outputString(nodeIdElement));
 
-            long value = Long.valueOf(incrementElement.getChild("value")
-                    .getValue());
+            long value = Long.valueOf(incrementElement.getChild(
+                    VALUE_ELEMENT_NAME).getValue());
 
             return new Increment(nodeId, value);
         } catch (JDOMException e) {
@@ -75,17 +82,20 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
      */
     @Override
     public Element writeObject(Version id) throws IOException {
+        if (id == null)
+            return new Element(VERSION_ELEMENT_NAME);
+
         Increment increment = (Increment) id;
 
-        Element versionElement = new Element("version");
+        Element versionElement = new Element(VERSION_ELEMENT_NAME);
 
-        Element incrementElement = new Element("increment");
+        Element incrementElement = new Element(INCREMENT_ELEMENT_NAME);
 
         incrementElement.addContent(identityXmlMarshaller.writeObject(increment
                 .getNodeId()));
 
-        Element valueElement = new Element("value").addContent(String
-                .valueOf(increment.getValue()));
+        Element valueElement = new Element(VALUE_ELEMENT_NAME)
+                .addContent(String.valueOf(increment.getValue()));
 
         incrementElement.addContent(valueElement);
 
