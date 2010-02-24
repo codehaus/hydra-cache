@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hydracache.io.XmlMarshaller;
 import org.hydracache.server.Identity;
@@ -92,11 +93,14 @@ public class VersionXmlMarshaller implements XmlMarshaller<Version> {
      * @see org.hydracache.io.XmlMarshaller#writeObject(java.lang.Object)
      */
     @Override
-    public Element writeObject(Version id) throws IOException {
-        if (id == null)
+    public Element writeObject(Version version) throws IOException {
+        if (version == null)
             return new Element(VERSION_ELEMENT_NAME);
 
-        Increment increment = (Increment) id;
+        Validate.isTrue(version instanceof Increment,
+                "Version xml marshaller can only handle Increment");
+
+        Increment increment = (Increment) version;
 
         Element versionElement = new Element(VERSION_ELEMENT_NAME);
 

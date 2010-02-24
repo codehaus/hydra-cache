@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityXmlMarshaller;
 import org.jdom.output.XMLOutputter;
@@ -53,6 +55,12 @@ public class VersionXmlMarshallerTest {
         assertTrue("Incorrect output", xml.endsWith("</version>"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void ensureEncodeXmlOnlyAcceptsIncrement() throws IOException {
+        new XMLOutputter().outputString(marshaller
+                .writeObject(new VectorClockVersionFactory().create(nodeId)));
+    }
+
     @Test
     public void ensureEncodeXmlHandlesNull() throws Exception {
         String xml = new XMLOutputter().outputString(marshaller
@@ -72,33 +80,37 @@ public class VersionXmlMarshallerTest {
 
         assertEquals("Incorrect object read result", version, newVersion);
     }
-    
+
     @Test
-    public void ensureDecodeXmlHandlesNull() throws Exception{
+    public void ensureDecodeXmlHandlesNull() throws Exception {
         Version newVersion = marshaller.readObject(null);
 
-        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+        assertEquals("Incorrect object read result",
+                new IncrementVersionFactory().createNull(), newVersion);
     }
-    
+
     @Test
-    public void ensureDecodeXmlHandlesBlank() throws Exception{
+    public void ensureDecodeXmlHandlesBlank() throws Exception {
         Version newVersion = marshaller.readObject(" ");
 
-        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+        assertEquals("Incorrect object read result",
+                new IncrementVersionFactory().createNull(), newVersion);
     }
-    
+
     @Test
-    public void ensureDecodeXmlHandlesBlankXml() throws Exception{
+    public void ensureDecodeXmlHandlesBlankXml() throws Exception {
         Version newVersion = marshaller.readObject("<version/>");
 
-        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+        assertEquals("Incorrect object read result",
+                new IncrementVersionFactory().createNull(), newVersion);
     }
-    
+
     @Test
-    public void ensureDecodeXmlHandlesInvalidXml() throws Exception{
+    public void ensureDecodeXmlHandlesInvalidXml() throws Exception {
         Version newVersion = marshaller.readObject(" <somethingElse> />");
 
-        assertEquals("Incorrect object read result", new IncrementVersionFactory().createNull(), newVersion);
+        assertEquals("Incorrect object read result",
+                new IncrementVersionFactory().createNull(), newVersion);
     }
 
 }
