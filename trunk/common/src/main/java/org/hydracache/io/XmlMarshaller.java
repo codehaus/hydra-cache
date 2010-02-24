@@ -17,13 +17,15 @@ package org.hydracache.io;
 
 import java.io.IOException;
 
+import org.jdom.Element;
+
 /**
  * @author nzhu
  * 
  */
 public interface XmlMarshaller<T> {
 
-    public abstract String writeObject(T id) throws IOException;
+    public abstract Element writeObject(T id) throws IOException;
 
     public abstract T readObject(String xml) throws IOException;
 

@@ -17,6 +17,8 @@ package org.hydracache.server;
 
 import java.io.IOException;
 
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -31,7 +33,9 @@ public class IdentityXmlMarshallerTest {
 
     @Test
     public void ensureIdentityCanBeEncodedToXml() throws IOException {
-        String xml = marshaller.writeObject(id);
+        Element e = marshaller.writeObject(id);
+
+        String xml = new XMLOutputter().outputString(e);
 
         assertTrue("xml output is incorrect", xml.startsWith("<identity"));
         assertTrue("xml output is incorrect", xml.contains("address=\""));
@@ -41,7 +45,9 @@ public class IdentityXmlMarshallerTest {
 
     @Test
     public void ensureIdentityCanBeDecodedFromXml() throws IOException {
-        String xml = marshaller.writeObject(id);
+        Element e = marshaller.writeObject(id);
+
+        String xml = new XMLOutputter().outputString(e);
 
         Identity newId = marshaller.readObject(xml);
 
@@ -50,9 +56,11 @@ public class IdentityXmlMarshallerTest {
 
     @Test
     public void ensureIdentityCanEncodeNull() throws IOException {
-        String xml = marshaller.writeObject(null);
+        Element e = marshaller.writeObject(null);
 
-        assertEquals("Incorrect output", "<identity/>", xml);
+        String xml = new XMLOutputter().outputString(e);
+
+        assertEquals("Incorrect output", "<identity />", xml);
     }
 
     @Test

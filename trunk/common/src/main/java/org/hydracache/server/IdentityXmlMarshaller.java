@@ -28,7 +28,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
 
 /**
  * @author nzhu
@@ -48,9 +47,9 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
      * org.hydracache.server.XmlMarshaller#writeObject(org.hydracache.server
      * .Identity)
      */
-    public String writeObject(Identity id) throws IOException {
+    public Element writeObject(Identity id) throws IOException {
         if (id == null)
-            return "<" + ID_ELEMENT_NAME + "/>";
+            return new Element(ID_ELEMENT_NAME);
 
         Element idElement = new Element(ID_ELEMENT_NAME);
 
@@ -59,9 +58,7 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
         idElement.setAttribute(new Attribute(PORT_ATTRIBUTE_NAME, String
                 .valueOf(id.getPort())));
 
-        XMLOutputter outputer = new XMLOutputter();
-
-        return outputer.outputString(idElement);
+        return idElement;
     }
 
     /*
