@@ -111,6 +111,22 @@ public class HttpGetMethodHandlerTest {
     }
 
     @Test
+    public void ensureHandlerDefaultsToBinary() throws HttpException,
+            IOException {
+
+        BaseHttpMethodHandler handler = createHttpGetMethodHandler();
+
+        stubGetRequestURI(mockRequest, "/testContext/testKey?protocol=unknown");
+        stubGetProtocolParam("unknown");
+        stubSuccessfulReliableGet(mockDataBank);
+
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
+
+        verify(mockResponse).setStatusCode(HttpStatus.SC_OK);
+        verify(mockResponse).setEntity(any(ByteArrayEntity.class));
+    }
+
+    @Test
     public void ensureServiceActionExecution() throws Exception {
         Set<HttpServiceAction> actions = new HashSet<HttpServiceAction>();
 
