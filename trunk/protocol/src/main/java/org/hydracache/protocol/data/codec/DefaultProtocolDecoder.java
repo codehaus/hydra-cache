@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.hydracache.io.Marshaller;
 import org.hydracache.protocol.data.ProtocolException;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.DataMessage;
 
 /**
@@ -33,13 +32,10 @@ import org.hydracache.protocol.data.message.DataMessage;
  * 
  */
 public class DefaultProtocolDecoder implements ProtocolDecoder<DataMessage> {
-    private MessageMarshallerFactory marshallerFactory;
+    private Marshaller<DataMessage> marshaller;
 
-    /**
-     * Constructor
-     */
-    public DefaultProtocolDecoder(MessageMarshallerFactory marshallerFactory) {
-        this.marshallerFactory = marshallerFactory;
+    public DefaultProtocolDecoder(Marshaller<DataMessage> marshaller) {
+        this.marshaller = marshaller;
     }
 
     /*
@@ -50,10 +46,7 @@ public class DefaultProtocolDecoder implements ProtocolDecoder<DataMessage> {
      */
     @Override
     public DataMessage decode(DataInputStream input) throws IOException {
-        short messageType = decodeHeader(input);
-
-        Marshaller<? extends DataMessage> marshaller = marshallerFactory
-                .createMarshallerFor(messageType);
+        decodeHeader(input);
 
         return marshaller.readObject(input);
     }
@@ -73,7 +66,7 @@ public class DefaultProtocolDecoder implements ProtocolDecoder<DataMessage> {
         if (headerLength > HEADER_LENGTH) {
             skipUnknownHeader(input, headerLength);
         }
-        
+
         return messageType;
     }
 

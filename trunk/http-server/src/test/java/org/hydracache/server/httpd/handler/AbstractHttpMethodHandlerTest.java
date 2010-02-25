@@ -17,7 +17,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.storage.Data;
@@ -68,9 +68,9 @@ public class AbstractHttpMethodHandlerTest {
                 .setIdentityMarshaller(new IdentityMarshaller());
 
         messageEncoder = new DefaultProtocolEncoder(
-                new MessageMarshallerFactory(versionFactoryMarshaller));
+                new DataMessageMarshaller(versionFactoryMarshaller));
         messageDecoder = new DefaultProtocolDecoder(
-                new MessageMarshallerFactory(versionFactoryMarshaller));
+                new DataMessageMarshaller(versionFactoryMarshaller));
     }
 
     @After

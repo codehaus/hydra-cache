@@ -47,7 +47,7 @@ import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
@@ -107,9 +107,9 @@ public class PartitionAwareClient implements HydraCacheClient,
         versionMap = new ConcurrentHashMap<String, Version>();
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
         protocolEncoder = new DefaultProtocolEncoder(
-                new MessageMarshallerFactory(versionFactory));
+                new DataMessageMarshaller(versionFactory));
         protocolDecoder = new DefaultProtocolDecoder(
-                new MessageMarshallerFactory(versionFactory));
+                new DataMessageMarshaller(versionFactory));
 
         // Register listeners for partition updates
         // TODO Make the interval configurable

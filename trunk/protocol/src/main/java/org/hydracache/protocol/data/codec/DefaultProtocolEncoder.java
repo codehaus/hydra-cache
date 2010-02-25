@@ -22,7 +22,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.hydracache.io.Marshaller;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
 import org.hydracache.protocol.data.message.DataMessage;
 
 /**
@@ -32,13 +31,10 @@ import org.hydracache.protocol.data.message.DataMessage;
  * 
  */
 public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
-    private MessageMarshallerFactory marshallerFactory;
+    private Marshaller<DataMessage> marshaller;
 
-    /**
-     * Constructor
-     */
-    public DefaultProtocolEncoder(MessageMarshallerFactory marshallerFactory) {
-        this.marshallerFactory = marshallerFactory;
+    public DefaultProtocolEncoder(Marshaller<DataMessage> marshaller) {
+        this.marshaller = marshaller;
     }
 
     /*
@@ -56,9 +52,6 @@ public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
         out.writeByte(PROTOCOL_VERSION);
 
         out.writeShort(msg.getMessageType());
-
-        Marshaller<DataMessage> marshaller = marshallerFactory
-                .createMarshallerFor(msg.getMessageType());
 
         marshaller.writeObject(msg, out);
     }

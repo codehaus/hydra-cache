@@ -25,7 +25,7 @@ import java.net.UnknownHostException;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
@@ -51,11 +51,12 @@ public class ProtocolUtilsTest {
     public void initialize() {
         versionMarshaller = new IncrementVersionFactory();
         versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
+
         defaultProtocolEncoder = new DefaultProtocolEncoder(
-                new MessageMarshallerFactory(versionMarshaller));
+                new DataMessageMarshaller(versionMarshaller));
 
         defaultProtocolDecoder = new DefaultProtocolDecoder(
-                new MessageMarshallerFactory(versionMarshaller));
+                new DataMessageMarshaller(versionMarshaller));
     }
 
     @Test
@@ -109,9 +110,8 @@ public class ProtocolUtilsTest {
             throws IOException {
         final Buffer buffer = Buffer.allocate();
 
-        new DefaultProtocolEncoder(new MessageMarshallerFactory(
-                versionMarshaller)).encode(expectedMessage, buffer
-                .asDataOutpuStream());
+        new DefaultProtocolEncoder(new DataMessageMarshaller(versionMarshaller))
+                .encode(expectedMessage, buffer.asDataOutpuStream());
 
         return buffer;
     }

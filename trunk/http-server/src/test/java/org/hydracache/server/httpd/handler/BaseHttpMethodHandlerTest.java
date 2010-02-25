@@ -26,7 +26,7 @@ import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
-import org.hydracache.protocol.data.marshaller.MessageMarshallerFactory;
+import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.server.IdentityMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
@@ -213,7 +213,7 @@ public class BaseHttpMethodHandlerTest {
         public StubHandler(HarmonyDataBank dataBank,
                 IncrementVersionFactory versionFactoryMarshaller) {
             super(dataBank, BaseHttpMethodHandlerTest.this.hashFunction,
-                    new DefaultProtocolEncoder(new MessageMarshallerFactory(
+                    new DefaultProtocolEncoder(new DataMessageMarshaller(
                             versionFactoryMarshaller)));
         }
 
