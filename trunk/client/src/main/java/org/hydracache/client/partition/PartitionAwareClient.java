@@ -43,8 +43,8 @@ import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.io.Buffer;
-import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
-import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.codec.BinaryProtocolDecoder;
+import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
@@ -106,9 +106,9 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         versionMap = new ConcurrentHashMap<String, Version>();
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
-        protocolEncoder = new DefaultProtocolEncoder(
+        protocolEncoder = new BinaryProtocolEncoder(
                 new DataMessageMarshaller(versionFactory));
-        protocolDecoder = new DefaultProtocolDecoder(
+        protocolDecoder = new BinaryProtocolDecoder(
                 new DataMessageMarshaller(versionFactory));
 
         // Register listeners for partition updates

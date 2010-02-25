@@ -25,20 +25,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <!-- Import harmony context  -->
     <import resource="classpath:harmony-context.xml" />
 
-    <!-- Message marshaller factory  -->
-    <bean id="messageMarshallerFactory"
-        class="org.hydracache.protocol.data.marshaller.MessageMarshallerFactory">
-        <constructor-arg ref="versionMarshaller" />
-    </bean>
-
     <!-- Protocol codec -->
     <bean id="protocolEncoder"
-        class="org.hydracache.protocol.data.codec.DefaultProtocolEncoder">
-        <constructor-arg ref="messageMarshallerFactory" />
+        class="org.hydracache.protocol.data.codec.BinaryProtocolEncoder">
+        <constructor-arg ref="versionMarshaller" />
     </bean>
     <bean id="protocolDecoder"
-        class="org.hydracache.protocol.data.codec.DefaultProtocolDecoder">
-        <constructor-arg ref="messageMarshallerFactory" />
+        class="org.hydracache.protocol.data.codec.BinaryProtocolDecoder">
+        <constructor-arg ref="versionMarshaller" />
     </bean>
 
     <bean id="printRegistryAction"

@@ -146,14 +146,14 @@ public class ProtocolCodecTest {
 
     private ProtocolEncoder<DataMessage> buildEncoder() {
 
-        final ProtocolEncoder<DataMessage> encoder = new DefaultProtocolEncoder(
+        final ProtocolEncoder<DataMessage> encoder = new BinaryProtocolEncoder(
                 new DataMessageMarshaller(versionFactory));
 
         return encoder;
     }
 
     private ProtocolDecoder<DataMessage> buildDecoder() {
-        final ProtocolDecoder<DataMessage> decoder = new DefaultProtocolDecoder(
+        final ProtocolDecoder<DataMessage> decoder = new BinaryProtocolDecoder(
                 new DataMessageMarshaller(versionFactory));
         return decoder;
     }

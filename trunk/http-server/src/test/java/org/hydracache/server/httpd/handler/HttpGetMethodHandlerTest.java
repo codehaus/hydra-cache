@@ -21,7 +21,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
-import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
@@ -72,7 +72,7 @@ public class HttpGetMethodHandlerTest {
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
                 new IdentityMarshaller());
 
-        DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
+        BinaryProtocolEncoder messageEncoder = new BinaryProtocolEncoder(
                 new DataMessageMarshaller(versionMarshaller));
 
         HttpGetMethodHandler handler = new HttpGetMethodHandler(mockDataBank,

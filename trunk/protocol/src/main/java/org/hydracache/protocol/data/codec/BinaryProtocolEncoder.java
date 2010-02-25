@@ -30,10 +30,10 @@ import org.hydracache.protocol.data.message.DataMessage;
  * @author nzhu
  * 
  */
-public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
+public class BinaryProtocolEncoder implements ProtocolEncoder<DataMessage> {
     private Marshaller<DataMessage> marshaller;
 
-    public DefaultProtocolEncoder(Marshaller<DataMessage> marshaller) {
+    public BinaryProtocolEncoder(Marshaller<DataMessage> marshaller) {
         this.marshaller = marshaller;
     }
 

@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import org.hydracache.io.Buffer;
-import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
-import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.codec.BinaryProtocolDecoder;
+import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
@@ -43,19 +43,19 @@ public class ProtocolUtilsTest {
 
     private IncrementVersionFactory versionMarshaller;
 
-    private DefaultProtocolEncoder defaultProtocolEncoder;
+    private BinaryProtocolEncoder binaryProtocolEncoder;
 
-    private DefaultProtocolDecoder defaultProtocolDecoder;
+    private BinaryProtocolDecoder binaryProtocolDecoder;
 
     @Before
     public void initialize() {
         versionMarshaller = new IncrementVersionFactory();
         versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
 
-        defaultProtocolEncoder = new DefaultProtocolEncoder(
+        binaryProtocolEncoder = new BinaryProtocolEncoder(
                 new DataMessageMarshaller(versionMarshaller));
 
-        defaultProtocolDecoder = new DefaultProtocolDecoder(
+        binaryProtocolDecoder = new BinaryProtocolDecoder(
                 new DataMessageMarshaller(versionMarshaller));
     }
 
@@ -68,7 +68,7 @@ public class ProtocolUtilsTest {
         final Data data = new Data(1234L, version, new byte[dataLength]);
 
         final Buffer buffer = ProtocolUtils.encodeDataMessage(
-                defaultProtocolEncoder, data);
+                binaryProtocolEncoder, data);
 
         assertNotNull("Buffer is null", buffer);
 
@@ -85,7 +85,7 @@ public class ProtocolUtilsTest {
         final Data data = null;
 
         final Buffer buffer = ProtocolUtils.encodeDataMessage(
-                defaultProtocolEncoder, data);
+                binaryProtocolEncoder, data);
 
         assertNotNull("Buffer is null", buffer);
 
@@ -100,7 +100,7 @@ public class ProtocolUtilsTest {
         final Buffer buffer = encodeMessageToBuffer(expectedMessage);
 
         final DataMessage decodedMessage = ProtocolUtils.decodeProtocolMessage(
-                defaultProtocolDecoder, buffer.toByteArray());
+                binaryProtocolDecoder, buffer.toByteArray());
 
         assertEquals("Decoded message is incorrect", expectedMessage,
                 decodedMessage);
@@ -110,7 +110,7 @@ public class ProtocolUtilsTest {
             throws IOException {
         final Buffer buffer = Buffer.allocate();
 
-        new DefaultProtocolEncoder(new DataMessageMarshaller(versionMarshaller))
+        new BinaryProtocolEncoder(new DataMessageMarshaller(versionMarshaller))
                 .encode(expectedMessage, buffer.asDataOutpuStream());
 
         return buffer;

@@ -18,7 +18,9 @@ package org.hydracache.protocol.data.codec;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -30,22 +32,28 @@ import org.junit.Test;
  * @author nzhu
  *
  */
-public class DefaultProtocolEncoderTest {
+public class BinaryProtocolDecoderTest {
     
     @Test
     @SuppressWarnings("unchecked")
-    public void ensureProtocolEncodeInBinary() throws IOException{
+    public void ensureProtocolDecodeInBinary() throws IOException{
         Marshaller<DataMessage> marshaller = mock(Marshaller.class);
-        
-        ProtocolEncoder<DataMessage> encoder = new DefaultProtocolEncoder(marshaller);
         
         DataMessage dataMsg = new DataMessage();
         
-        DataOutputStream out = new DataOutputStream(new ByteArrayOutputStream());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         
-        encoder.encode(dataMsg , out);
+        ProtocolEncoder<DataMessage> encoder = new BinaryProtocolEncoder(marshaller);
         
-        verify(marshaller).writeObject(dataMsg, out);
+        encoder.encode(dataMsg , new DataOutputStream(out));
+        
+        ProtocolDecoder<DataMessage> decoder = new BinaryProtocolDecoder(marshaller);
+        
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(out.toByteArray()));
+        
+        decoder.decode(in);
+        
+        verify(marshaller).readObject(in);
     }
 
 }
