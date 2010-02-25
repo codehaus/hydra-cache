@@ -28,10 +28,13 @@ import java.net.UnknownHostException;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.ProtocolException;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -145,17 +148,19 @@ public class ProtocolCodecTest {
     }
 
     private ProtocolEncoder<DataMessage> buildEncoder() {
-
-        final ProtocolEncoder<DataMessage> encoder = new BinaryProtocolEncoder(
-                new DataMessageMarshaller(versionFactory));
+        final ProtocolEncoder<DataMessage> encoder = new DefaultProtocolEncoder(
+                new DataMessageMarshaller(versionFactory),
+                new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                        new IdentityXmlMarshaller(), versionFactory)));
 
         return encoder;
     }
 
     private ProtocolDecoder<DataMessage> buildDecoder() {
-        final ProtocolDecoder<DataMessage> decoder = new BinaryProtocolDecoder(
-                new DataMessageMarshaller(versionFactory));
+        final ProtocolDecoder<DataMessage> decoder = new DefaultProtocolDecoder(
+                new DataMessageMarshaller(versionFactory),
+                new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                        new IdentityXmlMarshaller(), versionFactory)));
         return decoder;
     }
-
 }

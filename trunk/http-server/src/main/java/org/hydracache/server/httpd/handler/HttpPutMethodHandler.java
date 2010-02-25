@@ -119,7 +119,7 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
 
             response.setStatusCode(statusCode);
 
-            ByteArrayEntity body = generateEntityForData(data);
+            ByteArrayEntity body = generateBinaryEntityForData(data);
 
             response.setEntity(body);
         } catch (VersionConflictException vce) {

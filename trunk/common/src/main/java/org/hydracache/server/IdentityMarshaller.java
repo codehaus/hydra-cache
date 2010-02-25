@@ -20,18 +20,18 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 
 /**
  * @author nzhu
  * 
  */
-public class IdentityMarshaller implements Marshaller<Identity> {
+public class IdentityMarshaller implements BinaryMarshaller<Identity> {
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.io.Marshaller#readObject(java.io.DataInputStream)
+     * @see org.hydracache.io.BinaryMarshaller#readObject(java.io.DataInputStream)
      */
     @Override
     public Identity readObject(DataInputStream dataIn) throws IOException {
@@ -52,7 +52,7 @@ public class IdentityMarshaller implements Marshaller<Identity> {
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.io.Marshaller#writeObject(java.lang.Object,
+     * @see org.hydracache.io.BinaryMarshaller#writeObject(java.lang.Object,
      * java.io.DataOutputStream)
      */
     @Override

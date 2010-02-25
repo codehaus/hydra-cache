@@ -15,7 +15,7 @@
  */
 package org.hydracache.server.data.versioning;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.server.Identity;
 
 /**
@@ -30,7 +30,7 @@ import org.hydracache.server.Identity;
  * 
  * @see Version
  */
-public interface VersionFactory extends Marshaller<Version> {
+public interface VersionFactory extends BinaryMarshaller<Version> {
     
     /**
      * Create a null version instance

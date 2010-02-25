@@ -21,31 +21,31 @@ import java.io.IOException;
 
 import org.apache.commons.lang.Validate;
 import org.hydracache.io.IoUtils;
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.Version;
 
 /**
- * {@link Marshaller} used to handle {@link DataMessage} serialization
+ * {@link BinaryMarshaller} used to handle {@link DataMessage} serialization
  * 
  * @author nzhu
  * 
  */
-public class DataMessageMarshaller implements Marshaller<DataMessage> {
+public class DataMessageMarshaller implements BinaryMarshaller<DataMessage> {
 
-    private Marshaller<Version> versionMarshaller;
+    private BinaryMarshaller<Version> versionMarshaller;
 
     /**
      * Constructor
      */
-    public DataMessageMarshaller(Marshaller<Version> versionMarshaller) {
+    public DataMessageMarshaller(BinaryMarshaller<Version> versionMarshaller) {
         this.versionMarshaller = versionMarshaller;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.io.Marshaller#readObject(java.io.DataInputStream)
+     * @see org.hydracache.io.BinaryMarshaller#readObject(java.io.DataInputStream)
      */
     @Override
     public DataMessage readObject(DataInputStream dataIn) throws IOException {
@@ -63,7 +63,7 @@ public class DataMessageMarshaller implements Marshaller<DataMessage> {
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.io.Marshaller#writeObject(java.lang.Object,
+     * @see org.hydracache.io.BinaryMarshaller#writeObject(java.lang.Object,
      * java.io.DataOutputStream)
      */
     @Override

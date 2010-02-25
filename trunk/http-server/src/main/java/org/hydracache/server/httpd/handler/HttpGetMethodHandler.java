@@ -18,6 +18,7 @@ package org.hydracache.server.httpd.handler;
 import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -104,9 +105,17 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
             return;
         }
 
-        ByteArrayEntity body = generateEntityForData(data);
-        response.setEntity(body);
         response.setStatusCode(HttpStatus.SC_OK);
+
+        if (isRequestingXmlProtocol(request)) {
+            StringEntity stringEntity = generateStringEntityForXmlData(data);
+
+            response.setEntity(stringEntity);
+        } else {
+            ByteArrayEntity body = generateBinaryEntityForData(data);
+
+            response.setEntity(body);
+        }
     }
 
     private void handleNotFound(HttpResponse response) {
@@ -118,6 +127,23 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to generate response: ", e);
         }
+    }
+
+    private boolean isRequestingXmlProtocol(HttpRequest request) {
+        return request.getParams() != null
+                && XML_PROTOCOL.equalsIgnoreCase(String.valueOf(request
+                        .getParams().getParameter(PROTOCOL_PARAMETER_NAME)));
+    }
+
+    private StringEntity generateStringEntityForXmlData(Data data)
+            throws IOException, UnsupportedEncodingException {
+        DataMessage dataMsg = new DataMessage(data);
+
+        StringWriter out = new StringWriter();
+        messageEncoder.encodeXml(dataMsg, out);
+
+        StringEntity stringEntity = new StringEntity(out.toString());
+        return stringEntity;
     }
 
 }

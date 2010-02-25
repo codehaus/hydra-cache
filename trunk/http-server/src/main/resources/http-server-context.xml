@@ -22,18 +22,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <!-- Load system configuration from classpath conf file -->
     <context:property-placeholder location="classpath:hydra.conf" />
 
+    <!-- Import protocol context  -->
+    <import resource="classpath:protocol-context.xml" />
     <!-- Import harmony context  -->
     <import resource="classpath:harmony-context.xml" />
-
-    <!-- Protocol codec -->
-    <bean id="protocolEncoder"
-        class="org.hydracache.protocol.data.codec.BinaryProtocolEncoder">
-        <constructor-arg ref="versionMarshaller" />
-    </bean>
-    <bean id="protocolDecoder"
-        class="org.hydracache.protocol.data.codec.BinaryProtocolDecoder">
-        <constructor-arg ref="versionMarshaller" />
-    </bean>
 
     <bean id="printRegistryAction"
         class="org.hydracache.server.httpd.handler.PrintRegistryAction">

@@ -17,6 +17,9 @@ package org.hydracache.protocol.data.codec;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Writer;
+
+import org.hydracache.protocol.data.message.DataMessage;
 
 /**
  * Protocol encoder interface
@@ -37,5 +40,17 @@ public interface ProtocolEncoder<T> {
      *             io exception
      */
     void encode(T msg, DataOutputStream out) throws IOException;
+
+    /**
+     * Encode the given message in xml through the given writer
+     * 
+     * @param dataMsg
+     *            message to be encoded
+     * @param out
+     *            data output
+     * @throws IOException
+     *             io exception
+     */
+    void encodeXml(DataMessage dataMsg, Writer out) throws IOException;
 
 }

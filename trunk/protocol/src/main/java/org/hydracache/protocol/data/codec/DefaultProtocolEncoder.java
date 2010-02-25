@@ -20,9 +20,13 @@ import static org.hydracache.protocol.data.codec.ProtocolConstants.PROTOCOL_VERS
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Writer;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
+import org.hydracache.io.XmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
 /**
  * Default protocol encoder implementation
@@ -30,11 +34,14 @@ import org.hydracache.protocol.data.message.DataMessage;
  * @author nzhu
  * 
  */
-public class BinaryProtocolEncoder implements ProtocolEncoder<DataMessage> {
-    private Marshaller<DataMessage> marshaller;
+public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
+    private BinaryMarshaller<DataMessage> binaryMarshaller;
+    private XmlMarshaller<DataMessage> xmlMarshaller;
 
-    public BinaryProtocolEncoder(Marshaller<DataMessage> marshaller) {
-        this.marshaller = marshaller;
+    public DefaultProtocolEncoder(BinaryMarshaller<DataMessage> marshaller,
+            XmlMarshaller<DataMessage> xmlMarshaller) {
+        this.binaryMarshaller = marshaller;
+        this.xmlMarshaller = xmlMarshaller;
     }
 
     /*
@@ -53,7 +60,23 @@ public class BinaryProtocolEncoder implements ProtocolEncoder<DataMessage> {
 
         out.writeShort(msg.getMessageType());
 
-        marshaller.writeObject(msg, out);
+        binaryMarshaller.writeObject(msg, out);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hydracache.protocol.data.codec.ProtocolEncoder#encodeXml(org.hydracache
+     * .protocol.data.message.DataMessage, java.io.Writer)
+     */
+    @Override
+    public void encodeXml(DataMessage dataMsg, Writer out) throws IOException {
+        Element element = xmlMarshaller.writeObject(dataMsg);
+
+        XMLOutputter outputter = new XMLOutputter();
+        
+        outputter.output(element, out);
     }
 
 }

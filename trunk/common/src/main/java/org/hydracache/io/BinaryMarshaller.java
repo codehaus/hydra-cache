@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author nzhu
  * 
  */
-public interface Marshaller<T> {
+public interface BinaryMarshaller<T> {
 
     void writeObject(T object, DataOutputStream dataOut) throws IOException;
 

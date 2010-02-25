@@ -38,4 +38,16 @@ public interface ProtocolDecoder<T> {
      */
     T decode(DataInputStream input) throws IOException;
 
+    /**
+     * Decode the given input xml string to a {@link DataMessage}
+     * 
+     * @param input
+     *            input xml data
+     * @return decoded {@link DataMessage} instance or null if no message
+     *         marshaller found
+     * @throws IOException
+     *             io exception
+     */
+    T decodeXml(String xml) throws IOException;
+
 }

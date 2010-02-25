@@ -18,15 +18,19 @@ import org.apache.http.HttpStatus;
 import org.apache.http.RequestLine;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
-import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,9 +59,10 @@ public class HttpGetMethodHandlerTest {
     public void ensureHandleGetXmlDataCorrectly() throws HttpException,
             IOException {
 
-        HttpGetMethodHandler handler = createHttpGetMethodHandler();
+        BaseHttpMethodHandler handler = createHttpGetMethodHandler();
 
         stubGetRequestURI(mockRequest, "/testContext/testKey?protocol=xml");
+        stubGetProtocolParam(HttpGetMethodHandler.XML_PROTOCOL);
         stubSuccessfulReliableGet(mockDataBank);
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
@@ -72,8 +77,10 @@ public class HttpGetMethodHandlerTest {
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
                 new IdentityMarshaller());
 
-        BinaryProtocolEncoder messageEncoder = new BinaryProtocolEncoder(
-                new DataMessageMarshaller(versionMarshaller));
+        DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
+                new DataMessageMarshaller(versionMarshaller),
+                new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                        new IdentityXmlMarshaller(), versionMarshaller)));
 
         HttpGetMethodHandler handler = new HttpGetMethodHandler(mockDataBank,
                 hashFunction, messageEncoder);
@@ -81,17 +88,26 @@ public class HttpGetMethodHandlerTest {
         return handler;
     }
 
+    private void stubGetRequestURI(HttpRequest mockRequest, String requestUri) {
+        RequestLine mockRequestLine = mock(RequestLine.class);
+        when(mockRequest.getRequestLine()).thenReturn(mockRequestLine);
+        when(mockRequestLine.getUri()).thenReturn(requestUri);
+    }
+
+    private void stubGetProtocolParam(String protocol) {
+        HttpParams mockHttpParams = mock(HttpParams.class);
+        when(mockRequest.getParams()).thenReturn(mockHttpParams);
+        when(
+                mockHttpParams
+                        .getParameter(HttpGetMethodHandler.PROTOCOL_PARAMETER_NAME))
+                .thenReturn(protocol);
+    }
+
     private void stubSuccessfulReliableGet(HarmonyDataBank mockDataBank)
             throws IOException {
         Data data = new Data();
         data.setVersion(new IncrementVersionFactory().create(new Identity(70)));
         when(mockDataBank.get(anyString(), anyLong())).thenReturn(data);
-    }
-
-    private void stubGetRequestURI(HttpRequest mockRequest, String requestUri) {
-        RequestLine mockRequestLine = mock(RequestLine.class);
-        when(mockRequest.getRequestLine()).thenReturn(mockRequestLine);
-        when(mockRequestLine.getUri()).thenReturn(requestUri);
     }
 
     @Test
@@ -121,7 +137,7 @@ public class HttpGetMethodHandlerTest {
         stubGetRequestURI(mockRequest, "/testContext/testKey");
         stubSuccessfulReliableGet(mockDataBank);
 
-        HttpGetMethodHandler handler = createHttpGetMethodHandler();
+        BaseHttpMethodHandler handler = createHttpGetMethodHandler();
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
 
@@ -133,7 +149,7 @@ public class HttpGetMethodHandlerTest {
     public void ensureNotFoundGenerates404() throws Exception {
         stubGetRequestURI(mockRequest, "/testContext/testKey");
 
-        HttpGetMethodHandler handler = createHttpGetMethodHandler();
+        BaseHttpMethodHandler handler = createHttpGetMethodHandler();
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
 
@@ -145,7 +161,7 @@ public class HttpGetMethodHandlerTest {
     public void ensureBlankKeyIsRejected() throws HttpException, IOException {
         stubGetRequestURI(mockRequest, "/");
 
-        HttpGetMethodHandler handler = createHttpGetMethodHandler();
+        BaseHttpMethodHandler handler = createHttpGetMethodHandler();
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
     }

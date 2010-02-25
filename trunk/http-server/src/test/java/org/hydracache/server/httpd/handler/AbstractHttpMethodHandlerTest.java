@@ -15,13 +15,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
-import org.hydracache.protocol.data.codec.BinaryProtocolDecoder;
-import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -43,8 +46,8 @@ public class AbstractHttpMethodHandlerTest {
     protected Identity localId = new Identity(71);
     protected HttpEntityEnclosingRequest request;
     protected HttpContext httpContext;
-    protected BinaryProtocolEncoder messageEncoder;
-    protected BinaryProtocolDecoder messageDecoder;
+    protected DefaultProtocolEncoder messageEncoder;
+    protected DefaultProtocolDecoder messageDecoder;
 
     public AbstractHttpMethodHandlerTest() {
         super();
@@ -67,10 +70,16 @@ public class AbstractHttpMethodHandlerTest {
         versionFactoryMarshaller
                 .setIdentityMarshaller(new IdentityMarshaller());
 
-        messageEncoder = new BinaryProtocolEncoder(
-                new DataMessageMarshaller(versionFactoryMarshaller));
-        messageDecoder = new BinaryProtocolDecoder(
-                new DataMessageMarshaller(versionFactoryMarshaller));
+        DataMessageMarshaller dataMsgMarshaller = new DataMessageMarshaller(
+                versionFactoryMarshaller);
+        DataMessageXmlMarshaller dataMsgXmlMarshaller = new DataMessageXmlMarshaller(
+                new VersionXmlMarshaller(new IdentityXmlMarshaller(),
+                        versionFactoryMarshaller));
+
+        messageEncoder = new DefaultProtocolEncoder(dataMsgMarshaller,
+                dataMsgXmlMarshaller);
+        messageDecoder = new DefaultProtocolDecoder(dataMsgMarshaller,
+                dataMsgXmlMarshaller);
     }
 
     @After

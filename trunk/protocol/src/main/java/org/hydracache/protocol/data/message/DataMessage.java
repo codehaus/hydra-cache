@@ -77,6 +77,9 @@ public class DataMessage implements Serializable {
     }
 
     public byte[] getBlob() {
+        if (blob == null)
+            return new byte[0];
+
         return blob.clone();
     }
 

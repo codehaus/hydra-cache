@@ -25,10 +25,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
-import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.hydracache.server.httpd.HttpConstants;
 import org.jmock.Mockery;
@@ -213,8 +216,10 @@ public class BaseHttpMethodHandlerTest {
         public StubHandler(HarmonyDataBank dataBank,
                 IncrementVersionFactory versionFactoryMarshaller) {
             super(dataBank, BaseHttpMethodHandlerTest.this.hashFunction,
-                    new BinaryProtocolEncoder(new DataMessageMarshaller(
-                            versionFactoryMarshaller)));
+                    new DefaultProtocolEncoder(new DataMessageMarshaller(
+                            versionFactoryMarshaller),
+                            new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                                    new IdentityXmlMarshaller(), versionFactoryMarshaller))));
         }
 
         @Override

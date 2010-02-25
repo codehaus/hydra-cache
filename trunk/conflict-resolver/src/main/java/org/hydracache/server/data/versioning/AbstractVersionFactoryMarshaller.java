@@ -15,7 +15,7 @@
  */
 package org.hydracache.server.data.versioning;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
 
@@ -24,7 +24,7 @@ import org.hydracache.server.IdentityMarshaller;
  */
 abstract class AbstractVersionFactoryMarshaller implements VersionFactory {
 
-    private Marshaller<Identity> identityMarshaller;
+    private BinaryMarshaller<Identity> identityMarshaller;
 
     /**
      * Default constructor
@@ -41,12 +41,12 @@ abstract class AbstractVersionFactoryMarshaller implements VersionFactory {
         this.identityMarshaller = identityMarshaller;
     }
 
-    protected Marshaller<Identity> getIdentityMarshaller() {
+    protected BinaryMarshaller<Identity> getIdentityMarshaller() {
         return identityMarshaller;
     }
 
     public void setIdentityMarshaller(
-            final Marshaller<Identity> identityMarshaller) {
+            final BinaryMarshaller<Identity> identityMarshaller) {
         this.identityMarshaller = identityMarshaller;
     }
 

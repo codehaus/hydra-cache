@@ -41,10 +41,11 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
  */
 public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
-    /**
-     * 
-     */
     private static final String QUESTION_MARK = "?";
+
+    protected static final String PROTOCOL_PARAMETER_NAME = "protocol";
+
+    protected static final String XML_PROTOCOL = "xml";
 
     protected HarmonyDataBank dataBank;
 
@@ -130,7 +131,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return requestString;
     }
 
-    protected ByteArrayEntity generateEntityForData(Data data)
+    protected ByteArrayEntity generateBinaryEntityForData(Data data)
             throws IOException {
         Buffer buffer = ProtocolUtils.encodeDataMessage(messageEncoder, data);
 

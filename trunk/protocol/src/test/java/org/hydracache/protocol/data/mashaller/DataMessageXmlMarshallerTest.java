@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hydracache.protocol.data.message;
+package org.hydracache.protocol.data.mashaller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.storage.Data;

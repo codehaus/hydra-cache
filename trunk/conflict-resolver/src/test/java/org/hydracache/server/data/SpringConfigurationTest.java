@@ -15,7 +15,7 @@
  */
 package org.hydracache.server.data;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.data.versioning.VersionFactory;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class SpringConfigurationTest {
                         "test-context.xml" });
 
         factory.isTypeMatch("versionFactory", VersionFactory.class);
-        factory.isTypeMatch("versionMarshaller", Marshaller.class);
+        factory.isTypeMatch("versionMarshaller", BinaryMarshaller.class);
         factory.isTypeMatch("conflictResolver", ConflictResolver.class);
     }
 }

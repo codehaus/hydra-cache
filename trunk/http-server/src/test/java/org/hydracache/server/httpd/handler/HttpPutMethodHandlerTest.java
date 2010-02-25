@@ -19,7 +19,7 @@ import java.io.IOException;
 
 import org.apache.http.HttpException;
 import org.hydracache.io.Buffer;
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
@@ -45,7 +45,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
 
     private HttpPutMethodHandler createHandler(
             final VersionFactory versionFactory,
-            final Marshaller<Version> versionMarshaller) {
+            final BinaryMarshaller<Version> versionMarshaller) {
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(
                 versionFactory, dataBank, hashFunction, messageEncoder,

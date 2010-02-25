@@ -23,15 +23,18 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import org.hydracache.io.Buffer;
-import org.hydracache.protocol.data.codec.BinaryProtocolDecoder;
-import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,20 +46,29 @@ public class ProtocolUtilsTest {
 
     private IncrementVersionFactory versionMarshaller;
 
-    private BinaryProtocolEncoder binaryProtocolEncoder;
+    private VersionXmlMarshaller versionXmlMarshaller;
 
-    private BinaryProtocolDecoder binaryProtocolDecoder;
+    private DefaultProtocolEncoder defaultProtocolEncoder;
+
+    private DefaultProtocolDecoder defaultProtocolDecoder;
 
     @Before
     public void initialize() {
-        versionMarshaller = new IncrementVersionFactory();
-        versionMarshaller.setIdentityMarshaller(new IdentityMarshaller());
+        versionMarshaller = new IncrementVersionFactory(
+                new IdentityMarshaller());
+        versionXmlMarshaller = new VersionXmlMarshaller(
+                new IdentityXmlMarshaller(), versionMarshaller);
 
-        binaryProtocolEncoder = new BinaryProtocolEncoder(
-                new DataMessageMarshaller(versionMarshaller));
+        DataMessageMarshaller binaryDataMsgMarshaller = new DataMessageMarshaller(
+                versionMarshaller);
+        DataMessageXmlMarshaller xmlDataMsgMarshaller = new DataMessageXmlMarshaller(
+                versionXmlMarshaller);
 
-        binaryProtocolDecoder = new BinaryProtocolDecoder(
-                new DataMessageMarshaller(versionMarshaller));
+        defaultProtocolEncoder = new DefaultProtocolEncoder(
+                binaryDataMsgMarshaller, xmlDataMsgMarshaller);
+
+        defaultProtocolDecoder = new DefaultProtocolDecoder(
+                binaryDataMsgMarshaller, xmlDataMsgMarshaller);
     }
 
     @Test
@@ -68,7 +80,7 @@ public class ProtocolUtilsTest {
         final Data data = new Data(1234L, version, new byte[dataLength]);
 
         final Buffer buffer = ProtocolUtils.encodeDataMessage(
-                binaryProtocolEncoder, data);
+                defaultProtocolEncoder, data);
 
         assertNotNull("Buffer is null", buffer);
 
@@ -85,7 +97,7 @@ public class ProtocolUtilsTest {
         final Data data = null;
 
         final Buffer buffer = ProtocolUtils.encodeDataMessage(
-                binaryProtocolEncoder, data);
+                defaultProtocolEncoder, data);
 
         assertNotNull("Buffer is null", buffer);
 
@@ -100,7 +112,7 @@ public class ProtocolUtilsTest {
         final Buffer buffer = encodeMessageToBuffer(expectedMessage);
 
         final DataMessage decodedMessage = ProtocolUtils.decodeProtocolMessage(
-                binaryProtocolDecoder, buffer.toByteArray());
+                defaultProtocolDecoder, buffer.toByteArray());
 
         assertEquals("Decoded message is incorrect", expectedMessage,
                 decodedMessage);
@@ -110,8 +122,8 @@ public class ProtocolUtilsTest {
             throws IOException {
         final Buffer buffer = Buffer.allocate();
 
-        new BinaryProtocolEncoder(new DataMessageMarshaller(versionMarshaller))
-                .encode(expectedMessage, buffer.asDataOutpuStream());
+        defaultProtocolEncoder.encode(expectedMessage, buffer
+                .asDataOutpuStream());
 
         return buffer;
     }

@@ -25,7 +25,7 @@ import org.jdom.Element;
  */
 public interface XmlMarshaller<T> {
 
-    public abstract Element writeObject(T id) throws IOException;
+    public abstract Element writeObject(T obj) throws IOException;
 
     public abstract T readObject(String xml) throws IOException;
 

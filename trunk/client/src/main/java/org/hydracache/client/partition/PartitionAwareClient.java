@@ -43,16 +43,19 @@ import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.io.Buffer;
-import org.hydracache.protocol.data.codec.BinaryProtocolDecoder;
-import org.hydracache.protocol.data.codec.BinaryProtocolEncoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
 import org.hydracache.protocol.data.codec.ProtocolDecoder;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
 import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.Version;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -106,16 +109,25 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         versionMap = new ConcurrentHashMap<String, Version>();
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
-        protocolEncoder = new BinaryProtocolEncoder(
-                new DataMessageMarshaller(versionFactory));
-        protocolDecoder = new BinaryProtocolDecoder(
-                new DataMessageMarshaller(versionFactory));
+        protocolEncoder = new DefaultProtocolEncoder(
+                createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
+        protocolDecoder = new DefaultProtocolDecoder(
+                createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
 
         // Register listeners for partition updates
         // TODO Make the interval configurable
         PartitionUpdatesPoller poller = new PartitionUpdatesPoller(180000,
                 this, this);
         poller.start();
+    }
+
+    private DataMessageXmlMarshaller createXmlDataMsgMarshaller() {
+        return new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                new IdentityXmlMarshaller(), versionFactory));
+    }
+
+    private DataMessageMarshaller createBinaryDataMsgMarshaller() {
+        return new DataMessageMarshaller(versionFactory);
     }
 
     NodePartition<Identity> getNodePartition() {

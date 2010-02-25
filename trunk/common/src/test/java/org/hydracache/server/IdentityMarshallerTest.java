@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.net.Inet6Address;
 
 import org.hydracache.io.Buffer;
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
 import org.junit.Test;
 
 /**
@@ -38,7 +38,7 @@ public class IdentityMarshallerTest {
 
         Identity identity = new Identity((short) 8080);
 
-        assertTrue(marshaller instanceof Marshaller);
+        assertTrue(marshaller instanceof BinaryMarshaller);
 
         Buffer buffer = writeIdentity(marshaller, identity);
 
@@ -53,7 +53,7 @@ public class IdentityMarshallerTest {
 
         Identity identity = new Identity((short) 8080);
 
-        assertTrue(marshaller instanceof Marshaller);
+        assertTrue(marshaller instanceof BinaryMarshaller);
 
         Buffer buffer = writeIdentity(marshaller, identity);
 

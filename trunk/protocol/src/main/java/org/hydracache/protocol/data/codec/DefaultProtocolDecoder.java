@@ -21,7 +21,8 @@ import static org.hydracache.protocol.data.codec.ProtocolConstants.PROTOCOL_VERS
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.hydracache.io.Marshaller;
+import org.hydracache.io.BinaryMarshaller;
+import org.hydracache.io.XmlMarshaller;
 import org.hydracache.protocol.data.ProtocolException;
 import org.hydracache.protocol.data.message.DataMessage;
 
@@ -31,11 +32,15 @@ import org.hydracache.protocol.data.message.DataMessage;
  * @author nzhu
  * 
  */
-public class BinaryProtocolDecoder implements ProtocolDecoder<DataMessage> {
-    private Marshaller<DataMessage> marshaller;
+public class DefaultProtocolDecoder implements ProtocolDecoder<DataMessage> {
+    private BinaryMarshaller<DataMessage> binaryMarshaller;
 
-    public BinaryProtocolDecoder(Marshaller<DataMessage> marshaller) {
-        this.marshaller = marshaller;
+    private XmlMarshaller<DataMessage> xmlMarshaller;
+
+    public DefaultProtocolDecoder(BinaryMarshaller<DataMessage> binaryMarshaller,
+            XmlMarshaller<DataMessage> xmlMarshaller) {
+        this.binaryMarshaller = binaryMarshaller;
+        this.xmlMarshaller = xmlMarshaller;
     }
 
     /*
@@ -48,7 +53,7 @@ public class BinaryProtocolDecoder implements ProtocolDecoder<DataMessage> {
     public DataMessage decode(DataInputStream input) throws IOException {
         decodeHeader(input);
 
-        return marshaller.readObject(input);
+        return binaryMarshaller.readObject(input);
     }
 
     private short decodeHeader(DataInputStream input) throws IOException,
@@ -88,6 +93,18 @@ public class BinaryProtocolDecoder implements ProtocolDecoder<DataMessage> {
         if (headerLength < HEADER_LENGTH)
             throw new ProtocolException("Invalid protocol header length ["
                     + headerLength + "]");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hydracache.protocol.data.codec.ProtocolDecoder#decodeXml(java.lang
+     * .String)
+     */
+    @Override
+    public DataMessage decodeXml(String xml) throws IOException {
+        return xmlMarshaller.readObject(xml);
     }
 
 }

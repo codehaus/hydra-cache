@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.hydracache.protocol.data.message;
+package org.hydracache.protocol.data.marshaller;
 
 import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.commons.codec.binary.Base64;
 import org.hydracache.io.XmlMarshaller;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.jdom.Document;
@@ -78,8 +79,11 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
 
         Element messageElement = new Element("message");
 
-        messageElement.addContent(new Element("data").addContent(Base64
-                .encodeBase64String(dataMessage.getBlob())));
+        Element dataElement = new Element("data");
+        if (dataMessage.getBlob() != null)
+            dataElement.addContent(Base64.encodeBase64String(dataMessage
+                    .getBlob()));
+        messageElement.addContent(dataElement);
 
         Element versionElement = versionXmlMarshaller.writeObject(dataMessage
                 .getVersion());
