@@ -36,7 +36,9 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
     private static Logger log = Logger.getLogger(IdentityXmlMarshaller.class);
 
     public static final String PORT_ATTRIBUTE_NAME = "port";
+    
     public static final String ADDRESS_ATTRIBUTE_NAME = "address";
+    
     public static final String ID_ELEMENT_NAME = "identity";
 
     /*

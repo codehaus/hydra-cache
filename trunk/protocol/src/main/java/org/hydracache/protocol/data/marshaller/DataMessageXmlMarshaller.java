@@ -34,6 +34,10 @@ import org.jdom.output.XMLOutputter;
  */
 public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
 
+    public static final String DATA_ELEMENT_NAME = "data";
+    
+    public static final String MESSAGE_ELEMENT_NAME = "message";
+    
     private VersionXmlMarshaller versionXmlMarshaller;
 
     public DataMessageXmlMarshaller(VersionXmlMarshaller versionXmlMarshaller) {
@@ -53,7 +57,7 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
             Document doc = builder.build(new StringReader(xml));
             Element messageElement = doc.getRootElement();
 
-            Element dataElement = messageElement.getChild("data");
+            Element dataElement = messageElement.getChild(DATA_ELEMENT_NAME);
             byte[] data = Base64.decodeBase64(dataElement.getValue());
 
             Element versionElement = messageElement
@@ -75,11 +79,11 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
     @Override
     public Element writeObject(DataMessage dataMessage) throws IOException {
         if (dataMessage == null)
-            return new Element("message");
+            return new Element(MESSAGE_ELEMENT_NAME);
 
-        Element messageElement = new Element("message");
+        Element messageElement = new Element(MESSAGE_ELEMENT_NAME);
 
-        Element dataElement = new Element("data");
+        Element dataElement = new Element(DATA_ELEMENT_NAME);
         if (dataMessage.getBlob() != null)
             dataElement.addContent(Base64.encodeBase64String(dataMessage
                     .getBlob()));
