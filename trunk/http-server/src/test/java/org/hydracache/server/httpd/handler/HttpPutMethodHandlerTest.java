@@ -15,16 +15,35 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
+import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.io.Buffer;
-import org.hydracache.io.BinaryMarshaller;
+import org.hydracache.protocol.data.codec.DefaultProtocolDecoder;
+import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
+import org.hydracache.protocol.data.marshaller.DataMessageMarshaller;
+import org.hydracache.protocol.data.marshaller.DataMessageXmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
+import org.hydracache.server.Identity;
+import org.hydracache.server.IdentityMarshaller;
+import org.hydracache.server.IdentityXmlMarshaller;
+import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
-import org.hydracache.server.data.versioning.Version;
-import org.hydracache.server.data.versioning.VersionFactory;
+import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
+import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.jgroups.stack.IpAddress;
 import org.junit.Test;
 
@@ -33,57 +52,73 @@ import org.junit.Test;
  * 
  */
 public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
-    private HttpPutMethodHandler handler;
+    @Test
+    public void ensureLocalVersionConflictDetectionIgnoresNull()
+            throws Exception {
+        HttpPutMethodHandler handler = createHttpPutHandler();
 
-    @Override
-    public void initialize() {
-        super.initialize();
+        stubGetRequestURI(mockRequest, "/testContext/testKey");
+        stubGetByteArrayEntityFromRequest(createValidNewMessageInBytes());
+        stubNotFoundLocalGet(mockDataBank);
 
-        handler = createHandler(versionFactoryMarshaller,
-                versionFactoryMarshaller);
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
+
+        verify(mockDataBank).put(anyString(), any(Data.class));
+        verify(mockResponse).setStatusCode(HttpStatus.SC_CREATED);
+        verify(mockResponse).setEntity(any(ByteArrayEntity.class));
+
     }
 
-    private HttpPutMethodHandler createHandler(
-            final VersionFactory versionFactory,
-            final BinaryMarshaller<Version> versionMarshaller) {
+    private void stubNotFoundLocalGet(HarmonyDataBank mockDataBank) throws IOException {
+        when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(null);
+    }
+
+    private void stubGetByteArrayEntityFromRequest(byte[] data) {
+        when(mockRequest.getEntity()).thenReturn(new ByteArrayEntity(data));
+    }
+
+    private HttpPutMethodHandler createHttpPutHandler() {
+        HashFunction hashFunction = new KetamaBasedHashFunction();
+
+        IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
+                new IdentityMarshaller());
+
+        DefaultProtocolEncoder messageEncoder = createMessageEncoder(versionMarshaller);
+
+        DefaultProtocolDecoder messageDecoder = new DefaultProtocolDecoder(
+                new DataMessageMarshaller(versionMarshaller),
+                new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                        new IdentityXmlMarshaller(), versionMarshaller)));
 
         final HttpPutMethodHandler handler = new HttpPutMethodHandler(
-                versionFactory, dataBank, hashFunction, messageEncoder,
-                messageDecoder, new JGroupsNode(localId, new IpAddress(7000)));
+                versionMarshaller, mockDataBank, hashFunction, messageEncoder,
+                messageDecoder, new JGroupsNode(new Identity(7070),
+                        new IpAddress(7000)));
 
         return handler;
     }
 
-    @Test
-    public void ensureLocalVersionConflictDetectionIgnoresNull()
-            throws Exception {
-        {
-            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
-            addGetEntityExp(createValidNewMessageInBytes());
-        }
-
-        {
-            addNullReturnedFromLocalGetExp(dataBank, testStorageContext);
-            addSuccessLocalPutExp(dataBank, testStorageContext);
-        }
-
-        {
-            addSetCreatedStatusCodeExp(response);
-            addSetBinaryDataEntityExp(response);
-        }
-
-        handler.handle(request, response, httpContext);
+    private DefaultProtocolEncoder createMessageEncoder(
+            IncrementVersionFactory versionMarshaller) {
+        DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
+                new DataMessageMarshaller(versionMarshaller),
+                new DataMessageXmlMarshaller(new VersionXmlMarshaller(
+                        new IdentityXmlMarshaller(), versionMarshaller)));
+        return messageEncoder;
     }
 
     private byte[] createValidNewMessageInBytes() throws IOException {
         DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setBlob(generateRandomBytes());
+        incomingDataMsg.setBlob("test data".getBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
         DataMessage message = incomingDataMsg;
         return encodeMessage(message);
     }
 
     private byte[] encodeMessage(DataMessage message) throws IOException {
+        IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
+                new IdentityMarshaller());
+        DefaultProtocolEncoder messageEncoder = createMessageEncoder(versionMarshaller);
         Buffer buffer = Buffer.allocate();
         messageEncoder.encode(message, buffer.asDataOutpuStream());
         byte[] bytes = buffer.toByteArray();
@@ -92,89 +127,72 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
 
     @Test
     public void ensureLocalVersionConflictDetection() throws Exception {
-        {
-            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
-            addGetEntityExp(createValidNewMessageInBytes());
-        }
+        HttpPutMethodHandler handler = createHttpPutHandler();
 
-        {
-            addConflictLocalGetExp(dataBank, testStorageContext);
-        }
+        stubGetRequestURI(mockRequest, "/testContext/testKey");
+        stubGetByteArrayEntityFromRequest(createValidNewMessageInBytes());
+        
+        Data data = new Data();
+        data.setVersion(new IncrementVersionFactory().create(new Identity(4040))
+                .incrementFor(new Identity(7070)));
+        when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(data);
 
-        {
-            addSetConflictStatusCodeExp(response);
-            addSetStringMessageEntityExp(response);
-        }
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
 
-        handler.handle(request, response, httpContext);
+        verify(mockDataBank, never()).put(anyString(), any(Data.class));
+        verify(mockResponse).setStatusCode(HttpStatus.SC_CONFLICT);
+        verify(mockResponse).setEntity(any(StringEntity.class));
     }
 
     @Test
     public void ensureNewVersionIsCreatedIfGivenVersionIsNull()
             throws Exception {
-        {
-            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
-            addGetEntityExp(createNullVersionMessageInBytes());
-        }
+        HttpPutMethodHandler handler = createHttpPutHandler();
 
-        {
-            addNullReturnedFromLocalGetExp(dataBank, testStorageContext);
-            addSuccessLocalPutExp(dataBank, testStorageContext);
-        }
+        stubGetRequestURI(mockRequest, "/testContext/testKey");
+        stubGetByteArrayEntityFromRequest(createValidNewMessageInBytes());
+        stubNotFoundLocalGet(mockDataBank);
 
-        {
-            addSetCreatedStatusCodeExp(response);
-            addSetBinaryDataEntityExp(response);
-        }
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
 
-        handler.handle(request, response, httpContext);
-    }
-
-    private byte[] createNullVersionMessageInBytes() throws IOException {
-        DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setBlob(generateRandomBytes());
-        incomingDataMsg.setVersion(new IncrementVersionFactory().createNull());
-        DataMessage message = incomingDataMsg;
-        message.setVersion(versionFactoryMarshaller.createNull());
-        return encodeMessage(message);
+        verify(mockDataBank).put(anyString(), any(Data.class));
+        verify(mockResponse).setStatusCode(HttpStatus.SC_CREATED);
+        verify(mockResponse).setEntity(any(ByteArrayEntity.class));
     }
 
     @Test
     public void ensureStatusOkIsReturnedForUpdate() throws Exception {
-        {
-            addGetRequestLineExp(request, TEST_KEY_REQUEST_CTX);
-            addGetEntityExp(createValidUpdateDataMessageInBytes());
-        }
+        HttpPutMethodHandler handler = createHttpPutHandler();
 
-        {
-            addSuccessfulLocalGetExp(dataBank, testStorageContext);
-            addSuccessLocalPutExp(dataBank, testStorageContext);
-        }
+        stubGetRequestURI(mockRequest, "/testContext/testKey");
+        stubGetByteArrayEntityFromRequest(createValidUpdateDataMessageInBytes());
+        Data data = new Data();
+        data.setVersion(new IncrementVersionFactory().create(new Identity(4040)));
+        when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(data);
 
-        {
-            addSetOkStatusCodeExp(response);
-            addSetBinaryDataEntityExp(response);
-        }
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
 
-        handler.handle(request, response, httpContext);
+        verify(mockDataBank).put(anyString(), any(Data.class));
+        verify(mockResponse).setStatusCode(HttpStatus.SC_OK);
+        verify(mockResponse).setEntity(any(ByteArrayEntity.class));
     }
 
     private byte[] createValidUpdateDataMessageInBytes() throws IOException {
         DataMessage incomingDataMsg = new DataMessage();
-        incomingDataMsg.setBlob(generateRandomBytes());
+        incomingDataMsg.setBlob("test data".getBytes());
         incomingDataMsg.setVersion(new IncrementVersionFactory()
-                .create(localId).incrementFor(localId));
+                .create(new Identity(4040)).incrementFor(new Identity(7070)));
         DataMessage message = incomingDataMsg;
         return encodeMessage(message);
     }
 
     @Test
     public void ensureBlankKeyIsRejected() throws HttpException, IOException {
-        {
-            addGetRequestLineExp(request, "/");
-        }
+        HttpPutMethodHandler handler = createHttpPutHandler();
 
-        handler.handle(request, response, httpContext);
+        stubGetRequestURI(mockRequest, "/");
+        
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
     }
 
 }

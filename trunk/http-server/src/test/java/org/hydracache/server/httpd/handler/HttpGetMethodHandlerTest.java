@@ -12,14 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.RequestLine;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.protocol.data.codec.DefaultProtocolEncoder;
@@ -32,27 +27,10 @@ import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.VersionXmlMarshaller;
 import org.hydracache.server.harmony.storage.HarmonyDataBank;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-public class HttpGetMethodHandlerTest {
-    @Mock
-    private HarmonyDataBank mockDataBank;
-    @Mock
-    private HttpRequest mockRequest;
-    @Mock
-    private HttpResponse mockResponse;
-    @Mock
-    private HttpContext mockHttpContext;
-
+public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     public HttpGetMethodHandlerTest() {
-    }
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -86,21 +64,6 @@ public class HttpGetMethodHandlerTest {
                 hashFunction, messageEncoder);
 
         return handler;
-    }
-
-    private void stubGetRequestURI(HttpRequest mockRequest, String requestUri) {
-        RequestLine mockRequestLine = mock(RequestLine.class);
-        when(mockRequest.getRequestLine()).thenReturn(mockRequestLine);
-        when(mockRequestLine.getUri()).thenReturn(requestUri);
-    }
-
-    private void stubGetProtocolParam(String protocol) {
-        HttpParams mockHttpParams = mock(HttpParams.class);
-        when(mockRequest.getParams()).thenReturn(mockHttpParams);
-        when(
-                mockHttpParams
-                        .getParameter(HttpGetMethodHandler.PROTOCOL_PARAMETER_NAME))
-                .thenReturn(protocol);
     }
 
     private void stubSuccessfulReliableGet(HarmonyDataBank mockDataBank)
