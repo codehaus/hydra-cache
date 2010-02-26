@@ -90,15 +90,23 @@ public class HttpPutMethodHandler extends BaseHttpMethodHandler {
             return;
 
         Long dataKey = extractDataKeyHash(request);
+        
         String storageContext = extractRequestContext(request);
 
-        DataMessage dataMessage = decodeProtocolMessage(((HttpEntityEnclosingRequest) request)
+        DataMessage dataMessage;
+        if (isRequestingXmlProtocol(request)) {
+            String xmlData = EntityUtils.toString(((HttpEntityEnclosingRequest) request)
                 .getEntity());
+            dataMessage = decoder.decodeXml(xmlData);
+        }else{
+            dataMessage = decodeBinaryProtocolMessage(((HttpEntityEnclosingRequest) request)
+                .getEntity());
+        }
 
         processDataMessage(response, storageContext, dataKey, dataMessage);
     }
 
-    private DataMessage decodeProtocolMessage(HttpEntity entity)
+    private DataMessage decodeBinaryProtocolMessage(HttpEntity entity)
             throws IOException {
         byte[] entityContent = EntityUtils.toByteArray(entity);
 

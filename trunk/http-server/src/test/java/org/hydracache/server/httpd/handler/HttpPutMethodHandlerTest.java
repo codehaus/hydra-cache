@@ -23,7 +23,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ByteArrayEntity;
@@ -49,9 +52,43 @@ import org.junit.Test;
 
 /**
  * @author nzhu
- * 
+ * @TODO use spring to inject the protocol codec classes and other resources
+ *       instead of creating them on the fly
  */
 public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
+    @Test
+    public void testSuccessfulPutUsingXml() throws Exception {
+        HttpPutMethodHandler handler = createHttpPutHandler();
+
+        stubGetRequestURI(mockRequest, "/testContext/testKey?protocol=xml");
+        stubGetProtocolParam("xml");
+        stubGetStringEntityInXml(mockRequest);
+        stubNotFoundLocalGet(mockDataBank);
+
+        handler.handle(mockRequest, mockResponse, mockHttpContext);
+
+        verify(mockDataBank).put(anyString(), any(Data.class));
+        verify(mockResponse).setStatusCode(HttpStatus.SC_CREATED);
+        verify(mockResponse).setEntity(any(ByteArrayEntity.class));
+
+    }
+
+    private void stubGetStringEntityInXml(HttpEntityEnclosingRequest mockRequest)
+            throws UnsupportedEncodingException, IOException {
+        when(mockRequest.getEntity()).thenReturn(
+                new StringEntity(createValidNewMessageInXml()));
+    }
+
+    private String createValidNewMessageInXml() throws IOException {
+        DefaultProtocolEncoder encoder = createMessageEncoder();
+        DataMessage msg = new DataMessage(new IncrementVersionFactory()
+                .create(new Identity(8080)), "test data".getBytes());
+        StringWriter out = new StringWriter();
+        encoder.encodeXml(msg, out);
+        String xml = out.toString();
+        return xml;
+    }
+
     @Test
     public void ensureLocalVersionConflictDetectionIgnoresNull()
             throws Exception {
@@ -69,7 +106,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
 
     }
 
-    private void stubNotFoundLocalGet(HarmonyDataBank mockDataBank) throws IOException {
+    private void stubNotFoundLocalGet(HarmonyDataBank mockDataBank)
+            throws IOException {
         when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(null);
     }
 
@@ -83,7 +121,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
                 new IdentityMarshaller());
 
-        DefaultProtocolEncoder messageEncoder = createMessageEncoder(versionMarshaller);
+        DefaultProtocolEncoder messageEncoder = createMessageEncoder();
 
         DefaultProtocolDecoder messageDecoder = new DefaultProtocolDecoder(
                 new DataMessageMarshaller(versionMarshaller),
@@ -98,8 +136,10 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         return handler;
     }
 
-    private DefaultProtocolEncoder createMessageEncoder(
-            IncrementVersionFactory versionMarshaller) {
+    private DefaultProtocolEncoder createMessageEncoder() {
+        IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
+                new IdentityMarshaller());
+
         DefaultProtocolEncoder messageEncoder = new DefaultProtocolEncoder(
                 new DataMessageMarshaller(versionMarshaller),
                 new DataMessageXmlMarshaller(new VersionXmlMarshaller(
@@ -116,9 +156,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     }
 
     private byte[] encodeMessage(DataMessage message) throws IOException {
-        IncrementVersionFactory versionMarshaller = new IncrementVersionFactory(
-                new IdentityMarshaller());
-        DefaultProtocolEncoder messageEncoder = createMessageEncoder(versionMarshaller);
+        DefaultProtocolEncoder messageEncoder = createMessageEncoder();
         Buffer buffer = Buffer.allocate();
         messageEncoder.encode(message, buffer.asDataOutpuStream());
         byte[] bytes = buffer.toByteArray();
@@ -131,10 +169,10 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
 
         stubGetRequestURI(mockRequest, "/testContext/testKey");
         stubGetByteArrayEntityFromRequest(createValidNewMessageInBytes());
-        
+
         Data data = new Data();
-        data.setVersion(new IncrementVersionFactory().create(new Identity(4040))
-                .incrementFor(new Identity(7070)));
+        data.setVersion(new IncrementVersionFactory()
+                .create(new Identity(4040)).incrementFor(new Identity(7070)));
         when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(data);
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
@@ -167,7 +205,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         stubGetRequestURI(mockRequest, "/testContext/testKey");
         stubGetByteArrayEntityFromRequest(createValidUpdateDataMessageInBytes());
         Data data = new Data();
-        data.setVersion(new IncrementVersionFactory().create(new Identity(4040)));
+        data.setVersion(new IncrementVersionFactory()
+                .create(new Identity(4040)));
         when(mockDataBank.getLocally(anyString(), anyLong())).thenReturn(data);
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
@@ -180,8 +219,8 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
     private byte[] createValidUpdateDataMessageInBytes() throws IOException {
         DataMessage incomingDataMsg = new DataMessage();
         incomingDataMsg.setBlob("test data".getBytes());
-        incomingDataMsg.setVersion(new IncrementVersionFactory()
-                .create(new Identity(4040)).incrementFor(new Identity(7070)));
+        incomingDataMsg.setVersion(new IncrementVersionFactory().create(
+                new Identity(4040)).incrementFor(new Identity(7070)));
         DataMessage message = incomingDataMsg;
         return encodeMessage(message);
     }
@@ -191,7 +230,7 @@ public class HttpPutMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         HttpPutMethodHandler handler = createHttpPutHandler();
 
         stubGetRequestURI(mockRequest, "/");
-        
+
         handler.handle(mockRequest, mockResponse, mockHttpContext);
     }
 

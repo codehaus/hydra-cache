@@ -40,7 +40,7 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
         BaseHttpMethodHandler handler = createHttpGetMethodHandler();
 
         stubGetRequestURI(mockRequest, "/testContext/testKey?protocol=xml");
-        stubGetProtocolParam(HttpGetMethodHandler.XML_PROTOCOL);
+        stubGetProtocolParam(BaseHttpMethodHandler.XML_PROTOCOL);
         stubSuccessfulReliableGet(mockDataBank);
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);

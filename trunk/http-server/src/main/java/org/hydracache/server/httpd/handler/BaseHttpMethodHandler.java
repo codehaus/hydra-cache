@@ -141,4 +141,10 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         return body;
     }
 
+    protected boolean isRequestingXmlProtocol(HttpRequest request) {
+        return request.getParams() != null
+                && XML_PROTOCOL.equalsIgnoreCase(String.valueOf(request
+                        .getParams().getParameter(PROTOCOL_PARAMETER_NAME)));
+    }
+
 }

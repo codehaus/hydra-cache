@@ -129,12 +129,6 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         }
     }
 
-    private boolean isRequestingXmlProtocol(HttpRequest request) {
-        return request.getParams() != null
-                && XML_PROTOCOL.equalsIgnoreCase(String.valueOf(request
-                        .getParams().getParameter(PROTOCOL_PARAMETER_NAME)));
-    }
-
     private StringEntity generateStringEntityForXmlData(Data data)
             throws IOException, UnsupportedEncodingException {
         DataMessage dataMsg = new DataMessage(data);

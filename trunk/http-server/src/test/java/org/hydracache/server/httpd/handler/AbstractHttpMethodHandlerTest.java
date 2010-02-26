@@ -64,7 +64,7 @@ public class AbstractHttpMethodHandlerTest {
         when(mockRequest.getParams()).thenReturn(mockHttpParams);
         when(
                 mockHttpParams
-                        .getParameter(HttpGetMethodHandler.PROTOCOL_PARAMETER_NAME))
+                        .getParameter(BaseHttpMethodHandler.PROTOCOL_PARAMETER_NAME))
                 .thenReturn(protocol);
     }
 
