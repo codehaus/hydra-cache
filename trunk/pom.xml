@@ -7,12 +7,12 @@
     <name>Hydra Project Parent</name>
     <description>Java implementation of Dynamo - consistent-hash based distributed cache system</description>
     <inceptionYear>2008</inceptionYear>
-    <version>0.4</version>
+    <version>1.0RC1-SNAPSHOT</version>
     <url>http://www.hydracache.org</url>
 
     <scm>
-        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/tags/hydracache-0.4</connection>
-        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/tags/hydracache-0.4</developerConnection>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/trunk</connection>
+        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/trunk</developerConnection>
     </scm>
 
     <issueManagement>
