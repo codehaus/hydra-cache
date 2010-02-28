@@ -102,7 +102,11 @@ public class BasicPutAndGetIntegrationTest {
     }
 
     private String createRandomKey() {
-        String randomKey = RandomStringUtils.randomAlphanumeric(10);
+//        String randomKey = RandomStringUtils.randomAlphanumeric(10);
+        String randomKey = "TestKey";
+        
+        log.info("Creating random key: " + randomKey);
+        
         return randomKey;
     }
 

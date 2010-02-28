@@ -30,9 +30,6 @@ import org.hydracache.server.harmony.storage.HarmonyDataBank;
 import org.junit.Test;
 
 public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
-    public HttpGetMethodHandlerTest() {
-    }
-
     @Test
     public void ensureHandleGetXmlDataCorrectly() throws HttpException,
             IOException {
