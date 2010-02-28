@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.codehaus.hydra-cache</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.4</version>
+    </parent>
+    <artifactId>assembler</artifactId>
+    <name>Hydra Server Assembly</name>
+    <description>Maven assembler module for Hydra Cache server</description>
+
+    <properties>
+        <app.name>hydraserver</app.name>
+        <app.long.name>Hydra Server</app.long.name>
+        <app.description>Hydra Distributed Cache Server</app.description>
+    </properties>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/conf</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/assembly</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>
+                            ${pom.basedir}/src/main/assembly/independent/descriptor.xml
+                        </descriptor>
+                        <descriptor>
+                            ${pom.basedir}/src/main/assembly/linux-x86-32/descriptor.xml
+                        </descriptor>
+                        <descriptor>
+                            ${pom.basedir}/src/main/assembly/win-x86-32/descriptor.xml
+						</descriptor>
+                    </descriptors>
+                    <finalName>hydra-server-${version}</finalName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <!-- INTERNAL DEPENDENCIES -->
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>bootstrap</artifactId>
+        </dependency>
+        
+    </dependencies>
+
+</project>

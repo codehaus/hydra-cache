@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        /* * Copyright 2008 the original author or authors. * * Licensed
+        under the Apache License, Version 2.0 (the "License"); * you may
+        not use this file except in compliance with the License. * You
+        may obtain a copy of the License at * *
+        http://www.apache.org/licenses/LICENSE-2.0 * * Unless required
+        by applicable law or agreed to in writing, software *
+        distributed under the License is distributed on an "AS IS"
+        BASIS, * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+        express or implied. * See the License for the specific language
+        governing permissions and * limitations under the License. */
+
+        @author David Dossot (david@dossot.net)
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Import harmony context  -->
+    <import resource="classpath:common-context.xml" />
+
+    <!--
+        TODO based on a parameter in hydra.conf, select either increment
+        or vector clock versioning
+    -->
+    <bean id="versionFactory"
+        class="org.hydracache.server.data.versioning.IncrementVersionFactory"
+        p:identityMarshaller-ref="identityMarshaller" />
+
+    <alias alias="versionMarshaller" name="versionFactory" />
+
+    <bean id="versionXmlMarshaller"
+        class="org.hydracache.server.data.versioning.VersionXmlMarshaller">
+        <constructor-arg ref="identityXmlMarshaller" />
+        <constructor-arg ref="versionFactory" />
+    </bean>
+
+    <bean id="conflictResolver"
+        class="org.hydracache.server.data.resolver.SequentialResolver">
+        <constructor-arg>
+            <list>
+                <bean
+                    class="org.hydracache.server.data.resolver.SyntacticReconciliationResolver" />
+                <bean
+                    class="org.hydracache.server.data.resolver.ArbitraryResolver" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

@@ -1,0 +1,59 @@
+<assembly>
+    <id>binary-independent</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>            
+            <excludes>
+                <exclude>assembler*.jar</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>conf</outputDirectory>
+            <includes>
+                <include>*.conf</include>
+                <include>*.xml</include>
+                <include>*.properties</include>
+            </includes>
+            <excludes>
+                <exclude>wrapper.conf</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>
+                src/main/assembly/independent/conf
+            </directory>
+            <outputDirectory>conf</outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>
+                src/main/assembly/independent/bin
+            </directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <fileMode>774</fileMode>
+        </fileSet>
+
+        <fileSet>
+            <directory>
+                src/main/assembly/independent/lib
+            </directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+</assembly>

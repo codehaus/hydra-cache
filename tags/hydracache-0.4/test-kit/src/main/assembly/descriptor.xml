@@ -1,0 +1,11 @@
+<assembly>
+    <id>binary</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+</assembly>

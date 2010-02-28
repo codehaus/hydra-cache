@@ -1,0 +1,10 @@
+#!/bin/sh
+
+APP_HOME=..
+
+$JAVA_HOME/bin/java \
+    -classpath $APP_HOME/lib/classworlds-1.1.jar \
+    -Dclassworlds.conf=$APP_HOME/conf/classworlds.conf \
+    -Djava.net.preferIPv4Stack=true \
+    -Dapp.home=$APP_HOME \
+    org.codehaus.classworlds.Launcher $*

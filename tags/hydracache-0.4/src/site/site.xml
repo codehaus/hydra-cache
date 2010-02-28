@@ -1,0 +1,25 @@
+<project name="HydraCache">
+        <skin>
+                <groupId>org.apache.maven.skins</groupId>
+                <artifactId>maven-stylus-skin</artifactId>
+                <version>1.1</version>
+        </skin>
+        
+        <publishDate format="dd MMM yyyy" />
+        
+        <version position="right"/>
+
+        <body>
+                <links>
+                        <item name="HydraCache.org" href="http://www.hydracache.org"/>
+                        <item name="User Wiki" href="http://www.hydracache.org/project/wiki/UserWiki"/>
+                        <item name="Developer Wiki" href="http://www.hydracache.org/project/wiki/DeveloperWiki"/>
+                        <item name="Codehaus Project Page" href="http://xircles.codehaus.org/projects/hydra-cache"/>
+                </links>
+                
+                <menu ref="modules" />
+
+                ${reports}
+
+        </body>
+</project>
