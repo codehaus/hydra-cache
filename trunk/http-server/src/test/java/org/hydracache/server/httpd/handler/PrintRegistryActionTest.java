@@ -1,40 +1,38 @@
 package org.hydracache.server.httpd.handler;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.jgroups.stack.IpAddress;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.junit.Test;
 
 public class PrintRegistryActionTest {
-    private Mockery context = new Mockery();
-
     private JGroupsNode self = new JGroupsNode(new Identity(8080),
             new IpAddress(7000));
+    
+    private HttpResponse mockRequest;
 
     @Test
-    public void ensureCorrectRegistryPrint() throws Exception {
+    public void ensureCorrectRegistryPrintWithoutPadding() throws Exception {
         MembershipRegistry membershipRegistry = new MembershipRegistry(self);
         
         membershipRegistry.register(new JGroupsNode(new Identity(8081),
                 new IpAddress(7001)));
-
-        final HttpResponse response = context.mock(HttpResponse.class);
-
-        context.checking(new Expectations() {
-            {
-                one(response).setEntity(with(any(StringEntity.class)));
-            }
-        });
+        
+        mockRequest = mock(HttpResponse.class);
 
         HttpServiceAction command = new PrintRegistryAction(membershipRegistry);
-        command.execute(response);
+        
+        command.execute(mockRequest);
 
-        context.assertIsSatisfied();
+        verify(mockRequest, times(1)).setEntity(any(StringEntity.class));
     }
 
 }
