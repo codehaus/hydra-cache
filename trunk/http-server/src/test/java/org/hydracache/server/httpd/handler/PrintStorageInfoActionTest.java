@@ -25,7 +25,7 @@ public class PrintStorageInfoActionTest {
 
         PrintStorageInfoAction handler = new PrintStorageInfoAction(dataBank);
 
-        handler.execute(response);
+        handler.execute(null, response);
 
         context.assertIsSatisfied();
     }

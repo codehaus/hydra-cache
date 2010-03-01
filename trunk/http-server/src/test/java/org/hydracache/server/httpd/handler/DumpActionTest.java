@@ -42,7 +42,7 @@ public class DumpActionTest {
 
         DumpAction handler = new DumpAction(dataBank);
 
-        handler.execute(response);
+        handler.execute(null, response);
 
         context.assertIsSatisfied();
     }

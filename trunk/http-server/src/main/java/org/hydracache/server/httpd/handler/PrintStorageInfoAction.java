@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
@@ -43,7 +44,7 @@ public class PrintStorageInfoAction implements HttpServiceAction {
      * org.hydracache.server.httpd.handler.HttpGetCommand#execute(org.apache
      * .http.HttpResponse)
      */
-    public void execute(HttpResponse response) throws HttpException,
+    public void execute(HttpRequest request, HttpResponse response) throws HttpException,
             IOException {
         JSONObject output = new JSONObject();
 

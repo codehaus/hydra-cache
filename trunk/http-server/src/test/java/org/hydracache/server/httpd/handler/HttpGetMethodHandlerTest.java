@@ -104,7 +104,7 @@ public class HttpGetMethodHandlerTest extends AbstractHttpMethodHandlerTest {
 
         handler.handle(mockRequest, mockResponse, mockHttpContext);
 
-        verify(mockAction).execute(mockResponse);
+        verify(mockAction).execute(null, mockResponse);
     }
 
     @Test
