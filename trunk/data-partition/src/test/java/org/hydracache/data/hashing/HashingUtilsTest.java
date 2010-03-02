@@ -30,11 +30,5 @@ public class HashingUtilsTest {
         Assert.assertNotNull(HashingUtils
                 .computeMd5(new ConsistentHashableString("10")));
     }
-
-    @Test
-    public void ensureGetKeyBytesCanHandleNull() throws Exception {
-        Assert.assertNotNull(HashingUtils
-                .computeMd5(new ConsistentHashableString(null)));
-    }
     
 }

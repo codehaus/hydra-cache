@@ -105,13 +105,17 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
      * @see org.hydracache.data.partitioning.NodePartition#get(java.lang.String)
      */
     public T get(String hashKey) {
+        if (hashKey == null)
+            return null;
+
         readLock.lock();
         try {
             if (circle.isEmpty()) {
                 return null;
             }
 
-            long hash = hashFunction.hash(new ConsistentHashableString(hashKey));
+            long hash = hashFunction
+                    .hash(new ConsistentHashableString(hashKey));
 
             return getByHash(hash);
         } finally {
