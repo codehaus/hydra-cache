@@ -102,11 +102,11 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
         if (StringUtils.contains(requestString, SLASH)) {
             requestString = StringUtils.substringAfter(requestString, SLASH);
-
-            if (StringUtils.contains(requestString, QUESTION_MARK)) {
-                requestString = StringUtils.substringBefore(requestString,
-                        QUESTION_MARK);
-            }
+        }
+        
+        if (StringUtils.contains(requestString, QUESTION_MARK)) {
+            requestString = StringUtils.substringBefore(requestString,
+                    QUESTION_MARK);
         }
 
         return requestString;

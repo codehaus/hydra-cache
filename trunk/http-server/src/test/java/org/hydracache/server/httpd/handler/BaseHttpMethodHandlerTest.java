@@ -168,6 +168,17 @@ public class BaseHttpMethodHandlerTest {
 
         checkKeyExtrationResult(handler, expectedDataKey, uri);
     }
+    
+    @Test
+    public void ensureParameterAfterContextlessKeyIsIgnored() {
+        BaseHttpMethodHandler handler = createHandler();
+
+        String expectedDataKey = "registry";
+
+        String uri = "/registry?handler=callback";
+
+        checkKeyExtrationResult(handler, expectedDataKey, uri);
+    }
 
     @Test
     public void ensureKeyExtractionWithEndSlash() {

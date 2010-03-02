@@ -87,7 +87,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
 
         if (serviceActionMap.containsKey(requestContext)) {
             HttpServiceAction action = serviceActionMap.get(requestContext);
-            action.execute(null, response);
+            action.execute(request, response);
         } else {
             handleGetData(request, response);
         }
