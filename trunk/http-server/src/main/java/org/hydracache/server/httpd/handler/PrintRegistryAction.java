@@ -4,12 +4,10 @@ import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONT
 
 import java.io.IOException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.NodeSet;
@@ -18,17 +16,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * @author nick.zhu
+ * Http service action that generate Hydra space registry information in either
+ * JSON or JSONP format for consumption
  * 
+ * @author Nick Zhu (nzhu@jointsource.com)
  */
-public class PrintRegistryAction implements HttpServiceAction {
+public class PrintRegistryAction extends BaseJsonServiceAction implements
+        HttpServiceAction {
     private static final String PORT_FIELD_NAME = "port";
 
     private static final String IP_FIELD_NAME = "ip";
-
-    private static final String JSONP_CALLBACK_PARAM_NAME = "handler";
-
-    private static Logger log = Logger.getLogger(PrintRegistryAction.class);
 
     private MembershipRegistry membershipRegistry;
 
@@ -71,20 +68,6 @@ public class PrintRegistryAction implements HttpServiceAction {
         response.setEntity(body);
     }
 
-    private boolean isJSONPRequest(String jsonHandlerParam) {
-        return StringUtils.isNotBlank(jsonHandlerParam);
-    }
-
-    private String padJSONResponse(String jsonString, String jsonHandlerParam) {
-        jsonString = jsonHandlerParam + "(" + jsonString + ")";
-        return jsonString;
-    }
-
-    private String getJsonHandlerParam(HttpRequest request) {
-        return request.getParams() == null ? "" : String.valueOf(request
-                .getParams().getParameter(JSONP_CALLBACK_PARAM_NAME));
-    }
-
     private String buildJsonNodeArray() {
         JSONArray nodeArray = new JSONArray();
 
@@ -102,7 +85,7 @@ public class PrintRegistryAction implements HttpServiceAction {
         }
 
         String jsonString = nodeArray.toString();
-        
+
         return jsonString;
     }
 
