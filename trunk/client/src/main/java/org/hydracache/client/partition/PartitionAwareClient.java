@@ -137,15 +137,17 @@ public class PartitionAwareClient implements HydraCacheClient,
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
+     * @see org.hydracache.client.HydraCacheClient#get(java.lang.String,
+     * java.lang.String)
      */
     @Override
-    public synchronized Object get(final String key) throws Exception {
+    public Object get(String context, String key) throws Exception {
         Identity identity = nodePartition.get(key);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(GET);
         requestMessage.setPath(key);
+        requestMessage.setContext(context);
 
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
@@ -163,11 +165,21 @@ public class PartitionAwareClient implements HydraCacheClient,
     /*
      * (non-Javadoc)
      * 
-     * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
-     * java.io.Serializable)
+     * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
      */
     @Override
-    public synchronized void put(String key, Serializable data)
+    public synchronized Object get(final String key) throws Exception {
+        return get(null, key);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
+     * java.lang.String, java.io.Serializable)
+     */
+    @Override
+    public void put(String context, String key, Serializable data)
             throws Exception {
         Identity identity = nodePartition.get(key);
         Buffer buffer = serializeData(key, data);
@@ -175,11 +187,24 @@ public class PartitionAwareClient implements HydraCacheClient,
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(PUT);
         requestMessage.setPath(key);
+        requestMessage.setContext(context);
         requestMessage.setRequestData(buffer);
 
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         assert responseMessage != null && responseMessage.isSuccessful();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
+     * java.io.Serializable)
+     */
+    @Override
+    public synchronized void put(String key, Serializable data)
+            throws Exception {
+        put(null, key, data);
     }
 
     /*

@@ -34,6 +34,8 @@ import org.junit.Test;
  * 
  */
 public class BasicPutAndGetIntegrationTest {
+    private static final String INTEGRATION_TEST_STORAGE_CONTEXT = "integrationTest";
+
     private static Logger log = Logger
             .getLogger(BasicPutAndGetIntegrationTest.class);
 
@@ -91,14 +93,15 @@ public class BasicPutAndGetIntegrationTest {
     }
 
     private void assertPutAndGet(String testKey) throws Exception {
-        client.get(testKey);
-        
+        client.get(INTEGRATION_TEST_STORAGE_CONTEXT, testKey);
+
         String data = RandomStringUtils.randomAlphanumeric(RandomUtils
                 .nextInt(500));
 
-        client.put(testKey, data);
+        client.put(INTEGRATION_TEST_STORAGE_CONTEXT, testKey, data);
 
-        Object retrievedData = client.get(testKey);
+        Object retrievedData = client.get(INTEGRATION_TEST_STORAGE_CONTEXT,
+                testKey);
 
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }

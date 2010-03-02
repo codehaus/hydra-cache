@@ -43,6 +43,23 @@ public interface HydraCacheClient {
     public Object get(String key) throws Exception;
 
     /**
+     * Retrieve the data using the given key. The key is hashed and a lookup is
+     * performed to locate the node where the data resides. If it exists, it is
+     * returned, otherwise null is returned.
+     * 
+     * @param context
+     *            The storage context that the data will be retrieved from
+     * @param key
+     *            The key of the Data from the cache.
+     * @return Object retrieved from the cache or null if not found
+     * @throws IOException
+     *             If there are problems with the connection
+     * @throws OperationTimeoutException
+     *             if we cannot locate the data in sufficient time.
+     */
+    public Object get(String context, String key) throws Exception;
+
+    /**
      * Add data to the cache with the given key.
      * 
      * @param key
@@ -55,4 +72,20 @@ public interface HydraCacheClient {
      */
     public void put(String key, Serializable object) throws Exception,
             VersionConflictException;
+
+    /**
+     * Add data to the cache with the given key.
+     * 
+     * @param context
+     *            The storage context that the data will be attached to
+     * @param key
+     *            Identifies the data to put
+     * @param object
+     *            The object to be cached
+     * @return A Future to return true once the operation has completed
+     * @exception VersionConflictException
+     *                thrown if version conflict has been detected
+     */
+    public void put(String context, String key, Serializable object)
+            throws Exception;
 }
