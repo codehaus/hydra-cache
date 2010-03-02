@@ -37,7 +37,7 @@ public class BasicPutAndGetIntegrationTest {
     private static Logger log = Logger
             .getLogger(BasicPutAndGetIntegrationTest.class);
 
-    private static final int PORT_NUMBER = 8080;
+    private static final int PORT_NUMBER = 7345;
 
     private static final String SERVER_NAME = "localhost";
 
