@@ -1,14 +1,8 @@
 package org.hydracache.server.httpd.handler;
 
-import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
-
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
@@ -17,10 +11,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * @author nick.zhu
+ * @author Nick Zhu (nzhu@jointsource.com)
  * 
  */
-public class DumpAction implements HttpServiceAction {
+public class DumpAction extends BaseJsonServiceAction implements
+        HttpServiceAction {
+    private static final String SIZE_FIELD = "size";
+
+    private static final String VERSION_FIELD = "version";
+
+    private static final String KEY_HASH_FIELD = "keyHash";
+
     private static Logger log = Logger.getLogger(DumpAction.class);
 
     private DataBank internalDataBank;
@@ -42,20 +43,16 @@ public class DumpAction implements HttpServiceAction {
      * (non-Javadoc)
      * 
      * @see
-     * org.hydracache.server.httpd.handler.HttpGetCommand#execute(org.apache
-     * .http.HttpResponse)
+     * org.hydracache.server.httpd.handler.BaseJsonServiceAction#buildJsonOutput
+     * ()
      */
-    public void execute(HttpRequest request, HttpResponse response) throws HttpException,
-            IOException {
+    @Override
+    protected String buildJsonOutput() throws IOException {
         Collection<Data> allData = internalDataBank.getAll();
 
         String content = printDataSet(allData);
 
-        StringEntity body = new StringEntity(content);
-
-        body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
-
-        response.setEntity(body);
+        return content;
     }
 
     String printDataSet(Collection<Data> allData) {
@@ -66,9 +63,9 @@ public class DumpAction implements HttpServiceAction {
                 if (data != null) {
                     JSONObject row = new JSONObject();
 
-                    row.put("keyHash", data.getKeyHash());
-                    row.put("version", data.getVersion());
-                    row.put("size", data.getContent() == null ? 0 : data
+                    row.put(KEY_HASH_FIELD, data.getKeyHash());
+                    row.put(VERSION_FIELD, data.getVersion());
+                    row.put(SIZE_FIELD, data.getContent() == null ? 0 : data
                             .getContent().length);
 
                     outputArray.put(row);
