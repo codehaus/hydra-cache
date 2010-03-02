@@ -15,6 +15,8 @@
  */
 package org.hydracache.data.hashing;
 
+import org.hydracache.data.partition.ConsistentHashable;
+
 /**
  * A hashing function based on last.fm's ketama project.
  * 
@@ -29,7 +31,7 @@ public class KetamaBasedHashFunction implements HashFunction {
      * 
      * @see org.hydracache.data.hashing.HashFunction#hash(java.lang.Object)
      */
-    public long hash(Object key) {
+    public long hash(ConsistentHashable key) {
         long rv = 0;
 
         byte[] bKey = HashingUtils.computeMd5(key);

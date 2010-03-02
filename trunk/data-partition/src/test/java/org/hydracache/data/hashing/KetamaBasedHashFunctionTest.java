@@ -15,9 +15,9 @@
  */
 package org.hydracache.data.hashing;
 
+import org.hydracache.server.Identity;
 import org.junit.Assert;
 import org.junit.Test;
-
 
 /**
  * @author Tan Quach
@@ -27,6 +27,7 @@ public class KetamaBasedHashFunctionTest {
     @Test
     public void shouldSatsifyHashCodeContract() {
         HashFunction hashFunction = new KetamaBasedHashFunction();
-        Assert.assertEquals(1749342675, hashFunction.hash(new Integer(10)));
+        Assert.assertEquals(hashFunction.hash(new Identity(80)), hashFunction
+                .hash(new Identity(80)));
     }
 }

@@ -26,6 +26,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.data.partition.ConsistentHashableString;
 import org.hydracache.io.Buffer;
 import org.hydracache.protocol.data.codec.ProtocolEncoder;
 import org.hydracache.protocol.data.message.DataMessage;
@@ -76,7 +77,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
     protected Long extractDataKeyHash(final String requestUri) {
         String requestString = extractRequestString(requestUri);
 
-        return hashFunction.hash(requestString);
+        return hashFunction.hash(new ConsistentHashableString(requestString));
     }
 
     protected String getRequestUri(HttpRequest request) {
@@ -103,7 +104,7 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
         if (StringUtils.contains(requestString, SLASH)) {
             requestString = StringUtils.substringAfter(requestString, SLASH);
         }
-        
+
         if (StringUtils.contains(requestString, QUESTION_MARK)) {
             requestString = StringUtils.substringBefore(requestString,
                     QUESTION_MARK);
@@ -111,20 +112,20 @@ public abstract class BaseHttpMethodHandler implements HttpRequestHandler {
 
         return requestString;
     }
-    
+
     protected String extractRequestContext(final HttpRequest request) {
         return extractRequestContext(getRequestUri(request));
     }
-    
+
     protected String extractRequestContext(final String requestUri) {
         String requestString = StringUtils.trim(requestUri);
-        
+
         requestString = StringUtils.removeStart(requestString, SLASH);
         requestString = StringUtils.removeEnd(requestString, SLASH);
-        
+
         if (StringUtils.contains(requestString, SLASH)) {
             requestString = StringUtils.substringBefore(requestString, SLASH);
-        }else{
+        } else {
             requestString = "";
         }
 

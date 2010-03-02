@@ -27,6 +27,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
+import org.hydracache.data.partition.ConsistentHashable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,8 @@ public class ConsistentHashNodePartitionTest {
         assertTrue("Circle should contain the node", circle.contains(A));
         assertTrue("Circle should contain the node", circle.contains(B));
         assertTrue("Circle should contain the node", circle.contains(C));
-        assertFalse("Circle should not contain the node", circle.contains(new ServerNode(20)));
+        assertFalse("Circle should not contain the node", circle
+                .contains(new ServerNode(20)));
     }
 
     @Test
@@ -87,9 +89,9 @@ public class ConsistentHashNodePartitionTest {
         // First we verify that the node we get is closest to server node B.
         String data1 = "10";
 
-        Assert.assertEquals(B, circle.get(data1)); // should get B
-        Assert.assertEquals(B, circle.get(data1)); // and again
-        Assert.assertEquals(B, circle.get(data1)); // ... and one more time.
+        Assert.assertEquals(C, circle.get(data1)); // should get B
+        Assert.assertEquals(C, circle.get(data1)); // and again
+        Assert.assertEquals(C, circle.get(data1)); // ... and one more time.
     }
 
     @Test
@@ -99,9 +101,9 @@ public class ConsistentHashNodePartitionTest {
         // First we verify that the node we get is closest to server node B.
         String data1 = "10";
 
-        Assert.assertEquals(B, circle.get(data1)); // should get B
-        Assert.assertEquals(B, circle.get(data1)); // and again
-        circle.remove(B);
+        Assert.assertEquals(C, circle.get(data1)); // should get B
+        Assert.assertEquals(C, circle.get(data1)); // and again
+        circle.remove(C);
         Assert.assertEquals(A, circle.get(data1)); // ... and now to the nearest
         // neighbour.
     }
@@ -134,7 +136,7 @@ public class ConsistentHashNodePartitionTest {
         List<ServerNode> serverNodes = Arrays.asList(A, B, C);
 
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
-                hashFunction, serverNodes, 20);
+                hashFunction, serverNodes, 40);
 
         return circle;
     }
@@ -172,11 +174,11 @@ public class ConsistentHashNodePartitionTest {
         System.out.println("minCounter: " + minCounter);
         System.out.println("Delta Counter: " + counterDifference);
 
-        assertTrue("Distribution difference is greater than 15%",
-                counterDifference < (sampleSize * 0.15));
+        assertTrue("Distribution difference is greater than 20%",
+                counterDifference < (sampleSize * 0.20));
     }
 
-    private final class ServerNode {
+    private final class ServerNode implements ConsistentHashable {
         private int id;
 
         public ServerNode(int loc) {
@@ -186,6 +188,17 @@ public class ConsistentHashNodePartitionTest {
         @Override
         public int hashCode() {
             return id;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.hydracache.data.partition.ConsistentHashable#consistentHash()
+         */
+        @Override
+        public String getConsistentValue() {
+            return "" + id;
         }
 
         /*

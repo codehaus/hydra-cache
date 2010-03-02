@@ -26,6 +26,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
+import org.hydracache.data.partition.ConsistentHashable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -109,7 +110,7 @@ public class ConsistentHashNodePartitionTestConcurrency {
         }
     }
 
-    private final class ServerNode {
+    private final class ServerNode implements ConsistentHashable {
         private int loc;
 
         public ServerNode(int loc) {
@@ -119,6 +120,17 @@ public class ConsistentHashNodePartitionTestConcurrency {
         @Override
         public int hashCode() {
             return loc;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.hydracache.data.partition.ConsistentHashable#getConsistentValue()
+         */
+        @Override
+        public String getConsistentValue() {
+            return "" + loc;
         }
 
         @Override

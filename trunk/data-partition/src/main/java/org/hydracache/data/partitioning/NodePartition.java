@@ -15,6 +15,8 @@
  */
 package org.hydracache.data.partitioning;
 
+import org.hydracache.data.partition.ConsistentHashable;
+
 /**
  * <p>
  * A consistent hashing implementation which allows a client to partition a set
@@ -49,7 +51,7 @@ package org.hydracache.data.partitioning;
  * @author Tan Quach
  * @since 1.0
  */
-public interface NodePartition<T> {
+public interface NodePartition<T extends ConsistentHashable> {
 
     /**
      * Add a node to the circle. The hash function used to determine where on
@@ -73,13 +75,13 @@ public interface NodePartition<T> {
      * Given a key, return the node T that this key hashes to. Keys, like nodes,
      * must consistently hash to the same value.
      * 
-     * @param key
-     *            The data key
+     * @param hash
+     *            The hash key
      * @return The node where the key should consistently hash to. If the node
      *         goes down, the method should return the node's nearest neighbour
      *         going in a "clockwise" direction.
      */
-    public T get(String key);
+    public T get(String hash);
 
     /**
      * Test to see if the given node has been already represented in the

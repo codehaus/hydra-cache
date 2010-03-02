@@ -15,9 +15,9 @@
  */
 package org.hydracache.data.hashing;
 
+import org.hydracache.data.partition.ConsistentHashableString;
 import org.junit.Assert;
 import org.junit.Test;
-
 
 /**
  * @author Tan Quach
@@ -27,12 +27,14 @@ public class HashingUtilsTest {
 
     @Test
     public void shouldComputeMd5() throws Exception {
-        Assert.assertNotNull(HashingUtils.computeMd5(new Integer(10)));
+        Assert.assertNotNull(HashingUtils
+                .computeMd5(new ConsistentHashableString("10")));
+    }
+
+    @Test
+    public void ensureGetKeyBytesCanHandleNull() throws Exception {
+        Assert.assertNotNull(HashingUtils
+                .computeMd5(new ConsistentHashableString(null)));
     }
     
-    @Test
-    public void shouldGetKeyBytes() throws Exception {
-       byte[] keyBytes = HashingUtils.getKeyBytes("bytes");
-       Assert.assertNotNull(keyBytes);
-    }
 }

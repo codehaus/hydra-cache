@@ -15,6 +15,8 @@
  */
 package org.hydracache.data.hashing;
 
+import org.hydracache.data.partition.ConsistentHashable;
+
 /**
  * Provides a function signature for any client that wishes to provide a custom
  * hashing function.
@@ -30,8 +32,8 @@ public interface HashFunction {
      * TODO Beef up documentation
      * 
      * 
-     * @param key The data key
+     * @param obj The object to be hashed
      * @return A positive integer
      */
-    long hash(Object key);
+    long hash(ConsistentHashable obj);
 }

@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.hydracache.data.partition.ConsistentHashable;
 
 /**
  * Common identity class that can be used for identifying server nodes in a
@@ -30,7 +31,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
  * @author nzhu
  * 
  */
-public class Identity implements Serializable, Comparable<Identity> {
+public class Identity implements Serializable, Comparable<Identity>,
+        ConsistentHashable {
     public static final Identity NULL_IDENTITY = getNullIdentity();
 
     private static final long serialVersionUID = 1L;
@@ -76,12 +78,22 @@ public class Identity implements Serializable, Comparable<Identity> {
         return port;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.data.partition.ConsistentHashable#consistentHash()
+     */
     @Override
-    public String toString() {
+    public String getConsistentValue() {
         if (stringValue == null)
             stringValue = address.getHostAddress() + ":" + port;
 
         return stringValue;
+    }
+
+    @Override
+    public String toString() {
+        return getConsistentValue();
     }
 
     @Override

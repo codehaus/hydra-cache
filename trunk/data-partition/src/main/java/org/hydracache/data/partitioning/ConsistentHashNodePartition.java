@@ -22,6 +22,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.hydracache.data.hashing.HashFunction;
+import org.hydracache.data.partition.ConsistentHashable;
+import org.hydracache.data.partition.ConsistentHashableString;
 
 /**
  * <p>
@@ -41,7 +43,8 @@ import org.hydracache.data.hashing.HashFunction;
  * @author Tan Quach
  * @since 1.0
  */
-public class ConsistentHashNodePartition<T> implements NodePartition<T> {
+public class ConsistentHashNodePartition<T extends ConsistentHashable>
+        implements NodePartition<T> {
 
     private static final int DEFAULT_NUMBER_OF_REPLICAS = 20;
 
@@ -101,14 +104,14 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
      * 
      * @see org.hydracache.data.partitioning.NodePartition#get(java.lang.String)
      */
-    public T get(String key) {
+    public T get(String hashKey) {
         readLock.lock();
         try {
             if (circle.isEmpty()) {
                 return null;
             }
 
-            long hash = hashFunction.hash(key);
+            long hash = hashFunction.hash(new ConsistentHashableString(hashKey));
 
             return getByHash(hash);
         } finally {
@@ -162,7 +165,9 @@ public class ConsistentHashNodePartition<T> implements NodePartition<T> {
     }
 
     private long replicatedNodeHash(T node, int i) {
-        return hashFunction.hash(node.toString() + "-" + i);
+        return hashFunction.hash(new ConsistentHashableString(node
+                .getConsistentValue()
+                + "-" + i));
     }
 
 }
