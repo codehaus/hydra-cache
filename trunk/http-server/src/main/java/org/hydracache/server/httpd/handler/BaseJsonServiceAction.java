@@ -15,8 +15,16 @@
  */
 package org.hydracache.server.httpd.handler;
 
+import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 
 /**
@@ -25,7 +33,7 @@ import org.apache.log4j.Logger;
  * 
  * @author Nick Zhu (nzhu@jointsource.com)
  */
-public class BaseJsonServiceAction {
+public abstract class BaseJsonServiceAction {
 
     public static final String JSONP_CALLBACK_PARAM_NAME = "handler";
 
@@ -35,18 +43,49 @@ public class BaseJsonServiceAction {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.hydracache.server.httpd.handler.HttpServiceAction#execute(org.apache
+     * .http.HttpRequest, org.apache.http.HttpResponse)
+     */
+    public void execute(HttpRequest request, HttpResponse response)
+            throws HttpException, IOException {
+        String jsonString = buildJsonOutput();
+
+        String jsonHandlerParam = getJsonHandlerParam(request);
+
+        if (isJSONPRequest(jsonHandlerParam)) {
+            jsonString = padJSONResponse(jsonString, jsonHandlerParam);
+        }
+
+        generateResponse(response, jsonString);
+    }
+
+    protected abstract String buildJsonOutput() throws IOException;
+
+    private void generateResponse(HttpResponse response, String jsonString)
+            throws UnsupportedEncodingException {
+        StringEntity body = new StringEntity(jsonString);
+
+        body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
+
+        response.setEntity(body);
+    }
+
     protected boolean isJSONPRequest(String jsonHandlerParam) {
         return StringUtils.isNotBlank(jsonHandlerParam);
     }
 
     protected String padJSONResponse(String jsonString, String jsonHandlerParam) {
-        jsonString = jsonHandlerParam + "(" + jsonString + ")";
-        return jsonString;
+        return jsonHandlerParam + "(" + jsonString + ")";
     }
 
     protected String getJsonHandlerParam(HttpRequest request) {
-        return (request == null || request.getParams() == null) ? "" : String.valueOf(request
-                .getParams().getParameter(JSONP_CALLBACK_PARAM_NAME));
+        return (request == null || request.getParams() == null) ? "" : String
+                .valueOf(request.getParams().getParameter(
+                        JSONP_CALLBACK_PARAM_NAME));
     }
 
 }

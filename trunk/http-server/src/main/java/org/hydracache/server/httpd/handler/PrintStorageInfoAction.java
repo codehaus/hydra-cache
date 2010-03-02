@@ -1,25 +1,29 @@
 package org.hydracache.server.httpd.handler;
 
-import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
-
 import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
 import org.json.JSONObject;
 
 /**
- * @author nick.zhu
+ * Http service action that prints storage information in json format
  * 
+ * @author Nick Zhu (nzhu@jointsource.com)
  */
-public class PrintStorageInfoAction implements HttpServiceAction {
+public class PrintStorageInfoAction extends BaseJsonServiceAction implements
+        HttpServiceAction {
+    private static final String FREE_MEMORY_FIELD = "freeMemory";
+
+    private static final String MAX_MEMORY_FIELD = "maxMemory";
+
+    private static final String TOTAL_MEMORY_FIELD = "totalMemory";
+
+    private static final String SIZE_FIELD = "size";
+
     private static Logger log = Logger.getLogger(PrintStorageInfoAction.class);
 
     private DataBank internalDataBank;
@@ -41,30 +45,31 @@ public class PrintStorageInfoAction implements HttpServiceAction {
      * (non-Javadoc)
      * 
      * @see
-     * org.hydracache.server.httpd.handler.HttpGetCommand#execute(org.apache
-     * .http.HttpResponse)
+     * org.hydracache.server.httpd.handler.BaseJsonServiceAction#buildJsonOutput
+     * ()
      */
-    public void execute(HttpRequest request, HttpResponse response) throws HttpException,
-            IOException {
+    @Override
+    protected String buildJsonOutput() throws IOException {
         JSONObject output = new JSONObject();
 
         Collection<Data> allData = internalDataBank.getAll();
 
         try {
             Runtime runtime = Runtime.getRuntime();
-            output.put("size", allData.size());
-            output.put("totalMemory", FileUtils.byteCountToDisplaySize(runtime.totalMemory()));
-            output.put("maxMemory", FileUtils.byteCountToDisplaySize(runtime.maxMemory()));
-            output.put("freeMemory", FileUtils.byteCountToDisplaySize(runtime.freeMemory()));
+            output.put(SIZE_FIELD, allData.size());
+            output.put(TOTAL_MEMORY_FIELD, FileUtils
+                    .byteCountToDisplaySize(runtime.totalMemory()));
+            output.put(MAX_MEMORY_FIELD, FileUtils
+                    .byteCountToDisplaySize(runtime.maxMemory()));
+            output.put(FREE_MEMORY_FIELD, FileUtils
+                    .byteCountToDisplaySize(runtime.freeMemory()));
         } catch (Exception e) {
             log.error("Failed to print storage info", e);
         }
-        
-        StringEntity body = new StringEntity(output.toString());
 
-        body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
+        String jsonOutputString = output.toString();
 
-        response.setEntity(body);
+        return jsonOutputString;
     }
 
 }

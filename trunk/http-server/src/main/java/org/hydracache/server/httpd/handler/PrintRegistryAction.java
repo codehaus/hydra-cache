@@ -1,13 +1,7 @@
 package org.hydracache.server.httpd.handler;
 
-import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
-
 import java.io.IOException;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.core.Node;
 import org.hydracache.server.harmony.core.NodeSet;
@@ -48,27 +42,11 @@ public class PrintRegistryAction extends BaseJsonServiceAction implements
      * (non-Javadoc)
      * 
      * @see
-     * org.hydracache.server.httpd.handler.HttpServiceAction#execute(org.apache
-     * .http.HttpRequest, org.apache.http.HttpResponse)
+     * org.hydracache.server.httpd.handler.BaseJsonServiceAction#buildJsonOutput
+     * ()
      */
-    public void execute(HttpRequest request, HttpResponse response)
-            throws HttpException, IOException {
-        String jsonString = buildJsonNodeArray();
-
-        String jsonHandlerParam = getJsonHandlerParam(request);
-
-        if (isJSONPRequest(jsonHandlerParam)) {
-            jsonString = padJSONResponse(jsonString, jsonHandlerParam);
-        }
-
-        StringEntity body = new StringEntity(jsonString);
-
-        body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
-
-        response.setEntity(body);
-    }
-
-    private String buildJsonNodeArray() {
+    @Override
+    protected String buildJsonOutput() throws IOException {
         JSONArray nodeArray = new JSONArray();
 
         NodeSet allNodes = membershipRegistry.listAllMembers();

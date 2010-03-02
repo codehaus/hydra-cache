@@ -1,38 +1,19 @@
 package org.hydracache.server.httpd.handler;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.params.HttpParams;
 import org.hydracache.server.Identity;
 import org.hydracache.server.harmony.jgroups.JGroupsNode;
 import org.hydracache.server.harmony.membership.MembershipRegistry;
 import org.jgroups.stack.IpAddress;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-public class PrintRegistryActionTest {
-    @Mock
-    private HttpResponse mockResponse;
-
-    @Mock
-    private HttpRequest mockRequest;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
+public class PrintRegistryActionTest extends AbstractJsonServiceActionTest {
     @Test
     public void ensureCorrectRegistryPrintWithoutPadding() throws Exception {
         MembershipRegistry membershipRegistry = mockMembershipRegistry();
@@ -56,10 +37,6 @@ public class PrintRegistryActionTest {
                 .contains(",{\"port\":8081,"));
     }
 
-    private void stubRequestWithEmptyParams() {
-        mockRequest = null;
-    }
-
     private MembershipRegistry mockMembershipRegistry() {
         JGroupsNode self = new JGroupsNode(new Identity(8080), new IpAddress(
                 7000));
@@ -76,9 +53,7 @@ public class PrintRegistryActionTest {
     public void ensureCorrectRegistryPrintWithPadding() throws Exception {
         MembershipRegistry membershipRegistry = mockMembershipRegistry();
 
-        String jsonHandlerName = "testHandler";
-
-        stubJSonPHandlerParam(jsonHandlerName);
+        stubJSonPHandlerParam("testHandler");
 
         ArgumentCaptor<StringEntity> captor = ArgumentCaptor
                 .forClass(StringEntity.class);
@@ -97,11 +72,5 @@ public class PrintRegistryActionTest {
                 .contains("[{\"port\":8080,"));
         assertTrue("JSON output is incorrect", printOutput
                 .contains(",{\"port\":8081,"));
-    }
-
-    private void stubJSonPHandlerParam(String jsonHandlerName) {
-        HttpParams httpParams = mock(HttpParams.class);
-        when(mockRequest.getParams()).thenReturn(httpParams);
-        when(httpParams.getParameter("handler")).thenReturn(jsonHandlerName);
     }
 }
