@@ -62,7 +62,7 @@ public class BasicPutAndGetIntegrationTest {
 
         stopwatch.start();
 
-        assertPutAndGet(createRandomKey());
+        assertPutAndGet(createTestKey());
 
         stopwatch.stop();
 
@@ -78,7 +78,7 @@ public class BasicPutAndGetIntegrationTest {
 
         int numberOfTests = 100;
 
-        String testKey = createRandomKey();
+        String testKey = createTestKey();
 
         for (int i = 0; i < numberOfTests; i++) {
             assertPutAndGet(testKey);
@@ -91,6 +91,8 @@ public class BasicPutAndGetIntegrationTest {
     }
 
     private void assertPutAndGet(String testKey) throws Exception {
+        client.get(testKey);
+        
         String data = RandomStringUtils.randomAlphanumeric(RandomUtils
                 .nextInt(500));
 
@@ -101,13 +103,8 @@ public class BasicPutAndGetIntegrationTest {
         assertEquals("Retrieved data is incorrect", data, retrievedData);
     }
 
-    private String createRandomKey() {
-//        String randomKey = RandomStringUtils.randomAlphanumeric(10);
-        String randomKey = "TestKey";
-        
-        log.info("Creating random key: " + randomKey);
-        
-        return randomKey;
+    private String createTestKey() {
+        return "TestKey";
     }
 
 }

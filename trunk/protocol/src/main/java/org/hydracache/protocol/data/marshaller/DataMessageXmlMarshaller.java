@@ -23,6 +23,7 @@ import org.hydracache.io.XmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.data.versioning.Version;
 import org.hydracache.server.data.versioning.VersionXmlMarshaller;
+import org.jdom.CDATA;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -35,9 +36,9 @@ import org.jdom.output.XMLOutputter;
 public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
 
     public static final String DATA_ELEMENT_NAME = "data";
-    
+
     public static final String MESSAGE_ELEMENT_NAME = "message";
-    
+
     private VersionXmlMarshaller versionXmlMarshaller;
 
     public DataMessageXmlMarshaller(VersionXmlMarshaller versionXmlMarshaller) {
@@ -57,8 +58,8 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
             Document doc = builder.build(new StringReader(xml));
             Element messageElement = doc.getRootElement();
 
-            Element dataElement = messageElement.getChild(DATA_ELEMENT_NAME);
-            byte[] data = Base64.decodeBase64(dataElement.getValue());
+            byte[] data = Base64.decodeBase64(messageElement
+                    .getChildText(DATA_ELEMENT_NAME));
 
             Element versionElement = messageElement
                     .getChild(VersionXmlMarshaller.VERSION_ELEMENT_NAME);
@@ -85,8 +86,8 @@ public class DataMessageXmlMarshaller implements XmlMarshaller<DataMessage> {
 
         Element dataElement = new Element(DATA_ELEMENT_NAME);
         if (dataMessage.getBlob() != null)
-            dataElement.addContent(Base64.encodeBase64String(dataMessage
-                    .getBlob()));
+            dataElement.addContent(new CDATA(Base64
+                    .encodeBase64String(dataMessage.getBlob())));
         messageElement.addContent(dataElement);
 
         Element versionElement = versionXmlMarshaller.writeObject(dataMessage

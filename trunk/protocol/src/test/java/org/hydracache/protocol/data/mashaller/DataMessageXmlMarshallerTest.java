@@ -59,6 +59,7 @@ public class DataMessageXmlMarshallerTest {
         assertNotNull("Output is null", xml);
         assertTrue("Missing child element", xml.contains("<data"));
         assertTrue("Missing child element", xml.contains("<version"));
+        assertTrue("Missing cdata element", xml.contains("CDATA"));
     }
     
     @Test

@@ -38,9 +38,9 @@ public class IdentityXmlMarshallerTest {
         String xml = new XMLOutputter().outputString(e);
 
         assertTrue("xml output is incorrect", xml.startsWith("<identity"));
-        assertTrue("xml output is incorrect", xml.contains("address=\""));
-        assertTrue("xml output is incorrect", xml.contains("port=\"8080\""));
-        assertTrue("xml output is incorrect", xml.endsWith("/>"));
+        assertTrue("xml output is incorrect", xml.contains("<address>"));
+        assertTrue("xml output is incorrect", xml.contains("<port>8080</port>"));
+        assertTrue("Missing cdata element", xml.contains("CDATA"));        
     }
 
     @Test

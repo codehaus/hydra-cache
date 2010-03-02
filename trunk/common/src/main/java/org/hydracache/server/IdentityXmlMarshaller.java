@@ -23,7 +23,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.io.XmlMarshaller;
-import org.jdom.Attribute;
+import org.jdom.CDATA;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -36,9 +36,9 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
     private static Logger log = Logger.getLogger(IdentityXmlMarshaller.class);
 
     public static final String PORT_ATTRIBUTE_NAME = "port";
-    
+
     public static final String ADDRESS_ATTRIBUTE_NAME = "address";
-    
+
     public static final String ID_ELEMENT_NAME = "identity";
 
     /*
@@ -54,9 +54,10 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
 
         Element idElement = new Element(ID_ELEMENT_NAME);
 
-        idElement.setAttribute(new Attribute(ADDRESS_ATTRIBUTE_NAME, Base64
-                .encodeBase64String(id.getAddress().getAddress())));
-        idElement.setAttribute(new Attribute(PORT_ATTRIBUTE_NAME, String
+        idElement.addContent(new Element(ADDRESS_ATTRIBUTE_NAME)
+                .addContent(new CDATA(Base64.encodeBase64String(id.getAddress()
+                        .getAddress()))));
+        idElement.addContent(new Element(PORT_ATTRIBUTE_NAME).addContent(String
                 .valueOf(id.getPort())));
 
         return idElement;
@@ -79,9 +80,9 @@ public class IdentityXmlMarshaller implements XmlMarshaller<Identity> {
             Element idElement = doc.getRootElement();
 
             String addressAttributeValue = idElement
-                    .getAttributeValue(ADDRESS_ATTRIBUTE_NAME);
+                    .getChildText(ADDRESS_ATTRIBUTE_NAME);
             String portAttributeValue = idElement
-                    .getAttributeValue(PORT_ATTRIBUTE_NAME);
+                    .getChildText(PORT_ATTRIBUTE_NAME);
 
             if (StringUtils.isBlank(addressAttributeValue)
                     || StringUtils.isBlank(portAttributeValue))

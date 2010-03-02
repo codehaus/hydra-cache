@@ -26,6 +26,8 @@ public interface HttpConstants {
     String BINARY_RESPONSE_CONTENT_TYPE = "application/vnd.hydra-binary";
     
     String PLAIN_TEXT_RESPONSE_CONTENT_TYPE = "text/plain";
+    
+    String XML_TEXT_RESPONSE_CONTENT_TYPE = "text/xml";
 
     String SLASH = "/";
 

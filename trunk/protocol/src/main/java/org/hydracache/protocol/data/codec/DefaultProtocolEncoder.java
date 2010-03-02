@@ -25,6 +25,7 @@ import java.io.Writer;
 import org.hydracache.io.BinaryMarshaller;
 import org.hydracache.io.XmlMarshaller;
 import org.hydracache.protocol.data.message.DataMessage;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
@@ -76,7 +77,7 @@ public class DefaultProtocolEncoder implements ProtocolEncoder<DataMessage> {
 
         XMLOutputter outputter = new XMLOutputter();
         
-        outputter.output(element, out);
+        outputter.output(new Document(element), out);
     }
 
 }

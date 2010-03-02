@@ -16,6 +16,7 @@
 package org.hydracache.server.httpd.handler;
 
 import static org.hydracache.server.httpd.HttpConstants.PLAIN_TEXT_RESPONSE_CONTENT_TYPE;
+import static org.hydracache.server.httpd.HttpConstants.XML_TEXT_RESPONSE_CONTENT_TYPE;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -137,6 +138,7 @@ public class HttpGetMethodHandler extends BaseHttpMethodHandler {
         messageEncoder.encodeXml(dataMsg, out);
 
         StringEntity stringEntity = new StringEntity(out.toString());
+        stringEntity.setContentType(XML_TEXT_RESPONSE_CONTENT_TYPE);
         return stringEntity;
     }
 
