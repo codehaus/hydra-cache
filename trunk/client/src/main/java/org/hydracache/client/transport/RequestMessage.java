@@ -25,6 +25,7 @@ public class RequestMessage {
 
     private String method;
     private Object requestData;
+    private String context;
     private String path;
 
     public String getMethod() {
@@ -50,4 +51,13 @@ public class RequestMessage {
     public void setPath(String path) {
         this.path = path;
     }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
 }

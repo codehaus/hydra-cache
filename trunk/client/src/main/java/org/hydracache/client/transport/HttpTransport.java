@@ -28,21 +28,22 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.lang.StringUtils;
 import org.hydracache.io.Buffer;
 
 /**
  * HTTP-based implementation of the message transport.
  * 
  * @author Tan Quach
- * @see <a href="http://www.hydracache.org/project/wiki/Protocol">Hydra Cache Protocol</a>
+ * @see <a href="http://www.hydracache.org/project/wiki/Protocol">Hydra Cache
+ *      Protocol</a>
  * @since 1.0
  */
-public class HttpTransport implements Transport
-{
+public class HttpTransport implements Transport {
     private HttpClient httpClient;
-    
+
     private final Map<Integer, ResponseMessageHandler> handlers = new HashMap<Integer, ResponseMessageHandler>();
-    
+
     public HttpTransport() {
         // FIXME Make this more IoC and configurable.
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -55,73 +56,82 @@ public class HttpTransport implements Transport
     }
 
     @Override
-    public Transport establishConnection(String hostName, int port)
-    {
+    public Transport establishConnection(String hostName, int port) {
         HostConfiguration hostConfiguration = new HostConfiguration();
         hostConfiguration.setHost(hostName, port);
 
-        this.httpClient.setHostConfiguration(hostConfiguration);
+        httpClient.setHostConfiguration(hostConfiguration);
+
         return this;
     }
-    
+
     @Override
-    public ResponseMessage sendRequest(RequestMessage requestMessage) throws Exception
-    {
+    public ResponseMessage sendRequest(RequestMessage requestMessage)
+            throws Exception {
         if (httpClient == null)
             throw new IllegalStateException("Establish connection first.");
 
-        HttpMethod getMethod = getMethod(requestMessage);
+        HttpMethod getMethod = createHttpMethod(requestMessage);
         try {
             int responseCode = httpClient.executeMethod(getMethod);
             if (responseCode == HttpStatus.SC_NOT_FOUND)
                 return null;
 
             ResponseMessageHandler handler = handlers.get(responseCode);
-            
-            return (handler == null ? null : handler.accept(responseCode, getMethod.getResponseBody()));
+
+            return (handler == null ? null : handler.accept(responseCode,
+                    getMethod.getResponseBody()));
         } finally {
             getMethod.releaseConnection();
         }
     }
 
-    /**
-     * @param path
-     * @return
-     */
-    private HttpMethod getMethod(RequestMessage requestMessage) {
+    HttpMethod createHttpMethod(RequestMessage requestMessage) {
         String action = requestMessage.getMethod();
-        
-        HttpMethod method = null;
-        String uri = httpClient.getHostConfiguration().getHostURL() + "/" + requestMessage.getPath();
 
-        if (action.equals("put")) {
-            
+        HttpMethod method = null;
+        String hostURL = httpClient.getHostConfiguration().getHostURL();
+        String uri = hostURL;
+        if (StringUtils.isNotBlank(requestMessage.getContext()))
+            uri += "/" + requestMessage.getContext();
+        uri += "/" + requestMessage.getPath();
+
+        if ("put".equalsIgnoreCase(action)) {
             method = new PutMethod(uri);
             Buffer buffer = (Buffer) requestMessage.getRequestData();
-            RequestEntity requestEntity = new InputStreamRequestEntity(buffer.asDataInputStream());
 
-            ((PutMethod) method).setRequestEntity(requestEntity );
+            if (buffer != null) {
+                RequestEntity requestEntity = new InputStreamRequestEntity(
+                        buffer.asDataInputStream());
+
+                ((PutMethod) method).setRequestEntity(requestEntity);
+            }
         } else {
             method = new GetMethod(uri);
         }
+
         return method;
-        
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.ganz.wjr.external.transport.Transport#cleanUpConnections()
      */
     @Override
-    public void cleanUpConnection()
-    {
+    public void cleanUpConnection() {
         this.httpClient.setHostConfiguration(null);
     }
 
-    /* (non-Javadoc)
-     * @see org.hydracache.client.transport.Transport#registerHandler(int, org.hydracache.client.transport.ConflictStatusHandler)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.client.transport.Transport#registerHandler(int,
+     * org.hydracache.client.transport.ConflictStatusHandler)
      */
     @Override
-    public void registerHandler(Integer statusCode, ResponseMessageHandler handler) {
+    public void registerHandler(Integer statusCode,
+            ResponseMessageHandler handler) {
         handlers.put(statusCode, handler);
     }
 }

@@ -44,6 +44,7 @@ import org.mockito.MockitoAnnotations;
  */
 public class PartitionAwareClientTest {
     private HydraCacheAdminClient service;
+    
     private NullTransport transport;
 
     @Mock
