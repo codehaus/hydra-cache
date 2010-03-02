@@ -45,7 +45,7 @@ public class BaseJsonServiceAction {
     }
 
     protected String getJsonHandlerParam(HttpRequest request) {
-        return request.getParams() == null ? "" : String.valueOf(request
+        return (request == null || request.getParams() == null) ? "" : String.valueOf(request
                 .getParams().getParameter(JSONP_CALLBACK_PARAM_NAME));
     }
 

@@ -55,6 +55,29 @@ public class MethodBasedRequestDispatcherTest {
             .mock(UnsupportedHttpMethodHandler.class);
 
     @Test
+    public void ensureErrorHandlingWithNullMessage() throws Exception {
+        stubGetHandleFailureWithNullErrMsg();
+
+        addGenerateErrorResponseExp();
+
+        MethodBasedRequestDispatcher dispatcher = createDispatcher();
+
+        dispatcher.dispatch(request, response, httpContext, "GET");
+
+        context.assertIsSatisfied();
+    }
+
+    private void stubGetHandleFailureWithNullErrMsg() throws HttpException,
+            IOException {
+        context.checking(new Expectations() {
+            {
+                one(getHandler).handle(request, response, httpContext);
+                will(throwException(new RuntimeException()));
+            }
+        });
+    }
+    
+    @Test
     public void ensureErrorHandlingIsCorrect() throws Exception {
         addGetHandleFailureExp();
 

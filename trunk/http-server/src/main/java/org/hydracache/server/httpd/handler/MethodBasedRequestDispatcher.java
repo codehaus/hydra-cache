@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -41,6 +42,11 @@ import org.hydracache.server.httpd.HttpMethod;
  * 
  */
 public class MethodBasedRequestDispatcher implements HttpRequestHandler {
+
+    /**
+     * 
+     */
+    private static final String GENERIC_ERROR_MESSAGE = "Unknown Internal Error";
 
     private static Logger log = Logger
             .getLogger(MethodBasedRequestDispatcher.class);
@@ -110,7 +116,8 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
         log.debug("Error occured while handling request: ", ex);
         response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         try {
-            StringEntity body = new StringEntity(ex.getMessage());
+            StringEntity body = new StringEntity(StringUtils.isEmpty(ex
+                    .getMessage()) ? GENERIC_ERROR_MESSAGE : ex.getMessage());
             body.setContentType(PLAIN_TEXT_RESPONSE_CONTENT_TYPE);
             response.setEntity(body);
         } catch (UnsupportedEncodingException e) {

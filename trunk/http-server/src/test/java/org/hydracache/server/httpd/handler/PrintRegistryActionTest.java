@@ -37,6 +37,8 @@ public class PrintRegistryActionTest {
     public void ensureCorrectRegistryPrintWithoutPadding() throws Exception {
         MembershipRegistry membershipRegistry = mockMembershipRegistry();
 
+        stubRequestWithEmptyParams();
+        
         ArgumentCaptor<StringEntity> captor = ArgumentCaptor
                 .forClass(StringEntity.class);
 
@@ -52,6 +54,10 @@ public class PrintRegistryActionTest {
                 .contains("[{\"port\":8080,"));
         assertTrue("JSON output is incorrect", printOutput
                 .contains(",{\"port\":8081,"));
+    }
+
+    private void stubRequestWithEmptyParams() {
+        mockRequest = null;
     }
 
     private MembershipRegistry mockMembershipRegistry() {
