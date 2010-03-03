@@ -2,7 +2,25 @@
 
 APP_HOME=..
 
+# Fine tune the following VM args for production system
+
+# JVM heap size 
+# HEAP_SIZE="-server -Xms512m -Xmx1g"
+
+# GC New Generation Sizes 
+# HEAP_SIZE_NEW="-XX:NewSize=128m -XX:MaxNewSize=128m"
+
+# Use concurrent mark and sweep GC for large heap
+# GC_ALG="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC"
+
+# GC oppupancy threshold fraction
+# GC_OPTS="-XX:CMSInitiatingOccupancyFraction=70"
+
 $JAVA_HOME/bin/java \
+    $HEAP_SIZE \
+    $HEAP_SIZE_NEW \
+    $GC_ALG \
+    $GC_OPTS \
     -classpath $APP_HOME/lib/classworlds-1.1.jar \
     -Dclassworlds.conf=$APP_HOME/conf/classworlds.conf \
     -Djava.net.preferIPv4Stack=true \
