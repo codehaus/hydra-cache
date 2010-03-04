@@ -1,26 +1,49 @@
 #!/bin/sh
 
+# *************************************************************************
+# This script is used to start Hydra Cache Server.  This script simply sets 
+# the environment variables and starts server.
+# 
+# Other variables this script takes are:
+# 
+# JAVA_OPTS    - Java command-line options for running the server. (These
+#                will be tagged on to the end of the JAVA_VM and MEM_ARGS)
+# JAVA_VM      - The java arg specifying the VM to run.  (i.e. -server,
+#                -hotspot, etc.)
+# MEM_ARGS     - The variable to override the standard memory arguments
+#                passed to java
+# 
+# *************************************************************************
+
+# Initialize the common environment.
+
 APP_HOME=..
+
+# Starting Server
+
+echo "."
+echo "CLASSPATH=$CLASSPATH"
+echo "."
+echo "PATH=$PATH"
+echo "."
+echo "******************************************************"
+echo "**                                                  **"
+echo "     Hydra Distributed Cache Server ${version}        "
+echo "**                                                  **"
+echo "******************************************************"
 
 # Fine tune the following VM args for production system
 
-# JVM heap size 
-# HEAP_SIZE="-server -Xms512m -Xmx1g"
+# JVM Variables
+# JAVA_VM="-server"
 
-# GC New Generation Sizes 
-# HEAP_SIZE_NEW="-XX:NewSize=128m -XX:MaxNewSize=128m"
-
-# Use concurrent mark and sweep GC for large heap
-# GC_ALG="-XX:+UseConcMarkSweepGC -XX:+UseParNewGC"
-
-# GC oppupancy threshold fraction
-# GC_OPTS="-XX:CMSInitiatingOccupancyFraction=70"
+# Memory and GC Tuning
+# MEM_ARGS="-Xms512m -Xmx1g -XX:NewSize=128m -XX:MaxNewSize=128m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=70"
 
 $JAVA_HOME/bin/java \
-    $HEAP_SIZE \
-    $HEAP_SIZE_NEW \
-    $GC_ALG \
-    $GC_OPTS \
+    $JAVA_VM \
+    $MEM_ARGS \
+    $JAVA_OPTS \
     -classpath $APP_HOME/lib/classworlds-1.1.jar \
     -Dclassworlds.conf=$APP_HOME/conf/classworlds.conf \
     -Djava.net.preferIPv4Stack=true \
