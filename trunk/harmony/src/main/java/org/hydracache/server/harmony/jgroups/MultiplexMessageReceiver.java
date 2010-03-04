@@ -25,12 +25,14 @@ import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.hydracache.concurrent.SimpleResultFuture;
 import org.hydracache.protocol.control.message.ControlMessage;
+import org.hydracache.protocol.control.message.DeleteOperation;
 import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.PutOperation;
 import org.hydracache.protocol.control.message.ResponseMessage;
 import org.hydracache.server.data.resolver.ConflictResolver;
 import org.hydracache.server.harmony.core.Space;
 import org.hydracache.server.harmony.handler.ControlMessageHandler;
+import org.hydracache.server.harmony.handler.DeleteOperationHandler;
 import org.hydracache.server.harmony.handler.GetOperationHandler;
 import org.hydracache.server.harmony.handler.HeartBeatHandler;
 import org.hydracache.server.harmony.handler.PutOperationHandler;
@@ -88,6 +90,8 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
 
         tmpHandlerMap.put(GetOperation.class, new GetOperationHandler(space,
                 membershipRegistry, harmonyDataBank));
+        tmpHandlerMap.put(DeleteOperation.class, new DeleteOperationHandler(
+                space, membershipRegistry, harmonyDataBank));
         tmpHandlerMap.put(ResponseMessage.class, new ResponseHandler(
                 requestRegistry));
         tmpHandlerMap.put(PutOperation.class, new PutOperationHandler(space,
@@ -125,7 +129,7 @@ public class MultiplexMessageReceiver extends ReceiverAdapter {
 
         try {
             ControlMessageHandler handler = null;
-            
+
             // consider the message handler map is relatively small
             // this simple implementation is probably sufficiently fast
             for (Class<?> clazz : messageHandlerMap.keySet()) {

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
+import org.hydracache.protocol.control.message.DeleteOperation;
 import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.protocol.control.message.PutOperation;
@@ -189,13 +190,44 @@ public class HarmonyDataBank implements DataBank {
     /*
      * (non-Javadoc)
      * 
+     * @see org.hydracache.server.data.storage.DataBank#delete(java.lang.String,
+     * java.lang.Long)
+     */
+    @Override
+    public void delete(String context, Long keyHash) throws IOException {
+        if (isReliableWriteRequired()) {
+            DeleteOperation deleteOperation = new DeleteOperation(space
+                    .getLocalNode().getId(), context, keyHash);
+
+            Collection<ResponseMessage> responses = space
+                    .broadcast(deleteOperation);
+
+            ensureReliableDelete(responses);
+        }
+
+        localDataBank.delete(context, keyHash);
+    }
+
+    private void ensureReliableDelete(Collection<ResponseMessage> responses)
+            throws ReliableDataStorageException {
+        if (notEnoughWrites(responses)) {
+            throw new ReliableDataStorageException(
+                    "Not enough members participated this reliable DELETE operation - expected["
+                            + expectedWrites + "] : received["
+                            + responses.size() + "]");
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.hydracache.server.data.storage.DataBank#put(java.lang.String,
      * org.hydracache.server.data.storage.Data)
      */
     @Override
     public void put(String context, Data data) throws IOException,
             VersionConflictException {
-        if (reliablePutRequired()) {
+        if (isReliableWriteRequired()) {
             PutOperation putOperation = new PutOperation(space.getLocalNode()
                     .getId(), context, data);
 
@@ -208,7 +240,7 @@ public class HarmonyDataBank implements DataBank {
         putLocally(context, data);
     }
 
-    private boolean reliablePutRequired() {
+    private boolean isReliableWriteRequired() {
         return expectedWrites > 1;
     }
 
@@ -216,7 +248,7 @@ public class HarmonyDataBank implements DataBank {
             throws ReliableDataStorageException, VersionConflictException {
         detectVersionConflictRejection(helps);
 
-        if (notEnoughPuts(helps)) {
+        if (notEnoughWrites(helps)) {
             throw new ReliableDataStorageException(
                     "Not enough members participated this reliable PUT operation - expected["
                             + expectedWrites + "] : received[" + helps.size()
@@ -235,7 +267,7 @@ public class HarmonyDataBank implements DataBank {
         }
     }
 
-    private boolean notEnoughPuts(Collection<ResponseMessage> helps) {
+    private boolean notEnoughWrites(Collection<ResponseMessage> helps) {
         return helps == null || helps.size() < expectedWrites;
     }
 
@@ -249,6 +281,11 @@ public class HarmonyDataBank implements DataBank {
 
     public Data getLocally(String context, Long keyHash) throws IOException {
         return localDataBank.get(context, keyHash);
+    }
+
+    public void deleteLocally(String storageContext, Long hashKey)
+            throws IOException {
+        localDataBank.delete(storageContext, hashKey);
     }
 
 }

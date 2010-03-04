@@ -1,9 +1,12 @@
 package org.hydracache.server.harmony;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
+import org.hydracache.protocol.control.message.DeleteOperation;
+import org.hydracache.protocol.control.message.DeleteOperationResponse;
 import org.hydracache.protocol.control.message.GetOperation;
 import org.hydracache.protocol.control.message.GetOperationResponse;
 import org.hydracache.protocol.control.message.PutOperation;
@@ -76,30 +79,35 @@ public class AbstractMockeryTest {
     }
 
     protected static void addLocalPutExp(final Mockery context,
-            final HarmonyDataBank dataBank, final String storageContext) throws Exception {
+            final HarmonyDataBank dataBank, final String storageContext)
+            throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).putLocally(with(storageContext), with(any(Data.class)));
+                one(dataBank).putLocally(with(storageContext),
+                        with(any(Data.class)));
             }
         });
     }
 
     protected static void addLocalGetExp(Mockery context,
-            final HarmonyDataBank dataBank, final Data testData, final String storageContext)
-            throws Exception {
+            final HarmonyDataBank dataBank, final Data testData,
+            final String storageContext) throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).getLocally(with(storageContext), with(any(Long.class)));
+                one(dataBank).getLocally(with(storageContext),
+                        with(any(Long.class)));
                 will(returnValue(testData));
             }
         });
     }
 
     protected static void addLocalGetNothingExp(Mockery context,
-            final HarmonyDataBank dataBank, final String storageContext) throws Exception {
+            final HarmonyDataBank dataBank, final String storageContext)
+            throws Exception {
         context.checking(new Expectations() {
             {
-                one(dataBank).getLocally(with(storageContext), with(any(Long.class)));
+                one(dataBank).getLocally(with(storageContext),
+                        with(any(Long.class)));
                 will(returnValue(null));
             }
         });
@@ -135,8 +143,8 @@ public class AbstractMockeryTest {
         });
     }
 
-    protected static void addEmptyReliableGetExp(final Mockery context, final Data data,
-            final Space space) throws Exception {
+    protected static void addEmptyReliableGetExp(final Mockery context,
+            final Data data, final Space space) throws Exception {
         context.checking(new Expectations() {
             {
                 Collection<GetOperationResponse> putOperationResponses = Arrays
@@ -196,6 +204,46 @@ public class AbstractMockeryTest {
 
                 one(space).broadcast(with(any(PutOperation.class)));
                 will(returnValue(putOperationResponses));
+            }
+        });
+    }
+
+    protected void addReliableDeleteExp(final Mockery context, final Space space)
+            throws IOException {
+        context.checking(new Expectations() {
+            {
+                Collection<DeleteOperationResponse> responses = Arrays
+                        .asList(new DeleteOperationResponse(sourceId, UUID
+                                .randomUUID()), new DeleteOperationResponse(
+                                sourceId, UUID.randomUUID()));
+
+                one(space).broadcast(with(any(DeleteOperation.class)));
+                will(returnValue(responses));
+            }
+        });
+    }
+
+    protected void addUnreliableDeleteExp(final Mockery context,
+            final Space space) throws IOException {
+        context.checking(new Expectations() {
+            {
+                // only one help was provided
+                Collection<DeleteOperationResponse> responses = Arrays
+                        .asList(new DeleteOperationResponse(sourceId, UUID
+                                .randomUUID()));
+
+                one(space).broadcast(with(any(DeleteOperation.class)));
+                will(returnValue(responses));
+            }
+        });
+    }
+
+    protected void addDeleteLocallyExp(final Mockery context,
+            final HarmonyDataBank dataBank) throws IOException {
+        context.checking(new Expectations() {
+            {
+                one(dataBank).deleteLocally(with(any(String.class)),
+                        with(any(Long.class)));
             }
         });
     }

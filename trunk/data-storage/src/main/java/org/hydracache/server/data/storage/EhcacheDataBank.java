@@ -215,18 +215,14 @@ public class EhcacheDataBank implements DataBank {
      * java.lang.Long)
      */
     @Override
-    public Data delete(String context, Long keyHash) throws IOException {
+    public void delete(String context, Long keyHash) throws IOException {
         context = checkForEmptyContext(context);
 
         Validate.isTrue(keyHash != null, "Data key hash can not be null");
 
         Cache cache = acquireCache(context);
-        
-        Data data = get(context, keyHash);
-        
+
         cache.remove(keyHash);
-        
-        return data;
     }
 
 }

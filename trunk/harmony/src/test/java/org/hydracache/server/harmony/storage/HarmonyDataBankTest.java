@@ -43,16 +43,16 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
     private ConflictResolver conflictResolver = new ArbitraryResolver();
 
     private DataBank localDataBank = new EhcacheDataBank(conflictResolver);
-    
+
     private String cacheContext = "testContext";
-    
+
     @Before
-    public void setup(){
+    public void setup() {
         context = new Mockery();
     }
-    
+
     @After
-    public void teardown(){
+    public void teardown() {
         context.assertIsSatisfied();
     }
 
@@ -217,7 +217,8 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
 
         assertEquals(
                 "Data bank should have updated its local cache after a reliable GET",
-                receivedData, dataBank.getLocally(cacheContext, receivedData.getKeyHash()));
+                receivedData, dataBank.getLocally(cacheContext, receivedData
+                        .getKeyHash()));
     }
 
     @Test
@@ -275,4 +276,37 @@ public class HarmonyDataBankTest extends AbstractMockeryTest {
         dataBank.put(cacheContext, data);
     }
 
+    @Test
+    public void deleteShouldBroadcastToSpace() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        final Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+            addReliableDeleteExp(context, space);
+        }
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.delete(cacheContext, data.getKeyHash());
+    }
+
+    @Test(expected = ReliableDataStorageException.class)
+    public void deleteWithNotEnoughHelpShouldFail() throws Exception {
+        final Data data = TestDataGenerator.createRandomData();
+
+        final Space space = context.mock(Space.class);
+
+        {
+            addGetLocalNodeExp(context, space);
+            addUnreliableDeleteExp(context, space);
+        }
+
+        HarmonyDataBank dataBank = new HarmonyDataBank(localDataBank,
+                conflictResolver, space);
+
+        dataBank.delete(cacheContext, data.getKeyHash());
+    }
 }
