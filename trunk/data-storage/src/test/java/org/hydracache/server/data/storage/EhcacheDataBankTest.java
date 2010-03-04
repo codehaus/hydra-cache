@@ -79,6 +79,33 @@ public class EhcacheDataBankTest {
         assertEquals("Straight get after put retrieved incorrect data", data,
                 data2);
     }
+    
+    @Test
+    public void testDeletion() throws Exception {
+        final DataBank dataBank = createDataBank();
+
+        final Data data = generateData(NODE_A);
+        
+        dataBank.put(context, data);
+
+        final Data data2 = dataBank.get(context, data.getKeyHash());
+
+        assertEquals("Straight get after put retrieved incorrect data", data,
+                data2);
+        
+        dataBank.delete(context, data.getKeyHash());
+        
+        assertEquals("Data should be removed", null, dataBank.get(context, data.getKeyHash()));
+    }
+    
+    @Test
+    public void testDeletionWithNonExistData() throws Exception {
+        final DataBank dataBank = createDataBank();
+
+        dataBank.delete(context, 1L);
+        
+        assertEquals("Data should be removed", null, dataBank.get(context, 1L));
+    }
 
     @Test
     public void testPutAndGetWithStorage() throws Exception {

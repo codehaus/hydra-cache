@@ -92,10 +92,8 @@ public class EhcacheDataBank implements DataBank {
      */
     @Override
     public Data get(String context, Long keyHash) throws IOException {
-        if(StringUtils.isBlank(context)){
-            context = DEFAULT_CACHE_CONTEXT_NAME;
-        }
-        
+        context = checkForEmptyContext(context);
+
         Validate.isTrue(keyHash != null, "Data key hash can not be null");
 
         Cache cache = acquireCache(context);
@@ -111,6 +109,13 @@ public class EhcacheDataBank implements DataBank {
                 "Cache element contains unknown data[" + data + "]");
 
         return (Data) data;
+    }
+
+    private String checkForEmptyContext(String context) {
+        if (StringUtils.isBlank(context)) {
+            context = DEFAULT_CACHE_CONTEXT_NAME;
+        }
+        return context;
     }
 
     private Cache acquireCache(String cacheName) {
@@ -158,10 +163,8 @@ public class EhcacheDataBank implements DataBank {
     @Override
     public void put(String context, Data data) throws IOException,
             VersionConflictException {
-        if(StringUtils.isBlank(context)){
-            context = DEFAULT_CACHE_CONTEXT_NAME;
-        }
-        
+        context = checkForEmptyContext(context);
+
         Cache cache = acquireCache(context);
 
         Validate.notNull(data, "Data object can not be null");
@@ -204,4 +207,26 @@ public class EhcacheDataBank implements DataBank {
             throws IOException {
         return get(context, newData.getKeyHash()) != null;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.server.data.storage.DataBank#delete(java.lang.String,
+     * java.lang.Long)
+     */
+    @Override
+    public Data delete(String context, Long keyHash) throws IOException {
+        context = checkForEmptyContext(context);
+
+        Validate.isTrue(keyHash != null, "Data key hash can not be null");
+
+        Cache cache = acquireCache(context);
+        
+        Data data = get(context, keyHash);
+        
+        cache.remove(keyHash);
+        
+        return data;
+    }
+
 }

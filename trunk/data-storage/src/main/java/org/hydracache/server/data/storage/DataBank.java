@@ -53,6 +53,17 @@ public interface DataBank {
     Data get(String context, Long keyHash) throws IOException;
 
     /**
+     * Remove the data with the given hash
+     * 
+     * @param context
+     *            storage context
+     * @param keyHash
+     *            data hash key
+     * @return the data associated with the hash if any
+     */
+    Data delete(String context, Long keyHash) throws IOException;
+
+    /**
      * Get all data contained in this data bank from all storage contexts
      * 
      * @return all data in this storage bank
