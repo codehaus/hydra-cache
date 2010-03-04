@@ -43,9 +43,6 @@ import org.hydracache.server.httpd.HttpMethod;
  */
 public class MethodBasedRequestDispatcher implements HttpRequestHandler {
 
-    /**
-     * 
-     */
     private static final String GENERIC_ERROR_MESSAGE = "Unknown Internal Error";
 
     private static Logger log = Logger
@@ -57,14 +54,17 @@ public class MethodBasedRequestDispatcher implements HttpRequestHandler {
      * Constructor
      */
     public MethodBasedRequestDispatcher(
-            BaseHttpMethodHandler httpGetMethodHandler,
+            HttpGetMethodHandler httpGetMethodHandler,
             HttpPutMethodHandler httpPutMethodHandler,
+            HttpDeleteMethodHandler httpDeleteMethodHandler,
             UnsupportedHttpMethodHandler unsupportedHttpMethodHandler) {
         disallowAllMethods(unsupportedHttpMethodHandler);
 
         enableMethod(HttpMethod.GET, httpGetMethodHandler);
 
         enableMethod(HttpMethod.PUT, httpPutMethodHandler);
+
+        enableMethod(HttpMethod.DELETE, httpDeleteMethodHandler);
     }
 
     private void enableMethod(HttpMethod method,

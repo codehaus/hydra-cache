@@ -51,6 +51,9 @@ public class MethodBasedRequestDispatcherTest {
     private final HttpPutMethodHandler putHandler = context
             .mock(HttpPutMethodHandler.class);
 
+    private final HttpDeleteMethodHandler deleteHandler = context
+            .mock(HttpDeleteMethodHandler.class);
+
     private final UnsupportedHttpMethodHandler unsupportedHttpMethodHandler = context
             .mock(UnsupportedHttpMethodHandler.class);
 
@@ -76,7 +79,7 @@ public class MethodBasedRequestDispatcherTest {
             }
         });
     }
-    
+
     @Test
     public void ensureErrorHandlingIsCorrect() throws Exception {
         addGetHandleFailureExp();
@@ -169,7 +172,8 @@ public class MethodBasedRequestDispatcherTest {
 
     private MethodBasedRequestDispatcher createDispatcher() {
         MethodBasedRequestDispatcher dispatcher = new MethodBasedRequestDispatcher(
-                getHandler, putHandler, unsupportedHttpMethodHandler);
+                getHandler, putHandler, deleteHandler,
+                unsupportedHttpMethodHandler);
 
         return dispatcher;
     }

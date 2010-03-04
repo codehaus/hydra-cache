@@ -67,6 +67,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="protocolDecoder" />
         <constructor-arg ref="localNode" />
     </bean>
+    
+    <!-- Http Delete Method Handlers -->
+    <bean id="httpDeleteMethodHandler"
+        class="org.hydracache.server.httpd.handler.HttpDeleteMethodHandler">
+        <constructor-arg ref="harmonyDataBank" />
+        <constructor-arg ref="hashFunction" />
+        <constructor-arg ref="protocolEncoder" />
+    </bean>
 
     <!-- Unsupported Http Method Handler -->
     <bean id="unsupportedMethodHandler"
@@ -77,6 +85,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         class="org.hydracache.server.httpd.handler.MethodBasedRequestDispatcher">
         <constructor-arg ref="httpGetMethodHandler" />
         <constructor-arg ref="httpPutMethodHandler" />
+        <constructor-arg ref="httpDeleteMethodHandler" />
         <constructor-arg ref="unsupportedMethodHandler" />
     </bean>
 
