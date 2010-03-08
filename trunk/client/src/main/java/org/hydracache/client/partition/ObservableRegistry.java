@@ -49,6 +49,8 @@ public class ObservableRegistry extends Observable {
 
         if (newList != null)
             registry = newList;
+        
+        notifyObservers(registry);
     }
 
     private boolean sizeDifferenceDetected(List<Identity> newList) {

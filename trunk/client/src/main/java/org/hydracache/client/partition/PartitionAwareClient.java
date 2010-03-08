@@ -116,8 +116,8 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         // Register listeners for partition updates
         // TODO Make the interval configurable
-        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(180000,
-                this, this);
+        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(
+                seedServerIds, 180000, this, this);
         poller.start();
     }
 

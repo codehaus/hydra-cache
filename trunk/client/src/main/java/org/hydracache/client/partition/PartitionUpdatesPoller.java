@@ -16,7 +16,6 @@
 package org.hydracache.client.partition;
 
 import java.util.List;
-import java.util.Observable;
 import java.util.Observer;
 
 import org.apache.log4j.Logger;
@@ -31,9 +30,10 @@ import org.hydracache.server.Identity;
  */
 public class PartitionUpdatesPoller extends Thread {
 
-    private static final Logger logger = Logger.getLogger(PartitionUpdatesPoller.class);
+    private static final Logger logger = Logger
+            .getLogger(PartitionUpdatesPoller.class);
     private HydraCacheAdminClient adminClient;
-    private Observable obs;
+    private ObservableRegistry registry;
     private final long interval;
 
     /**
@@ -46,13 +46,13 @@ public class PartitionUpdatesPoller extends Thread {
      * @param listeners
      *            Any other observers interested
      */
-    public PartitionUpdatesPoller(long interval,
+    public PartitionUpdatesPoller(List<Identity> seedServerIds, long interval,
             HydraCacheAdminClient adminClient, Observer listener) {
         this.interval = interval;
         this.adminClient = adminClient;
 
-        this.obs = new Observable();
-        this.obs.addObserver(listener);
+        this.registry = new ObservableRegistry(seedServerIds);
+        this.registry.addObserver(listener);
     }
 
     /*
@@ -69,9 +69,9 @@ public class PartitionUpdatesPoller extends Thread {
                 list = adminClient.listNodes();
 
                 logger.info("Registry: " + list);
-                obs.notifyObservers(list);
+                registry.update(list);
             } catch (Exception e) {
-                logger.error(e);
+                logger.error("Failed to updated node registry", e);
             } finally {
                 try {
                     Thread.sleep(interval);
