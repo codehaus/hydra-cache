@@ -47,18 +47,12 @@ public class PartitionUpdatesPoller extends Thread {
      *            Any other observers interested
      */
     public PartitionUpdatesPoller(long interval,
-            HydraCacheAdminClient adminClient, Observer listener,
-            Observer... listeners) {
+            HydraCacheAdminClient adminClient, Observer listener) {
         this.interval = interval;
         this.adminClient = adminClient;
 
         this.obs = new Observable();
         this.obs.addObserver(listener);
-
-        if (listeners != null)
-            for (Observer observer : listeners) {
-                this.obs.addObserver(observer);
-            }
     }
 
     /*

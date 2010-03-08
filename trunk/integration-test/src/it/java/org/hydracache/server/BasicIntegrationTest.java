@@ -39,7 +39,7 @@ public class BasicIntegrationTest {
 
     private static Logger log = Logger.getLogger(BasicIntegrationTest.class);
 
-    private static final int PORT_NUMBER = 7345;
+    private static final int PORT_NUMBER = 7890;
 
     private static final String SERVER_NAME = "localhost";
 

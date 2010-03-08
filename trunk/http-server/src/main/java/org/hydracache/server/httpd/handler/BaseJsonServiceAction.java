@@ -75,7 +75,8 @@ public abstract class BaseJsonServiceAction {
     }
 
     protected boolean isJSONPRequest(String jsonHandlerParam) {
-        return StringUtils.isNotBlank(jsonHandlerParam);
+        return !"null".equalsIgnoreCase(jsonHandlerParam)
+                && StringUtils.isNotBlank(jsonHandlerParam);
     }
 
     protected String padJSONResponse(String jsonString, String jsonHandlerParam) {
