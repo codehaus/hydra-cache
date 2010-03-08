@@ -16,6 +16,7 @@
 package org.hydracache.client.partition;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.hydracache.server.Identity;
 import org.junit.Test;
@@ -52,6 +53,18 @@ public class ObservableRegistryTest {
     }
 
     @Test
+    public void ensureRegistryUpdatesWithChange() {
+        ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
+                new Identity(80), new Identity(81)));
+
+        registry.update(Arrays.asList(new Identity(80)));
+
+        registry.update(Arrays.asList(new Identity(80)));
+
+        assertFalse("Registry should be changed", registry.hasChanged());
+    }
+
+    @Test
     public void ensureRegistryCanDetectNodeChange() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
@@ -67,6 +80,39 @@ public class ObservableRegistryTest {
                 new Identity(80), new Identity(81)));
 
         registry.update(Arrays.asList(new Identity(80), new Identity(81)));
+
+        assertFalse("Registry should not be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryCanHandleNull() {
+        ObservableRegistry registry = new ObservableRegistry(null);
+
+        registry.update(Arrays.asList(new Identity(80), new Identity(81)));
+
+        assertTrue("Registry should not be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryCanHandleNullInUpdate() {
+        ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
+                new Identity(80), new Identity(81)));
+
+        registry.update(null);
+
+        assertFalse("Registry should not be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryDiscardNullInUpdate() {
+        List<Identity> originalList = Arrays.asList(new Identity(80),
+                new Identity(81));
+        
+        ObservableRegistry registry = new ObservableRegistry(originalList);
+
+        registry.update(null);
+
+        registry.update(originalList);
 
         assertFalse("Registry should not be changed", registry.hasChanged());
     }

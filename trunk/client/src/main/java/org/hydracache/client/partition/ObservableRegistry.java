@@ -35,15 +35,20 @@ public class ObservableRegistry extends Observable {
     }
 
     public synchronized void update(List<Identity> newList) {
-        if (sizeDifferenceDetected(newList)){
+        clearChanged();
+
+        if (registry == null) {
+            setChanged();
+        } else if (newList == null) {
+            // do nothing
+        } else if (sizeDifferenceDetected(newList)) {
+            setChanged();
+        } else if (!registry.containsAll(newList)) {
             setChanged();
         }
-        
-        if(registry.containsAll(newList)){
-            return;
-        }
-        
-        setChanged();
+
+        if (newList != null)
+            registry = newList;
     }
 
     private boolean sizeDifferenceDetected(List<Identity> newList) {

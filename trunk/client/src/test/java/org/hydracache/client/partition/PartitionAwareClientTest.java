@@ -40,7 +40,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
+import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.*;
+import org.mockito.*;
 /**
  * @author Tan Quach
  * @since 1.0
@@ -119,7 +121,7 @@ public class PartitionAwareClientTest {
             throws Exception {
         ArgumentCaptor<RequestMessage> reqMsgCaptor = ArgumentCaptor
                 .forClass(RequestMessage.class);
-        verify(messager).sendMessage(any(Identity.class),
+        verify(messager, atLeastOnce()).sendMessage(any(Identity.class),
                 any(SubstancePartition.class), reqMsgCaptor.capture());
         return reqMsgCaptor;
     }
