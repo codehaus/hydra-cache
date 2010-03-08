@@ -23,6 +23,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -106,6 +107,8 @@ public class HttpTransport implements Transport {
 
                 ((PutMethod) method).setRequestEntity(requestEntity);
             }
+        } else if ("delete".equalsIgnoreCase(action)) {
+            method = new DeleteMethod(uri);
         } else {
             method = new GetMethod(uri);
         }

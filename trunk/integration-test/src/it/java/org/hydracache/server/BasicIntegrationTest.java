@@ -28,16 +28,16 @@ import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * @author nzhu
  * 
  */
-public class BasicPutAndGetIntegrationTest {
+public class BasicIntegrationTest {
     private static final String INTEGRATION_TEST_STORAGE_CONTEXT = "integrationTest";
 
-    private static Logger log = Logger
-            .getLogger(BasicPutAndGetIntegrationTest.class);
+    private static Logger log = Logger.getLogger(BasicIntegrationTest.class);
 
     private static final int PORT_NUMBER = 7345;
 
@@ -59,17 +59,31 @@ public class BasicPutAndGetIntegrationTest {
     }
 
     @Test
-    public void testBasicPutAndGet() throws Exception {
+    public void testBasicOperations() throws Exception {
         StopWatch stopwatch = new StopWatch();
 
         stopwatch.start();
 
-        assertPutAndGet(createTestKey());
+        String testKey = createTestKey();
+
+        assertPutAndGet(testKey);
+
+        assertDeletion(testKey);
 
         stopwatch.stop();
 
         log.info("Took [" + stopwatch.getTime()
-                + "]ms to perform a put and get pair");
+                + "]ms to perform a put and get pair + one deletion");
+    }
+
+    private void assertDeletion(String testKey) throws Exception {
+        boolean deletionResult = client.delete(
+                INTEGRATION_TEST_STORAGE_CONTEXT, testKey);
+
+        assertTrue("Deletion should be successful", deletionResult);
+
+        assertEquals(testKey + " should be deleted", null, client.get(
+                INTEGRATION_TEST_STORAGE_CONTEXT, testKey));
     }
 
     @Test
@@ -86,10 +100,12 @@ public class BasicPutAndGetIntegrationTest {
             assertPutAndGet(testKey);
         }
 
+        assertDeletion(testKey);
+
         stopwatch.stop();
 
         log.info("Took [" + stopwatch.getTime() + "]ms to perform "
-                + numberOfTests + " put and get pairs");
+                + numberOfTests + " put and get pairs + one deletion");
     }
 
     private void assertPutAndGet(String testKey) throws Exception {

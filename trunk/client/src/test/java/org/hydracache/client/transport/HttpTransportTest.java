@@ -18,6 +18,7 @@ package org.hydracache.client.transport;
 import static org.junit.Assert.*;
 
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.junit.Test;
@@ -29,54 +30,106 @@ import org.junit.Test;
 public class HttpTransportTest {
 
     @Test
+    public void testDeleteRequestPathGeneration() {
+        HttpTransport transport = new HttpTransport();
+
+        transport.establishConnection("localhost", 90);
+
+        RequestMessage requestMessage = new RequestMessage();
+
+        requestMessage.setMethod("delete");
+        requestMessage.setPath("testPath");
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
+        assertTrue("Method type is incorret", method instanceof DeleteMethod);
+        assertEquals("Path is incorrect", "/testPath", method.getPath());
+    }
+
+    @Test
+    public void testDeleteRequestPathGenerationWithContext() {
+        HttpTransport transport = new HttpTransport();
+
+        transport.establishConnection("localhost", 90);
+
+        RequestMessage requestMessage = new RequestMessage();
+
+        requestMessage.setMethod("delete");
+        requestMessage.setPath("testPath");
+        requestMessage.setContext("context");
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
+        assertTrue("Method type is incorret", method instanceof DeleteMethod);
+        assertEquals("Path is incorrect", "/context/testPath", method.getPath());
+    }
+
+    @Test
     public void testGetRequestPathGeneration() {
         HttpTransport transport = new HttpTransport();
-        
+
         transport.establishConnection("localhost", 90);
-        
+
         RequestMessage requestMessage = new RequestMessage();
-        
+
         requestMessage.setMethod("get");
         requestMessage.setPath("testPath");
-        
-        HttpMethod method = transport.createHttpMethod(requestMessage );
-        
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
         assertTrue("Method type is incorret", method instanceof GetMethod);
         assertEquals("Path is incorrect", "/testPath", method.getPath());
     }
-    
+
     @Test
     public void testGetRequestPathGenerationWithContext() {
         HttpTransport transport = new HttpTransport();
-        
+
         transport.establishConnection("localhost", 90);
-        
+
         RequestMessage requestMessage = new RequestMessage();
-        
+
         requestMessage.setMethod("get");
         requestMessage.setPath("testPath");
         requestMessage.setContext("context");
-        
-        HttpMethod method = transport.createHttpMethod(requestMessage );
-        
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
         assertTrue("Method type is incorret", method instanceof GetMethod);
         assertEquals("Path is incorrect", "/context/testPath", method.getPath());
     }
-    
+
+    @Test
+    public void testPutRequestPathGeneration() {
+        HttpTransport transport = new HttpTransport();
+
+        transport.establishConnection("localhost", 90);
+
+        RequestMessage requestMessage = new RequestMessage();
+
+        requestMessage.setMethod("PUT");
+        requestMessage.setPath("testPath");
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
+        assertTrue("Method type is incorret", method instanceof PutMethod);
+        assertEquals("Path is incorrect", "/testPath", method.getPath());
+    }
+
     @Test
     public void testPutRequestPathGenerationWithContext() {
         HttpTransport transport = new HttpTransport();
-        
+
         transport.establishConnection("localhost", 90);
-        
+
         RequestMessage requestMessage = new RequestMessage();
-        
+
         requestMessage.setMethod("PUT");
         requestMessage.setPath("testPath");
         requestMessage.setContext("context");
-        
-        HttpMethod method = transport.createHttpMethod(requestMessage );
-        
+
+        HttpMethod method = transport.createHttpMethod(requestMessage);
+
         assertTrue("Method type is incorret", method instanceof PutMethod);
         assertEquals("Path is incorrect", "/context/testPath", method.getPath());
     }
