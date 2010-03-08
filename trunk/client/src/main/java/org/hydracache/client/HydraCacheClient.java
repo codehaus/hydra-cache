@@ -43,9 +43,10 @@ public interface HydraCacheClient {
     public Object get(String key) throws Exception;
 
     /**
-     * Retrieve the data using the given key. The key is hashed and a lookup is
-     * performed to locate the node where the data resides. If it exists, it is
-     * returned, otherwise null is returned.
+     * Retrieve the data using the given key associated the given storage
+     * context. The key is hashed and a lookup is performed to locate the node
+     * where the data resides. If it exists, it is returned, otherwise null is
+     * returned.
      * 
      * @param context
      *            The storage context that the data will be retrieved from
@@ -58,6 +59,32 @@ public interface HydraCacheClient {
      *             if we cannot locate the data in sufficient time.
      */
     public Object get(String context, String key) throws Exception;
+
+    /**
+     * Delete the data using the given key.
+     * 
+     * @param key
+     *            The key of the Data from the cache.
+     * @throws IOException
+     *             If there are problems with the connection
+     * @throws OperationTimeoutException
+     *             if we cannot locate the data in sufficient time.
+     */
+    public boolean delete(String key) throws Exception;
+
+    /**
+     * Delete the data using the given key associated the given storage context.
+     * 
+     * @param context
+     *            The storage context that the data will be deleted from
+     * @param key
+     *            The key of the Data from the cache.
+     * @throws IOException
+     *             If there are problems with the connection
+     * @throws OperationTimeoutException
+     *             if we cannot locate the data in sufficient time.
+     */
+    public boolean delete(String context, String key) throws Exception;
 
     /**
      * Add data to the cache with the given key.
@@ -74,7 +101,8 @@ public interface HydraCacheClient {
             VersionConflictException;
 
     /**
-     * Add data to the cache with the given key.
+     * Add data to the cache with the given key associated the given storage
+     * context.
      * 
      * @param context
      *            The storage context that the data will be attached to

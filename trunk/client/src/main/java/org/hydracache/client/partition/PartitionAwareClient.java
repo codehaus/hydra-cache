@@ -134,6 +134,40 @@ public class PartitionAwareClient implements HydraCacheClient,
         return nodePartition;
     }
 
+    void setMessager(Messager messager) {
+        this.messager = messager;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.client.HydraCacheClient#delete(java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public boolean delete(String context, String key) throws Exception {
+        Identity identity = nodePartition.get(key);
+
+        RequestMessage requestMessage = new RequestMessage();
+        requestMessage.setMethod("DELETE");
+        requestMessage.setPath(key);
+        requestMessage.setContext(context);
+
+        ResponseMessage responseMessage = sendMessage(identity, requestMessage);
+
+        return responseMessage.isSuccessful();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.hydracache.client.HydraCacheClient#delete(java.lang.String)
+     */
+    @Override
+    public boolean delete(String key) throws Exception {
+        return delete(null, key);
+    }
+
     /*
      * (non-Javadoc)
      * 

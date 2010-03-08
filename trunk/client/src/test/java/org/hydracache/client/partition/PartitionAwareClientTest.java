@@ -15,26 +15,29 @@
  */
 package org.hydracache.client.partition;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.transport.NullTransport;
 import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
 import org.hydracache.data.partitioning.NodePartition;
+import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -43,12 +46,15 @@ import org.mockito.MockitoAnnotations;
  * @since 1.0
  */
 public class PartitionAwareClientTest {
-    private HydraCacheAdminClient service;
-    
-    private NullTransport transport;
+    private PartitionAwareClient client;
+
+    private NullTransport nullTransport = new NullTransport();
 
     @Mock
     private Transport mockTransport;
+
+    @Mock
+    private Messager messager;
 
     @Before
     public void beforeTestMethods() throws Exception {
@@ -60,23 +66,91 @@ public class PartitionAwareClientTest {
     }
 
     @Test
+    public void testSuccessfulDeletionWithoutContext() throws Exception {
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                mockTransport);
+
+        mockSuccessfulMessaging();
+
+        client.setMessager(messager);
+
+        String context = null;
+        String key = "testKey";
+
+        boolean result = client.delete(key);
+
+        assertTrue("Should be successful", result);
+
+        ArgumentCaptor<RequestMessage> reqMsgCaptor = verifySendMessageAndCaptureRequest();
+
+        assertRequestMsg("DELETE", context, key, reqMsgCaptor);
+    }
+
+    @Test
+    public void testSuccessfulDeletionWithContext() throws Exception {
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                mockTransport);
+
+        mockSuccessfulMessaging();
+
+        client.setMessager(messager);
+
+        String context = "testContext";
+        String key = "testKey";
+
+        boolean result = client.delete(context, key);
+
+        assertTrue("Should be successful", result);
+
+        ArgumentCaptor<RequestMessage> reqMsgCaptor = verifySendMessageAndCaptureRequest();
+
+        assertRequestMsg("DELETE", context, key, reqMsgCaptor);
+    }
+
+    private void mockSuccessfulMessaging() throws Exception {
+        when(
+                messager.sendMessage(any(Identity.class),
+                        any(SubstancePartition.class),
+                        any(RequestMessage.class))).thenReturn(
+                new ResponseMessage(true));
+    }
+
+    private ArgumentCaptor<RequestMessage> verifySendMessageAndCaptureRequest()
+            throws Exception {
+        ArgumentCaptor<RequestMessage> reqMsgCaptor = ArgumentCaptor
+                .forClass(RequestMessage.class);
+        verify(messager).sendMessage(any(Identity.class),
+                any(SubstancePartition.class), reqMsgCaptor.capture());
+        return reqMsgCaptor;
+    }
+
+    private void assertRequestMsg(String method, String context, String key,
+            ArgumentCaptor<RequestMessage> reqMsgCaptor) {
+        assertEquals("Method is incorrect", method, reqMsgCaptor.getValue()
+                .getMethod());
+        assertEquals("Context is incorrect", context, reqMsgCaptor.getValue()
+                .getContext());
+        assertEquals("Path is incorrect", key, reqMsgCaptor.getValue()
+                .getPath());
+    }
+
+    @Test
     public void shouldReturnEmptyListWhenCurrentPartitionIsNull()
             throws Exception {
-        this.transport = new NullTransport();
-        this.service = new PartitionAwareClient(Arrays
-                .asList(new Identity(8080)), this.transport);
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                nullTransport);
 
         ResponseMessage responseMessage = new ResponseMessage(true);
         responseMessage
                 .setResponseBody("[{\"port\":8080,\"ip\":\"127.0.0.1\"}]"
                         .getBytes());
-        this.transport.setResponseMessage(responseMessage);
+        nullTransport.setResponseMessage(responseMessage);
 
-        List<Identity> nodes = this.service.listNodes();
+        List<Identity> nodes = this.client.listNodes();
         assertNotNull(nodes);
         assertFalse(nodes.isEmpty());
 
-        this.transport.setResponseMessage(null);
+        nullTransport.setResponseMessage(null);
     }
 
     @Test
