@@ -38,6 +38,12 @@ public class ObservableRegistry extends Observable {
         if (sizeDifferenceDetected(newList)){
             setChanged();
         }
+        
+        if(registry.containsAll(newList)){
+            return;
+        }
+        
+        setChanged();
     }
 
     private boolean sizeDifferenceDetected(List<Identity> newList) {

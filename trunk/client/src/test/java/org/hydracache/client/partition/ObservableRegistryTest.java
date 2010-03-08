@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 public class ObservableRegistryTest {
 
     @Test
-    public void ensureRegistryCanDetectAdditionChange() {
+    public void ensureRegistryCanDetectNodeAdditionChange() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
 
@@ -39,6 +39,36 @@ public class ObservableRegistryTest {
                 new Identity(82)));
 
         assertTrue("Registry should be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryCanDetectNodeRemoveChange() {
+        ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
+                new Identity(80), new Identity(81)));
+
+        registry.update(Arrays.asList(new Identity(80)));
+
+        assertTrue("Registry should be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryCanDetectNodeChange() {
+        ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
+                new Identity(80), new Identity(81)));
+
+        registry.update(Arrays.asList(new Identity(80), new Identity(82)));
+
+        assertTrue("Registry should be changed", registry.hasChanged());
+    }
+
+    @Test
+    public void ensureRegistryCanDetectNoChange() {
+        ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
+                new Identity(80), new Identity(81)));
+
+        registry.update(Arrays.asList(new Identity(80), new Identity(81)));
+
+        assertFalse("Registry should not be changed", registry.hasChanged());
     }
 
 }
