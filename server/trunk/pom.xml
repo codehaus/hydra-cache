@@ -21,7 +21,6 @@
     <modules>
         <module>assembler</module>
         <module>common</module>
-        <module>client</module>
         <module>protocol</module>
         <module>http-server</module>
         <module>bootstrap</module>
