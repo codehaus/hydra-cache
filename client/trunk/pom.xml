@@ -2,12 +2,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.codehaus.hydra-cache</groupId>
-        <artifactId>parent</artifactId>
-        <version>1.0RC1-SNAPSHOT</version>
+        <artifactId>parent-pom</artifactId>
+        <version>1</version>
     </parent>
+    <groupId>org.codehaus.hydra-cache</groupId>
     <artifactId>client</artifactId>
     <name>Hydra Cache Java Client</name>
     <description>Hydra Cache java client API library</description>
+    <version>1.0RC1-SNAPSHOT</version>
+    
+    <scm>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/client/trunk</connection>
+        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/client/trunk</developerConnection>
+    </scm>
+    
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
@@ -27,43 +35,50 @@
 
         <!-- HTTP COMPONENTS DEPENDENCIE -->
         <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-        </dependency>
+		<groupId>commons-httpclient</groupId>
+		<artifactId>commons-httpclient</artifactId>
+		<version>3.1</version>
+	</dependency>
 
-        <!-- JSON -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-        </dependency>
+         <!-- JSON -->
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>20090211</version>
+            </dependency>
 
         <!-- COMMON DEPENDENCIES -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
+         <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.14</version>
+            </dependency>
 
-        <!-- TEST DEPENDENCIES -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock-junit4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock-legacy</artifactId>
-            <scope>test</scope>
-        </dependency>
+         <!-- TEST DEPENDENCIES -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.4</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>1.8.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jmock</groupId>
+                <artifactId>jmock-junit4</artifactId>
+                <version>2.5.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jmock</groupId>
+                <artifactId>jmock-legacy</artifactId>
+                <version>2.5.0</version>
+                <scope>test</scope>
+            </dependency>
     </dependencies>
 
 </project>

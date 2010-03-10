@@ -17,6 +17,8 @@ package org.hydracache.client.partition;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.hydracache.server.Identity;
 import org.junit.Test;
@@ -28,10 +30,31 @@ import static org.junit.Assert.*;
  */
 public class ObservableRegistryTest {
 
+    private final class TestObserver implements Observer {
+        private boolean changed;
+
+        public void setChanged(boolean changed) {
+            this.changed = changed;
+        }
+
+        public boolean isChanged() {
+            return changed;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            changed = true;
+        }
+    }
+
     @Test
     public void ensureRegistryCanDetectNodeAdditionChange() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
+
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         assertFalse("Newly created registry should not be changed", registry
                 .hasChanged());
@@ -39,7 +62,7 @@ public class ObservableRegistryTest {
         registry.update(Arrays.asList(new Identity(80), new Identity(81),
                 new Identity(82)));
 
-        assertTrue("Registry should be changed", registry.hasChanged());
+        assertTrue("Registry should be changed", testObserver.isChanged());
     }
 
     @Test
@@ -47,9 +70,13 @@ public class ObservableRegistryTest {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
 
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
+
         registry.update(Arrays.asList(new Identity(80)));
 
-        assertTrue("Registry should be changed", registry.hasChanged());
+        assertTrue("Registry should be changed", testObserver.isChanged());
     }
 
     @Test
@@ -57,64 +84,90 @@ public class ObservableRegistryTest {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
 
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
+
         registry.update(Arrays.asList(new Identity(80)));
+        
+        testObserver.setChanged(false);
 
         registry.update(Arrays.asList(new Identity(80)));
 
-        assertFalse("Registry should be changed", registry.hasChanged());
+        assertFalse("Registry should be changed", testObserver.isChanged());
     }
 
     @Test
     public void ensureRegistryCanDetectNodeChange() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
+        
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         registry.update(Arrays.asList(new Identity(80), new Identity(82)));
 
-        assertTrue("Registry should be changed", registry.hasChanged());
+        assertTrue("Registry should be changed", testObserver.isChanged());
     }
 
     @Test
     public void ensureRegistryCanDetectNoChange() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
+        
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         registry.update(Arrays.asList(new Identity(80), new Identity(81)));
 
-        assertFalse("Registry should not be changed", registry.hasChanged());
+        assertFalse("Registry should not be changed", testObserver.isChanged());
     }
 
     @Test
     public void ensureRegistryCanHandleNull() {
         ObservableRegistry registry = new ObservableRegistry(null);
+        
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         registry.update(Arrays.asList(new Identity(80), new Identity(81)));
 
-        assertTrue("Registry should not be changed", registry.hasChanged());
+        assertTrue("Registry should not be changed", testObserver.isChanged());
     }
 
     @Test
     public void ensureRegistryCanHandleNullInUpdate() {
         ObservableRegistry registry = new ObservableRegistry(Arrays.asList(
                 new Identity(80), new Identity(81)));
+        
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         registry.update(null);
 
-        assertFalse("Registry should not be changed", registry.hasChanged());
+        assertFalse("Registry should not be changed", testObserver.isChanged());
     }
 
     @Test
     public void ensureRegistryDiscardNullInUpdate() {
         List<Identity> originalList = Arrays.asList(new Identity(80),
                 new Identity(81));
-        
+
         ObservableRegistry registry = new ObservableRegistry(originalList);
+        
+        TestObserver testObserver = new TestObserver();
+
+        registry.addObserver(testObserver);
 
         registry.update(null);
 
         registry.update(originalList);
 
-        assertFalse("Registry should not be changed", registry.hasChanged());
+        assertFalse("Registry should not be changed", testObserver.isChanged());
     }
 
 }
