@@ -9,11 +9,18 @@ application {
     //frameClass = 'javax.swing.JFrame'
 }
 mvcGroups {
+    // MVC Group for "org.hydracache.console.NavigationPane"
+    'NavigationPane' {
+        model = 'org.hydracache.console.NavigationPaneModel'
+        controller = 'org.hydracache.console.NavigationPaneController'
+        view = 'org.hydracache.console.NavigationPaneView'
+    }
+
     // MVC Group for "hconsole"
     'hconsole' {
-        model = 'HconsoleModel'
-        controller = 'HconsoleController'
-        view = 'HconsoleView'
+        model = 'org.hydracache.console.HconsoleModel'
+        view = 'org.hydracache.console.HconsoleView'
+        controller = 'org.hydracache.console.HconsoleController'
     }
 
 }
