@@ -7,8 +7,13 @@
     <name>Hydra Project Parent</name>
     <description>Hydra Project Parent POM</description>
     <inceptionYear>2008</inceptionYear>
-    <version>1.0</version>
+    <version>1-SNAPSHOT</version>
     <url>http://www.hydracache.org</url>
+    
+    <scm>
+        <connection>scm:svn:http://svn.codehaus.org/hydra-cache/parent/trunk</connection>
+        <developerConnection>scm:svn:https://svn.codehaus.org/hydra-cache/parent/trunk</developerConnection>
+    </scm>
 
     <issueManagement>
         <system>Jira</system>
