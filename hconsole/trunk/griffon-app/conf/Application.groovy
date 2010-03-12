@@ -9,6 +9,13 @@ application {
     //frameClass = 'javax.swing.JFrame'
 }
 mvcGroups {
+    // MVC Group for "org.hydracache.console.AddressBar"
+    'AddressBar' {
+        model = 'org.hydracache.console.AddressBarModel'
+        controller = 'org.hydracache.console.AddressBarController'
+        view = 'org.hydracache.console.AddressBarView'
+    }
+
     // MVC Group for "org.hydracache.console.NavigationPane"
     'NavigationPane' {
         model = 'org.hydracache.console.NavigationPaneModel'

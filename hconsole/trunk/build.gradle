@@ -8,7 +8,7 @@ repositories {
 	mavenCentral()
     mavenRepo urls: ["http://repository.codehaus.org/",
             "http://snapshots.repository.codehaus.org/",
-            "file://" + System.getProperty('user.home') + "/.m2/repository/"]
+            "file://${System.getProperty('user.home')}/.m2/repository/"]
     
 }
 

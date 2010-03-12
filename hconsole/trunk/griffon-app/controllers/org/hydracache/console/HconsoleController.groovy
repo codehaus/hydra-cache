@@ -5,6 +5,7 @@ class HconsoleController {
 
     void mvcGroupInit(Map args) {
         createMVCGroup("NavigationPane", [navigationPane: view.navigationPane])
+        createMVCGroup("AddressBar", [addressBar: view.addressBar])
     }
 
     def quit = {evt = null ->

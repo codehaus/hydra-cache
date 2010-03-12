@@ -24,6 +24,7 @@ mainWindow = application(title: 'hconsole',
         }
     }
     borderLayout()
+    panel(id:'addressBar', constraints: NORTH)
     splitPane(id: 'splitPane', resizeWeight: 0.45f, constraints: CENTER,
             orientation: HORIZONTAL_SPLIT) {
          scrollPane(id:'navigationPane')
