@@ -4,7 +4,7 @@ import static javax.swing.JSplitPane.HORIZONTAL_SPLIT
 
 actions {
     action(id: "quitAction",
-            name: "Exit",
+            name: messageSource.getMessage('menuItem.exit.caption'),
             mnemonic: "x",
             closure: controller.quit)
 }
@@ -19,7 +19,7 @@ mainWindow = application(title: 'hconsole',
                 imageIcon('/griffon-icon-16x16.png').image]
 ) {
     menuBar {
-        menu("File") {
+        menu(messageSource.getMessage('menu.file.caption')) {
             menuItem(quitAction)
         }
     }

@@ -7,3 +7,6 @@ root {
         view = '*'
     }
 }
+root.'I18nGriffonAddon'.addon=true
+
+
