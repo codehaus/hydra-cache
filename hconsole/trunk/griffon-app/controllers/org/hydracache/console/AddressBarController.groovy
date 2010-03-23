@@ -1,16 +1,20 @@
 package org.hydracache.console
 
 class AddressBarController {
-    // these will be injected by Griffon
     def model
     def view
+
+    def hydraSpaceService
 
     void mvcGroupInit(Map args) {
         // this method is called after model and view are injected
     }
 
-    /*
-    def action = { evt = null ->
+    def connect = { evt = null ->
+        hydraSpaceService.connect(model.server, model.port)
     }
-    */
+
+    def onHydraSpaceConnected = {
+        log.debug "Event [HydraSpaceConnected] received"
+    }
 }
