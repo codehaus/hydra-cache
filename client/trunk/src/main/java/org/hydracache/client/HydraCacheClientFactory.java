@@ -9,7 +9,13 @@ import java.util.List;
  * Created by nick.zhu
  */
 public class HydraCacheClientFactory {
+
     public static HydraCacheClient createClient(List<Identity> seedServerIds) {
         return new PartitionAwareClient(seedServerIds);
     }
+
+    public static HydraCacheAdminClient createAdminClient(List<Identity> seedServerIds) {
+        return new PartitionAwareClient(seedServerIds);
+    }
+    
 }
