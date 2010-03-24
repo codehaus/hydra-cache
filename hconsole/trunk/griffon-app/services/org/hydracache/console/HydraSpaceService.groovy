@@ -3,6 +3,8 @@ package org.hydracache.console
 import org.hydracache.client.HydraCacheAdminClient
 import org.hydracache.client.HydraCacheClientFactory
 import org.hydracache.server.Identity
+import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang.math.NumberUtils
 
 class HydraSpaceService {
     public static final String HYDRA_SPACE_CONNECTED_EVENT = "HydraSpaceConnected"
@@ -10,25 +12,31 @@ class HydraSpaceService {
     def hydraCacheClientFactory = new HydraCacheClientFactory()
 
     def connect(server, port) {
-        if (!server || !port)
+        if (!server || !NumberUtils.isDigits(port))
             return false
 
         log.debug "Connecting to ${server}:${port} ..."
 
-        HydraCacheAdminClient adminClient = hydraCacheClientFactory.createAdminClient(
-                [new Identity(Inet4Address.getByName(server), Integer.valueOf(port))]
-        )
+        try {
+            def serverAddress = Inet4Address.getByName(server)
 
-        def nodes = adminClient.listNodes()
+            HydraCacheAdminClient adminClient = hydraCacheClientFactory.createAdminClient(
+                    [new Identity(serverAddress, Integer.valueOf(port))]
+            )
 
-        if (!nodes)
-            return false
+            def nodes = adminClient.listNodes()
 
-        app.event(HYDRA_SPACE_CONNECTED_EVENT)
+            if (!nodes)
+                return false
 
-        log.debug "[HydraSpaceConnected] event sent"
+            app.event(HYDRA_SPACE_CONNECTED_EVENT)
+            log.debug "[HydraSpaceConnected] event sent"
 
-        return true
+            return true
+        } catch (UnknownHostException uhex) {
+            log.debug("Unknown host", uhex)            
+            return false;
+        }
     }
 
 }

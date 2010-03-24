@@ -42,5 +42,17 @@ class HydraSpaceServiceTests extends GroovyTestCase {
         assertFalse "Event ${HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT} should not be sent", events.containsKey(HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT)
     }
 
-    
+    void testConnectHandleInvalidServerName(){
+        def result = service.connect("invalid name", "8080")
+
+        assertFalse "Connection should not be successful", result
+        assertFalse "Event ${HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT} should not be sent", events.containsKey(HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT)
+    }
+
+    void testConnectHandleInvalidPortNumber(){
+        def result = service.connect("localhost", "port")
+
+        assertFalse "Connection should not be successful", result
+        assertFalse "Event ${HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT} should not be sent", events.containsKey(HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT)
+    }
 }
