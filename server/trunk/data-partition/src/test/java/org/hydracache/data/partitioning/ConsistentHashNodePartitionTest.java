@@ -28,13 +28,14 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partition.ConsistentHashable;
+import org.hydracache.data.partition.ConsistentHashableString;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test basic functionality of consistent hashing.
- * 
+ *
  * @author Tan Quach
  * @author Nick Zhu
  * @since 1.0
@@ -49,6 +50,16 @@ public class ConsistentHashNodePartitionTest {
     @Before
     public void setUp() {
         hashFunction = new KetamaBasedHashFunction();
+    }
+
+    @Test
+    public void ensureEmptyPartitionReturnNullFromGetByHash() {
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, new LinkedList<ServerNode>());
+
+        ServerNode serverNode = circle.getByHash(hashFunction.hash(new ConsistentHashableString("4")));
+
+        Assert.assertNull(serverNode);
     }
 
     @Test
@@ -161,8 +172,8 @@ public class ConsistentHashNodePartitionTest {
     }
 
     private void assertUniformedDistribution(int sampleSize,
-            final ServerNode A, final ServerNode B, final ServerNode C,
-            HashMap<ServerNode, Integer> counterMap) {
+                                             final ServerNode A, final ServerNode B, final ServerNode C,
+                                             HashMap<ServerNode, Integer> counterMap) {
         int maxCounter = NumberUtils.max(counterMap.get(A), counterMap.get(B),
                 counterMap.get(C));
         int minCounter = NumberUtils.min(counterMap.get(A), counterMap.get(B),
@@ -196,6 +207,7 @@ public class ConsistentHashNodePartitionTest {
          * @see
          * org.hydracache.data.partition.ConsistentHashable#consistentHash()
          */
+
         @Override
         public String getConsistentValue() {
             return "" + id;
@@ -206,6 +218,7 @@ public class ConsistentHashNodePartitionTest {
          * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
