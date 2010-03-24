@@ -1,13 +1,23 @@
 package org.hydracache.console.validate
 
-import org.apache.commons.lang.builder.HashCodeBuilder
-import org.apache.commons.lang.builder.EqualsBuilder
-
 /**
  * Created by nick.zhu
  */
 class Errors {
     def fieldErrors = [:]
+    def globalErrors = []
+
+    def reject(errorCode){
+        reject(errorCode, [])
+    }
+
+    def reject(errorCode, arguments){
+        globalErrors.add(new SimpleError(errorCode: errorCode, arguments: arguments))
+    }
+
+    def hasGlobalErrors(){
+        return !globalErrors.isEmpty()
+    }
 
     def rejectValue(field, errorCode) {
         rejectValue(field, errorCode, [])
@@ -18,7 +28,7 @@ class Errors {
     }
 
     def hasFieldErrors(){
-        return fieldErrors.size() > 0
+        return !fieldErrors.isEmpty()
     }
 
     def hasFieldErrors(field){
@@ -30,8 +40,11 @@ class Errors {
     }
 }
 
-class FieldError {
+class FieldError extends SimpleError {
     def field
+}
+
+class SimpleError {
     def errorCode
     def arguments
 }
