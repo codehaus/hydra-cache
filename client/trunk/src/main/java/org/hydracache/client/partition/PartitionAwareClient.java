@@ -293,13 +293,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         this.nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), servers);
     }
-
-    /**
-     * @param key
-     * @param data
-     * @return
-     * @throws IOException
-     */
+    
     private Buffer serializeData(String key, Serializable data)
             throws IOException {
         DataMessage dataMessage = new DataMessage();
@@ -315,13 +309,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
         return buffer;
     }
-
-    /**
-     * @param identity
-     * @param requestMessage
-     * @return
-     * @throws Exception
-     */
+    
     private ResponseMessage sendMessage(Identity identity,
             RequestMessage requestMessage) throws Exception {
         return messenger.sendMessage(identity, nodePartition, requestMessage);
