@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,20 +37,20 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class MessagerTest {
+public class MessengerTest {
     @Mock
     private Transport transport;
 
     private int testPort = 8000;
     private Identity targetNode = new Identity(testPort);
     private RequestMessage message = new RequestMessage();
-    private Messager messenger;
+    private Messenger messenger;
 
     @Before
     public void setupBeforeTestMethod() {
         MockitoAnnotations.initMocks(this);
 
-        messenger = new Messager(transport);
+        messenger = new Messenger(transport);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class MessagerTest {
 
             verify(transport).establishConnection(anyString(), eq(testPort));
             verify(transport).sendRequest(message);
-            verify(transport).cleanUpConnection();
+            verify(transport, atLeast(1)).cleanUpConnection();
         }
     }
 

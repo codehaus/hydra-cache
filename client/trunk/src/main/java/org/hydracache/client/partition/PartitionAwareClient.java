@@ -82,7 +82,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     private ProtocolEncoder<DataMessage> protocolEncoder;
     private ProtocolDecoder<DataMessage> protocolDecoder;
     private IncrementVersionFactory versionFactory;
-    private Messager messager;
+    private Messenger messenger;
 
     private Map<String, Version> versionMap = Collections
             .synchronizedMap(new WeakHashMap<String, Version>());
@@ -91,9 +91,6 @@ public class PartitionAwareClient implements HydraCacheClient,
 
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
-     * 
-     * @param connection
-     *            The connection to the {@link Substance}.
      */
     public PartitionAwareClient(List<Identity> seedServerIds) {
         this(seedServerIds, new HttpTransport());
@@ -102,7 +99,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     public PartitionAwareClient(List<Identity> seedServerIds,
             Transport transport) {
         this.seedServerIds = seedServerIds;
-        this.messager = new Messager(transport);
+        this.messenger = new Messenger(transport);
 
         this.nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), seedServerIds);
@@ -134,8 +131,8 @@ public class PartitionAwareClient implements HydraCacheClient,
         return nodePartition;
     }
 
-    void setMessager(Messager messager) {
-        this.messager = messager;
+    void setMessager(Messenger messenger) {
+        this.messenger = messenger;
     }
 
     /*
@@ -259,7 +256,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         int nextInt = rnd.nextInt(seedServerIds.size());
         Identity identity = seedServerIds.get(nextInt);
 
-        ResponseMessage responseMessage = messager.sendMessage(identity,
+        ResponseMessage responseMessage = messenger.sendMessage(identity,
                 nodePartition, requestMessage);
 
         if (responseMessage == null)
@@ -327,7 +324,7 @@ public class PartitionAwareClient implements HydraCacheClient,
      */
     private ResponseMessage sendMessage(Identity identity,
             RequestMessage requestMessage) throws Exception {
-        return messager.sendMessage(identity, nodePartition, requestMessage);
+        return messenger.sendMessage(identity, nodePartition, requestMessage);
     }
 
     // FIXME: implement weak map to avoid memory leak

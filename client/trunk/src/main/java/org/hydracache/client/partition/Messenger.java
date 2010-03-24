@@ -25,17 +25,17 @@ import org.hydracache.client.transport.Transport;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
 
-public class Messager {
-    private static Logger log = Logger.getLogger(Messager.class);
+public class Messenger {
+    private static Logger log = Logger.getLogger(Messenger.class);
 
     private Transport transport;
 
-    public Messager(Transport transport) {
+    public Messenger(Transport transport) {
         this.transport = transport;
         
         registerDefaultHandlers();
     }
-    
+
     private void registerDefaultHandlers() {
         transport.registerHandler(HttpStatus.SC_CONFLICT,
                 new ConflictStatusHandler());

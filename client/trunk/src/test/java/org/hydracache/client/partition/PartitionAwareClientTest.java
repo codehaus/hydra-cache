@@ -54,7 +54,7 @@ public class PartitionAwareClientTest {
     private Transport mockTransport;
 
     @Mock
-    private Messager messager;
+    private Messenger messenger;
 
     @Before
     public void beforeTestMethods() throws Exception {
@@ -72,7 +72,7 @@ public class PartitionAwareClientTest {
 
         mockSuccessfulMessaging();
 
-        client.setMessager(messager);
+        client.setMessager(messenger);
 
         String context = null;
         String key = "testKey";
@@ -93,7 +93,7 @@ public class PartitionAwareClientTest {
 
         mockSuccessfulMessaging();
 
-        client.setMessager(messager);
+        client.setMessager(messenger);
 
         String context = "testContext";
         String key = "testKey";
@@ -109,7 +109,7 @@ public class PartitionAwareClientTest {
 
     private void mockSuccessfulMessaging() throws Exception {
         when(
-                messager.sendMessage(any(Identity.class),
+                messenger.sendMessage(any(Identity.class),
                         any(SubstancePartition.class),
                         any(RequestMessage.class))).thenReturn(
                 new ResponseMessage(true));
@@ -119,7 +119,7 @@ public class PartitionAwareClientTest {
             throws Exception {
         ArgumentCaptor<RequestMessage> reqMsgCaptor = ArgumentCaptor
                 .forClass(RequestMessage.class);
-        verify(messager, atLeastOnce()).sendMessage(any(Identity.class),
+        verify(messenger, atLeastOnce()).sendMessage(any(Identity.class),
                 any(SubstancePartition.class), reqMsgCaptor.capture());
         return reqMsgCaptor;
     }
