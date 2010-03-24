@@ -14,7 +14,7 @@ public class HydraCacheClientFactoryTest {
 
     @Test
     public void ensureCanCreateClient() {
-        HydraCacheClient client = HydraCacheClientFactory.createClient(
+        HydraCacheClient client = new HydraCacheClientFactory().createClient(
                 Arrays.asList(new Identity(80)));
 
         assertNotNull("Client can't be null", client);
@@ -22,7 +22,7 @@ public class HydraCacheClientFactoryTest {
 
     @Test
     public void ensureCanCreateAdminClient(){
-        HydraCacheAdminClient client = HydraCacheClientFactory.createAdminClient(
+        HydraCacheAdminClient client = new HydraCacheClientFactory().createAdminClient(
                 Arrays.asList(new Identity(80)));
 
         assertNotNull("Client can't be null", client);

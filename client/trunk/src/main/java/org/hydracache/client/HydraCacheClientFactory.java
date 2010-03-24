@@ -10,11 +10,11 @@ import java.util.List;
  */
 public class HydraCacheClientFactory {
 
-    public static HydraCacheClient createClient(List<Identity> seedServerIds) {
+    public HydraCacheClient createClient(List<Identity> seedServerIds) {
         return new PartitionAwareClient(seedServerIds);
     }
 
-    public static HydraCacheAdminClient createAdminClient(List<Identity> seedServerIds) {
+    public HydraCacheAdminClient createAdminClient(List<Identity> seedServerIds) {
         return new PartitionAwareClient(seedServerIds);
     }
     
