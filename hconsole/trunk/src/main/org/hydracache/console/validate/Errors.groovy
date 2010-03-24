@@ -38,6 +38,15 @@ class Errors {
     def getFieldError(field){
         return fieldErrors[field]
     }
+
+    def hasErrors(){
+        return hasGlobalErrors() || hasFieldErrors()
+    }
+
+    def clear(){
+        fieldErrors.clear()
+        globalErrors.clear()
+    }
 }
 
 class FieldError extends SimpleError {

@@ -5,6 +5,22 @@ package org.hydracache.console.validate
  */
 class ErrorsTest extends GroovyTestCase {
 
+    public void testHasErrors(){
+        Errors errors = new Errors()
+
+        errors.reject("errorCode")
+
+        assertTrue "Should have error", errors.hasErrors()
+
+        errors.clear()
+
+        assertFalse "Should not have any error", errors.hasErrors()
+
+        errors.rejectValue("field", "errorCode")
+
+        assertTrue "Should have error", errors.hasErrors()
+    }
+
     public void testReject(){
         Errors errors = new Errors()
 
