@@ -11,12 +11,7 @@ class ValidationEnhancer {
     static def log = Logger.getLogger(ValidationEnhancer)
 
     def validators = [
-            nullable: {value, delegate, nullable ->
-                if (nullable)
-                    return true
-
-                return value != null
-            }
+            nullable: new NullableValidator(this)
     ]
 
     def model
