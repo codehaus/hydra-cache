@@ -12,22 +12,22 @@ class ValidationEnhancer {
             nullable: {value, delegate, nullable ->
                 if(nullable)
                     return true
-                else
-                    return value != null
+
+                return value != null
             }
     ]
 
-    def delegate
+    def model
 
     public ValidationEnhancer(bean) {
-        delegate = bean
+        model = bean
         
         bean.metaClass.validate = {
             validate(bean)
         }
 
-        bean.metaClass.errors = []
-        bean.metaClass.hasErrors = {delegate.errors && delegate.errors.size() > 0}
+        bean.metaClass.errors = new Errors()
+        bean.metaClass.hasErrors = { model.errors.hasErrors() }
     }
 
     def validate(bean) {
@@ -37,11 +37,11 @@ class ValidationEnhancer {
 
         constraints.call()
 
-        return delegate.hasErrors()
+        return !model.hasErrors()
     }
 
     def methodMissing(String name, args) {
-        def propertyValue = delegate.getProperty(name)
+        def propertyValue = model.getProperty(name)
 
         def constraintsMap = args[0]
 
@@ -52,9 +52,12 @@ class ValidationEnhancer {
 
             def validator = validators[constraint]
 
-            def result = validator.call(propertyValue, delegate, config)
+            def success = validator.call(propertyValue, delegate, config)
 
-            valid |= result
+            if(!success){
+                model.errors.rejectValue(name, "")
+                valid = false
+            }
         }
 
         return valid
