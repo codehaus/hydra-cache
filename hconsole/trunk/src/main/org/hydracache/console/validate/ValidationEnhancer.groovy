@@ -12,7 +12,7 @@ class ValidationEnhancer {
 
     def validators = [
             nullable: {value, delegate, nullable ->
-                if(nullable)
+                if (nullable)
                     return true
 
                 return value != null
@@ -23,7 +23,7 @@ class ValidationEnhancer {
 
     public ValidationEnhancer(bean) {
         model = bean
-        
+
         bean.metaClass.validate = {
             validate(bean)
         }
@@ -49,17 +49,17 @@ class ValidationEnhancer {
 
         boolean valid = true
 
-        constraintsMap.each{constraint, config->
+        constraintsMap.each {constraint, config ->
             log.debug "Executing validation constraint[${constraint}] with input[${config}]"
 
             def validator = validators[constraint]
 
             def success = validator.call(propertyValue, delegate, config)
 
-            if(!success){
+            if (!success) {
                 log.debug "Rejecting property ${name} by constriant ${constraint}"
                 model.errors.rejectValue(name,
-                        buildErrorCode(name, constraint))
+                        buildErrorCode(name, constraint), buildErrorArguments(name, model, propertyValue))
                 valid = false
             }
         }
@@ -74,5 +74,8 @@ class ValidationEnhancer {
         return "${className}.${fieldName}.${constraint}.message"
     }
 
-
+     private List buildErrorArguments(String name, model, propertyValue) {
+        return [name, ClassUtils.getShortClassName(model.getClass()), "${propertyValue}"]
+    }
+    
 }
