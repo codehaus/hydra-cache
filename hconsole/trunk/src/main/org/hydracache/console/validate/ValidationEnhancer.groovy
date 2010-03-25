@@ -1,6 +1,8 @@
 package org.hydracache.console.validate
 
 import org.apache.log4j.Logger
+import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang.ClassUtils
 
 /**
  * Created by nick.zhu
@@ -55,12 +57,21 @@ class ValidationEnhancer {
             def success = validator.call(propertyValue, delegate, config)
 
             if(!success){
-                model.errors.rejectValue(name, "")
+                log.debug "Rejecting property ${name} by constriant ${constraint}"
+                model.errors.rejectValue(name,
+                        buildErrorCode(name, constraint))
                 valid = false
             }
         }
 
         return valid
+    }
+
+    private GString buildErrorCode(fieldName, constraint) {
+        def className = StringUtils.uncapitalize(
+                ClassUtils.getShortClassName(model.getClass()))
+
+        return "${className}.${fieldName}.${constraint}.message"
     }
 
 
