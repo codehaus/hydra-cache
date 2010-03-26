@@ -13,7 +13,8 @@ class ValidationEnhancer {
     static def log = Logger.getLogger(ValidationEnhancer)
 
     def validators = [
-            nullable: new NullableValidator(this)
+            nullable: new NullableValidator(this),
+            blank: new BlankValidator(this)
     ]
 
     def model
@@ -50,30 +51,52 @@ class ValidationEnhancer {
 
         def propertyValue = model.getProperty(name)
 
-        def constraintsMap = args[0]
+        boolean valid = processConstraints(args, propertyValue, name)
 
+        return valid
+    }
+
+    private boolean processConstraints(args, propertyValue, String name) {
         boolean valid = true
 
+        def constraintsMap = args[0]
+
         constraintsMap.each {constraint, config ->
-            log.debug "Executing validation constraint[${constraint}] with input[${config}]"
-
-            def validator = validators[constraint]
-
-            if (validator) {
-                def success = validator.call(propertyValue, delegate, config)
-
-                if (!success) {
-                    log.debug "Rejecting property ${name} by constriant ${constraint}"
-                    model.errors.rejectValue(name,
-                            buildErrorCode(name, constraint), buildErrorArguments(name, model, propertyValue))
-                    valid = false
-                }
-            }else{
-                log.warn """Ignoring unknown validator[${constraint}], please check your constraint configuration"""
-            }
+            valid = validate(constraint, propertyValue, config, name)
         }
 
         return valid
+    }
+
+    private def validate(constraint, propertyValue, config, name) {
+        log.debug "Executing validation constraint[${constraint}] with input[${config}]"
+
+        def validator = validators[constraint]
+
+        if (validator) {
+            return executeValidator(validator, propertyValue, config, name, constraint)
+        } else {
+            return handleMissingValidator(constraint)
+        }
+    }
+
+    private def executeValidator(validator, propertyValue, config, name, constraint) {
+        def success = validator.call(propertyValue, model, config)
+
+        if (success)
+            return true
+
+        log.debug "Rejecting property ${name} by constriant ${constraint}"
+
+        model.errors.rejectValue(name,
+                buildErrorCode(name, constraint), buildErrorArguments(name, model, propertyValue))
+
+        return false
+    }
+
+    private def handleMissingValidator(constraint) {
+        log.warn """Ignoring unknown validator[${constraint}], please check your constraint configuration"""
+        return true
     }
 
     private GString buildErrorCode(fieldName, constraint) {
