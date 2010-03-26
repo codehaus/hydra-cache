@@ -9,7 +9,7 @@ import org.apache.commons.lang.ClassUtils
  */
 class ValidationEnhancer {
     static final def CONSTRAINT_PROPERTY_NAME = "constraints"
-    
+
     static def log = Logger.getLogger(ValidationEnhancer)
 
     def validators = [
@@ -30,7 +30,7 @@ class ValidationEnhancer {
     }
 
     def validate(bean) {
-        if(!bean.hasProperty(CONSTRAINT_PROPERTY_NAME))
+        if (!bean.hasProperty(CONSTRAINT_PROPERTY_NAME))
             return true
 
         Closure constraints = bean.getProperty(CONSTRAINT_PROPERTY_NAME)
@@ -43,6 +43,11 @@ class ValidationEnhancer {
     }
 
     def methodMissing(String name, args) {
+        if (!model.hasProperty(name)) {
+            throw new IllegalStateException("""Invalid constraint configuration detected.
+                    Property [${name}] with constraint configured is missing.""")
+        }
+
         def propertyValue = model.getProperty(name)
 
         def constraintsMap = args[0]
@@ -74,8 +79,8 @@ class ValidationEnhancer {
         return "${className}.${fieldName}.${constraint}.message"
     }
 
-     private List buildErrorArguments(String name, model, propertyValue) {
+    private List buildErrorArguments(String name, model, propertyValue) {
         return [name, ClassUtils.getShortClassName(model.getClass()), "${propertyValue}"]
     }
-    
+
 }

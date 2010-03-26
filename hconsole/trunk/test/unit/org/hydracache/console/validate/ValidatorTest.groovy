@@ -24,7 +24,7 @@ class ValidationEnhancerTest extends GroovyTestCase {
         assertEquals("Error arg is not correct", "null", fieldError.arguments[2])
     }
 
-    public void testInvalidationWithNoConstraint() {
+    public void testValidationWithNoConstraint() {
         NoConstraintModelBean model = new NoConstraintModelBean()
 
         ValidationEnhancer validator = new ValidationEnhancer(model)
@@ -32,6 +32,19 @@ class ValidationEnhancerTest extends GroovyTestCase {
         boolean result = model.validate()
 
         assertTrue("Validation result should be true", result)
+    }
+
+    public void testValidationWithInvalidConstraint() {
+        InvalidConstraintModelBean model = new InvalidConstraintModelBean()
+
+        ValidationEnhancer validator = new ValidationEnhancer(model)
+
+        try {
+            boolean result = model.validate()
+            fail("Exception should be thrown with invalid constraint configuration")
+        } catch (IllegalStateException ex) {
+            // good
+        }
     }
 
 }
@@ -46,5 +59,12 @@ class ModelBean {
 }
 
 class NoConstraintModelBean {
+}
+
+class InvalidConstraintModelBean {
     String id
+
+    static constraints = {
+        missing(nullable: false)
+    }
 }
