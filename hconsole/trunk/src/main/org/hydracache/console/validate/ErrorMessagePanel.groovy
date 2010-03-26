@@ -2,7 +2,6 @@ package org.hydracache.console.validate
 
 import java.awt.BorderLayout
 import java.awt.Color
-import org.springframework.context.MessageSource
 import javax.swing.*
 import static javax.swing.SwingConstants.LEFT
 
@@ -11,11 +10,11 @@ import static javax.swing.SwingConstants.LEFT
  */
 class ErrorMessagePanel extends JPanel {
     Errors errors
-    MessageSource messageSource
+    def messageSource
     JPanel contentPanel
     ImageIcon errorIcon
 
-    def ErrorMessagePanel(MessageSource messageSource) {
+    def ErrorMessagePanel(def messageSource) {
         this.messageSource = messageSource
 
         errorIcon = new ImageIcon(getClass().getResource("/icons/error.png"))
