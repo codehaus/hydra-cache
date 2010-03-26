@@ -59,13 +59,17 @@ class ValidationEnhancer {
 
             def validator = validators[constraint]
 
-            def success = validator.call(propertyValue, delegate, config)
+            if (validator) {
+                def success = validator.call(propertyValue, delegate, config)
 
-            if (!success) {
-                log.debug "Rejecting property ${name} by constriant ${constraint}"
-                model.errors.rejectValue(name,
-                        buildErrorCode(name, constraint), buildErrorArguments(name, model, propertyValue))
-                valid = false
+                if (!success) {
+                    log.debug "Rejecting property ${name} by constriant ${constraint}"
+                    model.errors.rejectValue(name,
+                            buildErrorCode(name, constraint), buildErrorArguments(name, model, propertyValue))
+                    valid = false
+                }
+            }else{
+                log.warn """Ignoring unknown validator[${constraint}], please check your constraint configuration"""
             }
         }
 

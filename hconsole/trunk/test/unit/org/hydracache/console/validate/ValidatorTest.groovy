@@ -47,6 +47,16 @@ class ValidationEnhancerTest extends GroovyTestCase {
         }
     }
 
+    public void testUnknownConstraintIsIgnored() {
+        UnknownConstraintModelBean model = new UnknownConstraintModelBean()
+
+        ValidationEnhancer validator = new ValidationEnhancer(model)
+
+        boolean result = model.validate()
+
+        assertTrue("Validation result should be true", result)
+    }
+
 }
 
 
@@ -66,5 +76,13 @@ class InvalidConstraintModelBean {
 
     static constraints = {
         missing(nullable: false)
+    }
+}
+
+class UnknownConstraintModelBean {
+    String id
+
+    static constraints = {
+        id(missing: false)
     }
 }
