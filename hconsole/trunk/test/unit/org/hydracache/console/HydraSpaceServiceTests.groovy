@@ -4,13 +4,13 @@ import org.apache.log4j.Logger
 import org.hydracache.client.HydraCacheAdminClient
 import org.hydracache.server.Identity
 
-class HydraSpaceServiceTests extends GroovyTestCase {
+class HydraSpaceServiceTests extends GriffonTestCase {
     HydraSpaceService service = new HydraSpaceService()
     def events = [:]
 
     void setUp() {
-        service.metaClass.log = Logger.getLogger(HydraSpaceService)
-        service.metaClass.app = [event: {events[it] = []}]
+        mockLogging(service)
+        mockApp(service)
     }
 
     void tearDown() {
