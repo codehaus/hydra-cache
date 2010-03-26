@@ -47,13 +47,28 @@ class Errors {
         fieldErrors.clear()
         globalErrors.clear()
     }
+
+    def iterator(){
+        def allErrors = []
+        allErrors.addAll(globalErrors)
+        allErrors.addAll(fieldErrors.values())
+        return allErrors.iterator() 
+    }
 }
 
 class FieldError extends SimpleError {
     def field
+
+    public String toString(){
+        return "Error[${errorCode}] with args[${arguments}] on field[${field}]"
+    }
 }
 
 class SimpleError {
     def errorCode
     def arguments
+
+    public String toString(){
+        return "Error[${errorCode}] with args[${arguments}]"
+    }
 }

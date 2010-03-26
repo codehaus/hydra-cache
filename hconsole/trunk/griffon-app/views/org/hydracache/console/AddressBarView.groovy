@@ -1,6 +1,8 @@
 package org.hydracache.console
 
 import static java.awt.FlowLayout.LEFT
+import static java.awt.BorderLayout.*
+import org.hydracache.console.validate.ErrorMessagePanel
 
 actions {
     action(id: "connectAction",
@@ -8,11 +10,18 @@ actions {
             closure: controller.connect)
 }
 
+errorDialog = dialog(modal: true)
+
 panel(addressBar){
-    flowLayout(alignment : LEFT)
-    label(messageSource.getMessage('addressBar.address.label'))
-    textField(columns: 12, text: bind(target: model, 'server'))
-    label(messageSource.getMessage('addressBar.port.label'))
-    textField(columns: 4, text: bind(target: model, 'port'))
-    button(connectAction)
+    borderLayout()
+    container(new ErrorMessagePanel(messageSource), id:'errorMessagePanel', constraints: NORTH)
+
+    panel(constraints: CENTER){
+        flowLayout(alignment : LEFT)
+        label(messageSource.getMessage('addressBar.address.label'))
+        textField(columns: 12, text: bind(target: model, 'server'))
+        label(messageSource.getMessage('addressBar.port.label'))
+        textField(columns: 4, text: bind(target: model, 'port'))
+        button(connectAction)
+    }
 }

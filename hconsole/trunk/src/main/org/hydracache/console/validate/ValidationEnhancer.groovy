@@ -23,18 +23,20 @@ class ValidationEnhancer {
         model = bean
 
         bean.metaClass.validate = {
-            validate(bean)
+            validate()
         }
 
         bean.metaClass.errors = new Errors()
         bean.metaClass.hasErrors = { model.errors.hasErrors() }
     }
 
-    def validate(bean) {
-        if (!bean.hasProperty(CONSTRAINT_PROPERTY_NAME))
+    def validate() {
+        model.errors.clear()
+
+        if (!model.hasProperty(CONSTRAINT_PROPERTY_NAME))
             return true
 
-        Closure constraints = bean.getProperty(CONSTRAINT_PROPERTY_NAME)
+        Closure constraints = model.getProperty(CONSTRAINT_PROPERTY_NAME)
 
         constraints.delegate = this
 

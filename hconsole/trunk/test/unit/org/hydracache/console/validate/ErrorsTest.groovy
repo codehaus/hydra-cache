@@ -5,7 +5,7 @@ package org.hydracache.console.validate
  */
 class ErrorsTest extends GroovyTestCase {
 
-    public void testHasErrors(){
+    public void testHasErrors() {
         Errors errors = new Errors()
 
         errors.reject("errorCode")
@@ -21,7 +21,7 @@ class ErrorsTest extends GroovyTestCase {
         assertTrue "Should have error", errors.hasErrors()
     }
 
-    public void testReject(){
+    public void testReject() {
         Errors errors = new Errors()
 
         errors.reject("errorCode")
@@ -29,7 +29,7 @@ class ErrorsTest extends GroovyTestCase {
         assertTrue "Should have global error", errors.hasGlobalErrors()
     }
 
-    public void testRejectWithArgs(){
+    public void testRejectWithArgs() {
         Errors errors = new Errors()
 
         errors.reject("errorCode", [10, "arg2"])
@@ -41,7 +41,7 @@ class ErrorsTest extends GroovyTestCase {
         assertEquals "Error args is incorrect", globalErrors.first().arguments[1], "arg2"
     }
 
-    public void testRejectValue(){
+    public void testRejectValue() {
         Errors errors = new Errors()
 
         errors.rejectValue("field", "errorCode")
@@ -50,7 +50,7 @@ class ErrorsTest extends GroovyTestCase {
         assertTrue "Field should have error", errors.hasFieldErrors("field")
     }
 
-    public void testRejectValueWithArgs(){
+    public void testRejectValueWithArgs() {
         Errors errors = new Errors()
 
         errors.rejectValue("field", "errorCode", [10, "arg2"])
@@ -61,6 +61,21 @@ class ErrorsTest extends GroovyTestCase {
         assertEquals "Error code is incorrect", fieldError.errorCode, "errorCode"
         assertEquals "Field error args is incorrect", fieldError.arguments[0], 10
         assertEquals "Field error args is incorrect", fieldError.arguments[1], "arg2"
+    }
+
+    public void testIterator() {
+        def pass = false
+
+        Errors errors = new Errors()
+
+        errors.rejectValue("field", "errorCode")
+
+        errors.each {
+            if("errorCode" == it.errorCode)
+                pass = true
+        }
+
+        assertTrue "Should have passed", pass
     }
 
 }
