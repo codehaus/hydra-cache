@@ -8,6 +8,8 @@ import org.apache.commons.lang.ClassUtils
  * Created by nick.zhu
  */
 class ValidationEnhancer {
+    static final def CONSTRAINT_PROPERTY_NAME = "constraints"
+    
     static def log = Logger.getLogger(ValidationEnhancer)
 
     def validators = [
@@ -28,7 +30,10 @@ class ValidationEnhancer {
     }
 
     def validate(bean) {
-        Closure constraints = bean.getProperty("constraints")
+        if(!bean.hasProperty(CONSTRAINT_PROPERTY_NAME))
+            return true
+
+        Closure constraints = bean.getProperty(CONSTRAINT_PROPERTY_NAME)
 
         constraints.delegate = this
 

@@ -24,6 +24,16 @@ class ValidationEnhancerTest extends GroovyTestCase {
         assertEquals("Error arg is not correct", "null", fieldError.arguments[2])
     }
 
+    public void testInvalidationWithNoConstraint() {
+        NoConstraintModelBean model = new NoConstraintModelBean()
+
+        ValidationEnhancer validator = new ValidationEnhancer(model)
+
+        boolean result = model.validate()
+
+        assertTrue("Validation result should be true", result)
+    }
+
 }
 
 
@@ -33,4 +43,8 @@ class ModelBean {
     static constraints = {
         id(nullable: false)
     }
+}
+
+class NoConstraintModelBean {
+    String id
 }
