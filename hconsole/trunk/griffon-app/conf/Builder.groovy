@@ -10,3 +10,7 @@ root {
 root.'I18nGriffonAddon'.addon=true
 
 
+
+root.'ValidationGriffonAddon'.addon=true
+
+
