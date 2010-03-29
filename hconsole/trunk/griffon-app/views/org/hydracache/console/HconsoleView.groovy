@@ -10,7 +10,7 @@ actions {
 }
 
 mainWindow = application(title: 'hconsole',
-        size: [480, 320],
+        size: [720, 550],
         pack: false,
         locationByPlatform: true,
         iconImage: imageIcon('/griffon-icon-48x48.png').image,

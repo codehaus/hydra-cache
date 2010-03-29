@@ -9,11 +9,11 @@ class NullableValidator extends Closure {
         super(owner);
     }
 
-    def doCall(value, delegate, config) {
-        if (config)
+    def doCall(propertyValue, bean, allowNull) {
+        if (allowNull)
             return true
 
-        return value != null
+        return propertyValue != null
     }
 
 }
