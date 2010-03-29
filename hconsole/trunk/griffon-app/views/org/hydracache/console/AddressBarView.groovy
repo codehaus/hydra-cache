@@ -2,7 +2,6 @@ package org.hydracache.console
 
 import static java.awt.FlowLayout.LEFT
 import static java.awt.BorderLayout.*
-import org.hydracache.console.validate.ErrorMessagePanel
 import net.sourceforge.gvalidation.ErrorMessagePanel
 
 actions {
