@@ -29,12 +29,13 @@ import org.hydracache.server.Identity;
  * @since 1.0
  */
 public class PartitionUpdatesPoller extends Thread {
-
     private static final Logger logger = Logger
             .getLogger(PartitionUpdatesPoller.class);
+
     private HydraCacheAdminClient adminClient;
     private ObservableRegistry registry;
     private final long interval;
+    private boolean running;
 
     /**
      * Provide a reference to an admin client and at least one observer.
@@ -43,7 +44,7 @@ public class PartitionUpdatesPoller extends Thread {
      *            The admin client to perform the refresh
      * @param listener
      *            The observer required to be notified upon update
-     * @param listeners
+     * @param listener
      *            Any other observers interested
      */
     public PartitionUpdatesPoller(List<Identity> seedServerIds, long interval,
@@ -62,8 +63,11 @@ public class PartitionUpdatesPoller extends Thread {
      */
     @Override
     public void run() {
+        running = true;
+
         List<Identity> list;
-        while (true) {
+
+        while (running) {
             try {
                 logger.info("Updating node list.");
                 list = adminClient.listNodes();
@@ -82,4 +86,7 @@ public class PartitionUpdatesPoller extends Thread {
         }
     }
 
+    public void shutdown() {
+        running = false;
+    }
 }

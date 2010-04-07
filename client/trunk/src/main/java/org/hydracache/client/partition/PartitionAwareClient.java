@@ -29,6 +29,7 @@ import java.util.Observer;
 import java.util.Random;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
@@ -62,7 +63,7 @@ import org.json.JSONObject;
 /**
  * Manages a partition of nodes and uses an implementation of HydraCacheClient
  * to execute requests against the distributed cache.
- * 
+ *
  * @author Tan Quach
  * @since 1.0
  */
@@ -74,9 +75,13 @@ public class PartitionAwareClient implements HydraCacheClient,
 
     private static final String GET = "get";
 
+    private static final String DELETE = "delete";
+
     private static final String IP = "ip";
 
     private static final String PORT = "port";
+
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     private SubstancePartition nodePartition;
     private ProtocolEncoder<DataMessage> protocolEncoder;
@@ -89,6 +94,8 @@ public class PartitionAwareClient implements HydraCacheClient,
 
     private List<Identity> seedServerIds;
 
+    private PartitionUpdatesPoller poller;
+
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
      */
@@ -97,7 +104,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     public PartitionAwareClient(List<Identity> seedServerIds,
-            Transport transport) {
+                                Transport transport) {
         this.seedServerIds = seedServerIds;
         this.messenger = new Messenger(transport);
 
@@ -113,9 +120,11 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         // Register listeners for partition updates
         // TODO Make the interval configurable
-        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(
+        poller = new PartitionUpdatesPoller(
                 seedServerIds, 180000, this, this);
         poller.start();
+
+        running.set(true);
     }
 
     private DataMessageXmlMarshaller createXmlDataMsgMarshaller() {
@@ -141,18 +150,26 @@ public class PartitionAwareClient implements HydraCacheClient,
      * @see org.hydracache.client.HydraCacheClient#delete(java.lang.String,
      * java.lang.String)
      */
+
     @Override
     public boolean delete(String context, String key) throws Exception {
+        validateRunningState();
+
         Identity identity = nodePartition.get(key);
 
         RequestMessage requestMessage = new RequestMessage();
-        requestMessage.setMethod("DELETE");
+        requestMessage.setMethod(DELETE);
         requestMessage.setPath(key);
         requestMessage.setContext(context);
 
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         return responseMessage.isSuccessful();
+    }                                                    c
+
+    private void validateRunningState() {
+        if(!isRunning())
+            throw new IllegalStateException("Client instance has already been stopped, no operation is permitted");
     }
 
     /*
@@ -160,6 +177,7 @@ public class PartitionAwareClient implements HydraCacheClient,
      * 
      * @see org.hydracache.client.HydraCacheClient#delete(java.lang.String)
      */
+
     @Override
     public boolean delete(String key) throws Exception {
         return delete(null, key);
@@ -171,8 +189,11 @@ public class PartitionAwareClient implements HydraCacheClient,
      * @see org.hydracache.client.HydraCacheClient#get(java.lang.String,
      * java.lang.String)
      */
+
     @Override
     public Object get(String context, String key) throws Exception {
+        validateRunningState();
+        
         Identity identity = nodePartition.get(key);
 
         RequestMessage requestMessage = new RequestMessage();
@@ -198,8 +219,9 @@ public class PartitionAwareClient implements HydraCacheClient,
      * 
      * @see org.hydracache.client.HydraCacheClient#get(java.lang.String)
      */
+
     @Override
-    public synchronized Object get(final String key) throws Exception {
+    public Object get(final String key) throws Exception {
         return get(null, key);
     }
 
@@ -209,9 +231,12 @@ public class PartitionAwareClient implements HydraCacheClient,
      * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
      * java.lang.String, java.io.Serializable)
      */
+
     @Override
     public void put(String context, String key, Serializable data)
             throws Exception {
+        validateRunningState();
+        
         Identity identity = nodePartition.get(key);
         Buffer buffer = serializeData(key, data);
 
@@ -232,8 +257,9 @@ public class PartitionAwareClient implements HydraCacheClient,
      * @see org.hydracache.client.HydraCacheClient#put(java.lang.String,
      * java.io.Serializable)
      */
+
     @Override
-    public synchronized void put(String key, Serializable data)
+    public void put(String key, Serializable data)
             throws Exception {
         put(null, key, data);
     }
@@ -243,8 +269,11 @@ public class PartitionAwareClient implements HydraCacheClient,
      * 
      * @see org.hydracache.client.HydraCacheAdminClient#listNodes()
      */
+
     @Override
-    public synchronized List<Identity> listNodes() throws Exception {
+    public List<Identity> listNodes() throws Exception {
+        validateRunningState();
+        
         log.info("Retrieving list of nodes.");
 
         RequestMessage requestMessage = new RequestMessage();
@@ -281,10 +310,14 @@ public class PartitionAwareClient implements HydraCacheClient,
      * 
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
+
     @SuppressWarnings("unchecked")
     @Override
     public void update(Observable o, Object arg) {
+        validateRunningState();
+        
         log.info("Updating node partition");
+        
         List<Identity> servers = (List<Identity>) arg;
 
         this.seedServerIds = servers;
@@ -293,7 +326,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         this.nodePartition = new SubstancePartition(
                 new KetamaBasedHashFunction(), servers);
     }
-    
+
     private Buffer serializeData(String key, Serializable data)
             throws IOException {
         DataMessage dataMessage = new DataMessage();
@@ -309,14 +342,25 @@ public class PartitionAwareClient implements HydraCacheClient,
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
         return buffer;
     }
-    
+
     private ResponseMessage sendMessage(Identity identity,
-            RequestMessage requestMessage) throws Exception {
+                                        RequestMessage requestMessage) throws Exception {
         return messenger.sendMessage(identity, nodePartition, requestMessage);
     }
 
     // FIXME: implement weak map to avoid memory leak
+
     private void updateVersion(String key, DataMessage dataMessage) {
         versionMap.put(key, dataMessage.getVersion());
+    }
+
+    @Override
+    public synchronized void shutdown() throws Exception {
+       running.set(false);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running.get();
     }
 }

@@ -1,17 +1,15 @@
 package org.hydracache.console
 
-import org.hydracache.client.HydraCacheAdminClient
 import org.hydracache.client.HydraCacheClientFactory
 import org.hydracache.server.Identity
-import org.apache.commons.lang.StringUtils
-import org.apache.commons.lang.math.NumberUtils
-import org.apache.log4j.spi.LoggerFactory
-import org.apache.log4j.Logger
 
 class HydraSpaceService {
     public static final String HYDRA_SPACE_CONNECTED_EVENT = "HydraSpaceConnected"
+    public static final String HYDRA_SPACE_DISCONNECTED_EVENT = "HydraSpaceDisConnected"
 
     def hydraCacheClientFactory = new HydraCacheClientFactory()
+    def hydraCacheAdminClient
+    def hydraCacheClient
 
     def connect(server, port) {
         if (!server)
@@ -20,25 +18,41 @@ class HydraSpaceService {
         log.debug "Connecting to ${server}:${port} ..."
 
         try {
-            def serverAddress = Inet4Address.getByName(server)
-
-            HydraCacheAdminClient adminClient = hydraCacheClientFactory.createAdminClient(
-                    [new Identity(serverAddress, port)]
-            )
-
-            def nodes = adminClient.listNodes()
+            List<Identity> nodes = connectToHydraSpace(server, port)
 
             if (!nodes)
                 return false
 
             app.event(HYDRA_SPACE_CONNECTED_EVENT, nodes)
-            log.debug "[HydraSpaceConnected] event sent"
+            log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
             return true
         } catch (UnknownHostException uhex) {
-            log.debug("Unknown host", uhex)            
+            log.debug("Unknown host", uhex)
             return false;
         }
+    }
+
+    private List<Identity> connectToHydraSpace(server, port) {
+        def serverAddress = Inet4Address.getByName(server)
+
+        hydraCacheClient = hydraCacheClientFactory.createClient(
+                [new Identity(serverAddress, port)]
+        )
+
+        hydraCacheAdminClient = hydraCacheClientFactory.createAdminClient(
+                [new Identity(serverAddress, port)]
+        )
+
+        def nodes = hydraCacheAdminClient.listNodes()
+
+        return nodes
+    }
+
+    def disConnect() {
+        app.event(HYDRA_SPACE_DISCONNECTED_EVENT)
+
+        log.debug "[${HYDRA_SPACE_DISCONNECTED_EVENT}] event sent"
     }
 
 }

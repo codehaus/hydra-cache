@@ -34,4 +34,21 @@ public interface HydraCacheAdminClient {
      * @throws Exception 
      */
     List<Identity> listNodes() throws Exception;
+
+    /**
+     * Stop this client instance and release any resource it holds. Once a
+     * client has been shutdown it can not be used again, instead a new
+     * instance should be created.
+     *
+     * @throws Exception if anything goes wrong
+     */
+    public void shutdown() throws Exception;
+
+    /**
+     * Check if the client instance of a running instance or if it has
+     * already been shutdown
+     *
+     * @return if the client is running or not
+     */
+    public boolean isRunning();
 }

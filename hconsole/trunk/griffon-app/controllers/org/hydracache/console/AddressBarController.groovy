@@ -28,7 +28,25 @@ class AddressBarController {
         }
     }
 
+    def disConnect = {evt=null ->
+        doOutside{
+            hydraSpaceService.disConnect()
+        }
+    }
+
     def onHydraSpaceConnected = {nodes->
         log.debug "Event [HydraSpaceConnected] received ..."
+
+        doLater{
+            model.connected = true
+        }
+    }
+
+    def onHydraSpaceDisConnected = {nodes->
+        log.debug "Event [HydraSpaceDisConnected] received ..."
+
+        doLater{
+            model.connected = false
+        }
     }
 }

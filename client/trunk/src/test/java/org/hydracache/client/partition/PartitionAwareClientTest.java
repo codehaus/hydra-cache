@@ -83,7 +83,7 @@ public class PartitionAwareClientTest {
 
         ArgumentCaptor<RequestMessage> reqMsgCaptor = verifySendMessageAndCaptureRequest();
 
-        assertRequestMsg("DELETE", context, key, reqMsgCaptor);
+        assertRequestMsg("delete", context, key, reqMsgCaptor);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class PartitionAwareClientTest {
 
         ArgumentCaptor<RequestMessage> reqMsgCaptor = verifySendMessageAndCaptureRequest();
 
-        assertRequestMsg("DELETE", context, key, reqMsgCaptor);
+        assertRequestMsg("delete", context, key, reqMsgCaptor);
     }
 
     private void mockSuccessfulMessaging() throws Exception {
@@ -174,5 +174,17 @@ public class PartitionAwareClientTest {
             assertFalse("Partition should not contain the ID any more",
                     partition.contains(node));
         }
+    }
+
+    @Test
+    public void ensureShutdownReleasesResources() throws Exception {
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                nullTransport);
+
+        assertTrue("Client should be running", client.isRunning());
+
+        client.shutdown();
+
+        assertFalse("Client should be stopped", client.isRunning());
     }
 }
