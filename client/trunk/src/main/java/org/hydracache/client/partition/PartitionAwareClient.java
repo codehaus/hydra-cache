@@ -298,7 +298,6 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     private Identity pickRandomServerFromRegistry() {
-        // Pick a random node to connect to
         Random rnd = new Random();
         int nextInt = rnd.nextInt(seedServerIds.size());
         Identity identity = seedServerIds.get(nextInt);
