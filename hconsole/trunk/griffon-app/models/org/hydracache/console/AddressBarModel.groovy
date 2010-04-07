@@ -4,10 +4,10 @@ import groovy.beans.Bindable
 
 class AddressBarModel {
     @Bindable String server
-    @Bindable String port
+    @Bindable int port
 
     static constraints = {
-        server(blank: false)
-        port(blank: false)
+        server(blank: false, inetAddress: true)
+        port(range: 1..65535)
     }
 }

@@ -13,4 +13,13 @@ class NavigationPaneController {
     def action = { evt = null ->
     }
     */
+
+    def onHydraSpaceConnected = {nodes ->
+        log.debug "Event [HydraSpaceConnected] received ..."
+
+        doLater {
+            log.debug "Refreshing navigation pane"
+            model.updateServerList(nodes)
+        }
+    }
 }

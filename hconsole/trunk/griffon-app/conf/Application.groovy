@@ -1,6 +1,6 @@
 application {
     title='Hconsole'
-    startupGroups = ['hconsole']
+    startupGroups = ['Hconsole']
 
     // Should Griffon exit when no Griffon created frames are showing?
     autoShutdown = true
@@ -23,8 +23,8 @@ mvcGroups {
         view = 'org.hydracache.console.NavigationPaneView'
     }
 
-    // MVC Group for "hconsole"
-    'hconsole' {
+    // MVC Group for "Hconsole"
+    'Hconsole' {
         model = 'org.hydracache.console.HconsoleModel'
         view = 'org.hydracache.console.HconsoleView'
         controller = 'org.hydracache.console.HconsoleController'

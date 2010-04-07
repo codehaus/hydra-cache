@@ -5,6 +5,8 @@ import org.hydracache.client.HydraCacheClientFactory
 import org.hydracache.server.Identity
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.math.NumberUtils
+import org.apache.log4j.spi.LoggerFactory
+import org.apache.log4j.Logger
 
 class HydraSpaceService {
     public static final String HYDRA_SPACE_CONNECTED_EVENT = "HydraSpaceConnected"
@@ -12,7 +14,7 @@ class HydraSpaceService {
     def hydraCacheClientFactory = new HydraCacheClientFactory()
 
     def connect(server, port) {
-        if (!server || !NumberUtils.isDigits(port))
+        if (!server)
             return false
 
         log.debug "Connecting to ${server}:${port} ..."
@@ -21,7 +23,7 @@ class HydraSpaceService {
             def serverAddress = Inet4Address.getByName(server)
 
             HydraCacheAdminClient adminClient = hydraCacheClientFactory.createAdminClient(
-                    [new Identity(serverAddress, Integer.valueOf(port))]
+                    [new Identity(serverAddress, port)]
             )
 
             def nodes = adminClient.listNodes()
@@ -29,7 +31,7 @@ class HydraSpaceService {
             if (!nodes)
                 return false
 
-            app.event(HYDRA_SPACE_CONNECTED_EVENT)
+            app.event(HYDRA_SPACE_CONNECTED_EVENT, nodes)
             log.debug "[HydraSpaceConnected] event sent"
 
             return true
