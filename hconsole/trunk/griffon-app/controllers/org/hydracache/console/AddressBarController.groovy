@@ -1,7 +1,5 @@
 package org.hydracache.console
 
-import javax.swing.JOptionPane
-
 class AddressBarController {
     def model
     def view
@@ -28,7 +26,7 @@ class AddressBarController {
         }
     }
 
-    def disConnect = {evt=null ->
+    def disConnect = {evt = null ->
         doOutside{
             hydraSpaceService.disConnect()
         }
