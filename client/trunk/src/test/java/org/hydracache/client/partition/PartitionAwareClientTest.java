@@ -23,8 +23,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.hydracache.client.transport.NullTransport;
 import org.hydracache.client.transport.RequestMessage;
@@ -33,12 +35,14 @@ import org.hydracache.client.transport.Transport;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 /**
  * @author Tan Quach
  * @since 1.0
@@ -128,7 +132,7 @@ public class PartitionAwareClientTest {
     }
 
     private void assertRequestMsg(String method, String context, String key,
-            ArgumentCaptor<RequestMessage> reqMsgCaptor) {
+                                  ArgumentCaptor<RequestMessage> reqMsgCaptor) {
         assertEquals("Method is incorrect", method, reqMsgCaptor.getValue()
                 .getMethod());
         assertEquals("Context is incorrect", context, reqMsgCaptor.getValue()
@@ -189,5 +193,30 @@ public class PartitionAwareClientTest {
         client.shutdown();
 
         assertFalse("Client should be stopped", client.isRunning());
+    }
+
+    @Test
+    public void ensureStorageInfoCanBeRetrieved() throws Exception {
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                mockTransport, poller);
+
+        ResponseMessage responseMsg = new ResponseMessage(true);
+        JSONObject output = new JSONObject();
+        output.put("testField", "100");
+        StringWriter writer = new StringWriter();
+        output.write(writer);
+        responseMsg.setResponseBody(writer.toString().getBytes());
+
+        when(
+                messenger.sendMessage(any(Identity.class),
+                        any(SubstancePartition.class),
+                        any(RequestMessage.class))).thenReturn(
+                responseMsg);
+
+        client.setMessager(messenger);
+
+        Map<String, String> info = client.getStorageInfo();
+
+        assertEquals("Test field value is incorrect", "100", info.get("testField"));
     }
 }

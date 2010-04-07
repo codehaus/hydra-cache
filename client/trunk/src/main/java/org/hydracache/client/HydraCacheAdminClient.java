@@ -16,6 +16,7 @@
 package org.hydracache.client;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hydracache.server.Identity;
 
@@ -36,13 +37,21 @@ public interface HydraCacheAdminClient {
     List<Identity> listNodes() throws Exception;
 
     /**
+     * Retrieve server storage information
+     *
+     * @return the storage information of the connected server will be returned
+     * @throws Exception
+     */
+    Map<String, String> getStorageInfo() throws Exception;
+
+    /**
      * Stop this client instance and release any resource it holds. Once a
      * client has been shutdown it can not be used again, instead a new
      * instance should be created.
      *
      * @throws Exception if anything goes wrong
      */
-    public void shutdown() throws Exception;
+    void shutdown() throws Exception;
 
     /**
      * Check if the client instance of a running instance or if it has
@@ -50,5 +59,5 @@ public interface HydraCacheAdminClient {
      *
      * @return if the client is running or not
      */
-    public boolean isRunning();
+    boolean isRunning();
 }

@@ -20,14 +20,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -119,7 +112,7 @@ public class PartitionAwareClient implements HydraCacheClient,
                 createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
 
         this.poller = poller;
-        
+
         poller.start();
 
         running.set(true);
@@ -270,24 +263,7 @@ public class PartitionAwareClient implements HydraCacheClient,
 
     @Override
     public List<Identity> listNodes() throws Exception {
-        validateRunningState();
-
-        log.info("Retrieving list of nodes.");
-
-        RequestMessage requestMessage = new RequestMessage();
-        requestMessage.setMethod(GET);
-        requestMessage.setPath("registry");
-
-        // Pick a random node to connect to
-        Random rnd = new Random();
-        int nextInt = rnd.nextInt(seedServerIds.size());
-        Identity identity = seedServerIds.get(nextInt);
-
-        ResponseMessage responseMessage = messenger.sendMessage(identity,
-                nodePartition, requestMessage);
-
-        if (responseMessage == null)
-            throw new ClientException("Failed to retrieve node registry.");
+        ResponseMessage responseMessage = makeGetQuery("registry");
 
         List<Identity> identities = new LinkedList<Identity>();
 
@@ -303,11 +279,55 @@ public class PartitionAwareClient implements HydraCacheClient,
         return identities;
     }
 
+    private ResponseMessage makeGetQuery(String call) throws Exception {
+        validateRunningState();
+
+        RequestMessage requestMessage = new RequestMessage();
+        requestMessage.setMethod(GET);
+        requestMessage.setPath(call);
+
+        Identity identity = pickRandomServerFromRegistry();
+
+        ResponseMessage responseMessage = messenger.sendMessage(identity,
+                nodePartition, requestMessage);
+
+        if (responseMessage == null)
+            throw new ClientException("Failed to query server with call[" + call + "].");
+
+        return responseMessage;
+    }
+
+    private Identity pickRandomServerFromRegistry() {
+        // Pick a random node to connect to
+        Random rnd = new Random();
+        int nextInt = rnd.nextInt(seedServerIds.size());
+        Identity identity = seedServerIds.get(nextInt);
+        return identity;
+    }
+
+    @Override
+    public Map<String, String> getStorageInfo() throws Exception {
+        ResponseMessage responseMessage = makeGetQuery("storage");
+
+        String infoString = new String(responseMessage.getResponseBody());
+
+        HashMap<String, String> infoMap = new HashMap<String, String>();
+
+        JSONObject infoJsonObj = new JSONObject(infoString);
+
+        for (Iterator it = infoJsonObj.keys(); it.hasNext();) {
+            String key = it.next().toString();
+            infoMap.put(key, infoJsonObj.getString(key));
+        }
+
+        return infoMap;
+    }
+
     /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
+    * (non-Javadoc)
+    *
+    * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+    */
 
     @SuppressWarnings("unchecked")
     @Override
