@@ -27,8 +27,8 @@ class HydraSpaceService {
             log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
             return true
-        } catch (UnknownHostException uhex) {
-            log.debug("Unknown host", uhex)
+        } catch (UnknownHostException ex) {
+            log.debug("Unknown host", ex)
             return false;
         }
     }
@@ -50,6 +50,9 @@ class HydraSpaceService {
     }
 
     def disConnect() {
+        hydraCacheClient?.shutdown()
+        hydraCacheAdminClient?.shutdown()
+        
         app.event(HYDRA_SPACE_DISCONNECTED_EVENT)
 
         log.debug "[${HYDRA_SPACE_DISCONNECTED_EVENT}] event sent"

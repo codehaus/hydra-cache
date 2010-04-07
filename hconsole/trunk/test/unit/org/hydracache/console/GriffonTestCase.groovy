@@ -1,7 +1,6 @@
 package org.hydracache.console
 
 import org.apache.log4j.Logger
-import org.codehaus.griffon.commons.GriffonContext
 
 /**
  * Created by nick.zhu
@@ -13,7 +12,7 @@ class GriffonTestCase extends GroovyTestCase {
     }
 
     def mockApp(obj){
-        obj.metaClass.app = [event: {events[it] = []}]
+        obj.metaClass.app = [event: {event, args = [] -> appEvents[event] = args}]
     }
 
     def mockController(AddressBarController controller) {
