@@ -2,15 +2,13 @@ package org.hydracache.console
 
 import static java.awt.FlowLayout.LEFT
 import static java.awt.BorderLayout.*
-import net.sourceforge.gvalidation.ErrorMessagePanel
+import net.sourceforge.gvalidation.swing.ErrorMessagePanel
 
 actions {
     action(id: "connectAction",
             name: messageSource.getMessage('''addressBar.connectAction.caption'''),
             closure: controller.connect)
 }
-
-errorDialog = dialog(modal: true)
 
 panel(addressBar){
     borderLayout()
@@ -21,7 +19,7 @@ panel(addressBar){
         label(messageSource.getMessage('addressBar.address.label'))
         textField(columns: 12, text: bind(target: model, 'server'))
         label(messageSource.getMessage('addressBar.port.label'))
-        textField(columns: 4, text: bind(target: model, 'port'))
+        textField(columns: 4, text: bind(target: model, 'port', converter: Integer.&parseInt))
         button(connectAction)
     }
 }
