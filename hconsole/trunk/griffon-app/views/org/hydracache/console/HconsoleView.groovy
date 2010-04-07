@@ -30,6 +30,6 @@ mainWindow = application(title: 'hconsole',
             oneTouchExpandable: true, constraints: CENTER,
             orientation: HORIZONTAL_SPLIT) {
          scrollPane(id:'navigationPane')
-         panel(id:'contentPane')
+         tabbedPane(id: "tabGroup")
     }
 }

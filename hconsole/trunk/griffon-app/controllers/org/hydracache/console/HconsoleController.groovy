@@ -12,4 +12,12 @@ class HconsoleController {
         app.shutdown()
     }
 
+    def onHydraSpaceConnected = {nodes->
+        log.debug "Event [HydraSpaceConnected] received ..."
+
+        doLater{
+            createMVCGroup('SpaceDashboard', 'spaceDashboard', [tabGroup: view.tabGroup])
+        }
+    }
+
 }

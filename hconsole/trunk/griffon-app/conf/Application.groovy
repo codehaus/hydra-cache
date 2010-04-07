@@ -9,6 +9,13 @@ application {
     //frameClass = 'javax.swing.JFrame'
 }
 mvcGroups {
+    // MVC Group for "org.hydracache.console.SpaceDashboard"
+    'SpaceDashboard' {
+        model = 'org.hydracache.console.SpaceDashboardModel'
+        controller = 'org.hydracache.console.SpaceDashboardController'
+        view = 'org.hydracache.console.SpaceDashboardView'
+    }
+
     // MVC Group for "org.hydracache.console.AddressBar"
     'AddressBar' {
         model = 'org.hydracache.console.AddressBarModel'
