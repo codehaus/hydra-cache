@@ -21,9 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,25 +48,30 @@ public class PartitionAwareClientTest {
 
     private NullTransport nullTransport = new NullTransport();
 
-    @Mock
     private Transport mockTransport;
 
-    @Mock
     private Messenger messenger;
+
+    private PartitionUpdatesPoller poller;
 
     @Before
     public void beforeTestMethods() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mockTransport = mock(Transport.class);
+        messenger = mock(Messenger.class);
+        poller = mock(PartitionUpdatesPoller.class);
     }
 
     @After
     public void afterTestMethods() throws Exception {
+        mockTransport = null;
+        messenger = null;
+        poller = null;
     }
 
     @Test
     public void testSuccessfulDeletionWithoutContext() throws Exception {
         client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
-                mockTransport);
+                mockTransport, poller);
 
         mockSuccessfulMessaging();
 
@@ -89,7 +92,7 @@ public class PartitionAwareClientTest {
     @Test
     public void testSuccessfulDeletionWithContext() throws Exception {
         client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
-                mockTransport);
+                mockTransport, poller);
 
         mockSuccessfulMessaging();
 
@@ -138,7 +141,7 @@ public class PartitionAwareClientTest {
     public void shouldReturnEmptyListWhenCurrentPartitionIsNull()
             throws Exception {
         client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
-                nullTransport);
+                nullTransport, poller);
 
         ResponseMessage responseMessage = new ResponseMessage(true);
         responseMessage
@@ -161,7 +164,7 @@ public class PartitionAwareClientTest {
                 new RuntimeException());
 
         PartitionAwareClient client = new PartitionAwareClient(Arrays
-                .asList(node), mockTransport);
+                .asList(node), mockTransport, poller);
 
         NodePartition<Identity> partition = client.getNodePartition();
 
@@ -179,7 +182,7 @@ public class PartitionAwareClientTest {
     @Test
     public void ensureShutdownReleasesResources() throws Exception {
         client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
-                nullTransport);
+                nullTransport, poller);
 
         assertTrue("Client should be running", client.isRunning());
 

@@ -99,12 +99,12 @@ public class PartitionAwareClient implements HydraCacheClient,
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
      */
-    public PartitionAwareClient(List<Identity> seedServerIds) {
-        this(seedServerIds, new HttpTransport());
+    public PartitionAwareClient(List<Identity> seedServerIds, PartitionUpdatesPoller poller) {
+        this(seedServerIds, new HttpTransport(), poller);
     }
 
     public PartitionAwareClient(List<Identity> seedServerIds,
-                                Transport transport) {
+                                Transport transport, PartitionUpdatesPoller poller) {
         this.seedServerIds = seedServerIds;
         this.messenger = new Messenger(transport);
 
@@ -118,10 +118,8 @@ public class PartitionAwareClient implements HydraCacheClient,
         protocolDecoder = new DefaultProtocolDecoder(
                 createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
 
-        // Register listeners for partition updates
-        // TODO Make the interval configurable
-        poller = new PartitionUpdatesPoller(
-                seedServerIds, 180000, this, this);
+        this.poller = poller;
+        
         poller.start();
 
         running.set(true);
@@ -165,10 +163,10 @@ public class PartitionAwareClient implements HydraCacheClient,
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         return responseMessage.isSuccessful();
-    }                                                    c
+    }
 
     private void validateRunningState() {
-        if(!isRunning())
+        if (!isRunning())
             throw new IllegalStateException("Client instance has already been stopped, no operation is permitted");
     }
 
@@ -193,7 +191,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     @Override
     public Object get(String context, String key) throws Exception {
         validateRunningState();
-        
+
         Identity identity = nodePartition.get(key);
 
         RequestMessage requestMessage = new RequestMessage();
@@ -236,7 +234,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     public void put(String context, String key, Serializable data)
             throws Exception {
         validateRunningState();
-        
+
         Identity identity = nodePartition.get(key);
         Buffer buffer = serializeData(key, data);
 
@@ -273,7 +271,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     @Override
     public List<Identity> listNodes() throws Exception {
         validateRunningState();
-        
+
         log.info("Retrieving list of nodes.");
 
         RequestMessage requestMessage = new RequestMessage();
@@ -315,9 +313,9 @@ public class PartitionAwareClient implements HydraCacheClient,
     @Override
     public void update(Observable o, Object arg) {
         validateRunningState();
-        
+
         log.info("Updating node partition");
-        
+
         List<Identity> servers = (List<Identity>) arg;
 
         this.seedServerIds = servers;
@@ -356,7 +354,11 @@ public class PartitionAwareClient implements HydraCacheClient,
 
     @Override
     public synchronized void shutdown() throws Exception {
-       running.set(false);
+        try {
+            poller.shutdown();
+        } finally {
+            running.set(false);
+        }
     }
 
     @Override

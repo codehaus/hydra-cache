@@ -20,7 +20,10 @@ public class PartitionUpdatesPollerTest {
         HydraCacheAdminClient adminClient = mock(HydraCacheAdminClient.class);
         Observer observer = mock(Observer.class);
 
-        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(Arrays.asList(new Identity(80)), 100, adminClient, observer);
+        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(Arrays.asList(new Identity(80)), 100);
+
+        poller.setAdminClient(adminClient);
+        poller.addListener(observer);
 
         poller.start();
 

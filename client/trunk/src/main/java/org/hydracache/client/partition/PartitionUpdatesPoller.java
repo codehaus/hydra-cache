@@ -39,28 +39,26 @@ public class PartitionUpdatesPoller extends Thread {
 
     /**
      * Provide a reference to an admin client and at least one observer.
-     * 
-     * @param adminClient
-     *            The admin client to perform the refresh
-     * @param listener
-     *            The observer required to be notified upon update
-     * @param listener
-     *            Any other observers interested
      */
-    public PartitionUpdatesPoller(List<Identity> seedServerIds, long interval,
-            HydraCacheAdminClient adminClient, Observer listener) {
+    public PartitionUpdatesPoller(List<Identity> seedServerIds, long interval) {
         this.interval = interval;
-        this.adminClient = adminClient;
 
         this.registry = new ObservableRegistry(seedServerIds);
-        this.registry.addObserver(listener);
+    }
+
+    public void setAdminClient(HydraCacheAdminClient adminClient) {
+        this.adminClient = adminClient;
+    }
+
+    public void addListener(Observer listener){
+        registry.addObserver(listener);
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Thread#run()
-     */
+    * (non-Javadoc)
+    *
+    * @see java.lang.Thread#run()
+    */
     @Override
     public void run() {
         running = true;
@@ -84,6 +82,8 @@ public class PartitionUpdatesPoller extends Thread {
                 }
             }
         }
+
+        logger.info("Shutting down poller thread.");
     }
 
     public void shutdown() {
