@@ -12,13 +12,9 @@ class AddressBarController {
 
     def connect = {evt = null ->
         if (!model.validate()) {
-            doLater {
-                view.errorMessagePanel.errors = model.errors
-            }
+            view.errorMessagePanel.errors = model.errors
         } else {
-            doLater {
-                view.errorMessagePanel.errors = null
-            }
+            view.errorMessagePanel.errors = null
 
             doOutside {
                 hydraSpaceService.connect(model.server, model.port)
@@ -27,23 +23,23 @@ class AddressBarController {
     }
 
     def disConnect = {evt = null ->
-        doOutside{
+        doOutside {
             hydraSpaceService.disConnect()
         }
     }
 
-    def onHydraSpaceConnected = {nodes->
+    def onHydraSpaceConnected = {nodes ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
-        doLater{
+        doLater {
             model.connected = true
         }
     }
 
-    def onHydraSpaceDisConnected = {nodes->
+    def onHydraSpaceDisConnected = {nodes ->
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
-        doLater{
+        doLater {
             model.connected = false
         }
     }

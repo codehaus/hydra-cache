@@ -2,6 +2,7 @@ package org.hydracache.console
 class HconsoleController {
     def model
     def view
+    def hydraSpaceService
 
     void mvcGroupInit(Map args) {
         createMVCGroup("NavigationPane", [navigationPane: view.navigationPane])
@@ -12,11 +13,14 @@ class HconsoleController {
         app.shutdown()
     }
 
-    def onHydraSpaceConnected = {nodes->
+    def onHydraSpaceConnected = {nodes ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
-        doLater{
-            createMVCGroup('SpaceDashboard', 'spaceDashboard', [tabGroup: view.tabGroup])
+        doLater {
+            log.debug "Creating SpaceDashboard ..."
+            createMVCGroup('SpaceDashboard',
+                    'spaceDashboard',
+                    [tabGroup: view.tabGroup, nodes: nodes, hydraSpaceService: hydraSpaceService])
         }
     }
 

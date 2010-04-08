@@ -58,4 +58,8 @@ class HydraSpaceService {
         log.debug "[${HYDRA_SPACE_DISCONNECTED_EVENT}] event sent"
     }
 
+    def queryStorageInfo(){
+        return hydraCacheAdminClient?.getStorageInfo()
+    }
+
 }

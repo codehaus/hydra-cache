@@ -19,7 +19,7 @@ class HydraSpaceServiceTests extends GriffonTestCase {
     void testSuccessfulConnection() {
         def stubAdminClient = [listNodes: {[new Identity(80)]}] as HydraCacheAdminClient
 
-        service.hydraCacheClientFactory = [createAdminClient: {stubAdminClient}, createClient:{stubAdminClient}]
+        service.hydraCacheClientFactory = [createAdminClient: {stubAdminClient}, createClient: {stubAdminClient}]
 
         def result = service.connect("localhost", 8888)
 
@@ -34,21 +34,30 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         assertFalse "Event ${HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT} should not be sent", appEvents.containsKey(HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT)
     }
 
-    void testConnectHandleInvalidServerName(){
+    void testConnectHandleInvalidServerName() {
         def result = service.connect("invalid name", 8080)
 
         assertFalse "Connection should not be successful", result
         assertFalse "Event ${HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT} should not be sent", appEvents.containsKey(HydraSpaceService.HYDRA_SPACE_CONNECTED_EVENT)
     }
 
-    void testDisconnectShutdownClient(){
+    void testDisconnectShutdownClient() {
         boolean shutdown = false
 
-        service.hydraCacheClient = [shutdown:{shutdown=true}]
+        service.hydraCacheClient = [shutdown: {shutdown = true}]
 
         service.disConnect()
 
         assertTrue "Client should have been stoppped", shutdown
         assertTrue "Event ${HydraSpaceService.HYDRA_SPACE_DISCONNECTED_EVENT} should be sent", appEvents.containsKey(HydraSpaceService.HYDRA_SPACE_DISCONNECTED_EVENT)
+    }
+
+    void testQueryStorageInfo() {
+        def data = ['maxMemroy': '250 MB']
+        service.hydraCacheAdminClient = [getStorageInfo: {data}]
+
+        def info = service.queryStorageInfo()
+
+        assertEquals "Result is incorrect", data, info
     }
 }
