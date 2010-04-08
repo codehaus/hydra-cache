@@ -20,7 +20,15 @@ class AddressBarController {
             model.connectionState = CONNECTING
 
             doOutside {
-                hydraSpaceService.connect(model.server, model.port)
+                try {
+                    hydraSpaceService.connect(model.server, model.port)
+                } catch (Exception ex) {
+                    doLater{
+                        model.connectionState = DIS_CONNECTED
+                    }
+
+                    throw ex
+                }
             }
         }
     }

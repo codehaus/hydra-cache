@@ -11,7 +11,7 @@ class AddressBarModel {
 
     static constraints = {
         server(blank: false, inetAddress: true)
-        port(range: 1..65535)
+        port(min: 1, max: 65535)
     }
 
 }
