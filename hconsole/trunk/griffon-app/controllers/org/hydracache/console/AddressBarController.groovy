@@ -1,5 +1,7 @@
 package org.hydracache.console
 
+import static org.hydracache.console.ConnectionState.*
+
 class AddressBarController {
     def model
     def view
@@ -15,6 +17,7 @@ class AddressBarController {
             view.errorMessagePanel.errors = model.errors
         } else {
             view.errorMessagePanel.errors = null
+            model.connectionState = CONNECTING
 
             doOutside {
                 hydraSpaceService.connect(model.server, model.port)
@@ -32,7 +35,7 @@ class AddressBarController {
         log.debug "Event [HydraSpaceConnected] received ..."
 
         doLater {
-            model.connected = true
+            model.connectionState = CONNECTED
         }
     }
 
@@ -40,7 +43,7 @@ class AddressBarController {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
         doLater {
-            model.connected = false
+            model.connectionState = DIS_CONNECTED
         }
     }
 }
