@@ -36,7 +36,7 @@ public class PrintStorageInfoActionTest extends AbstractJsonServiceActionTest {
         String printOutput = IOUtils.toString(captor.getValue().getContent());
 
         assertTrue("JSON output is incorrect", printOutput
-                .contains("{\"totalMemory\":"));
+                .contains("\"totalMemory\":"));
         assertTrue("JSON output is incorrect", printOutput
                 .contains(",\"size\":2}"));
 
@@ -71,7 +71,7 @@ public class PrintStorageInfoActionTest extends AbstractJsonServiceActionTest {
         assertTrue("JSON output is missing the padding", printOutput
                 .startsWith("testHandler("));
         assertTrue("JSON output is incorrect", printOutput
-                .contains("{\"totalMemory\":"));
+                .contains("\"totalMemory\":"));
         assertTrue("JSON output is incorrect", printOutput
                 .contains(",\"size\":"));
 
