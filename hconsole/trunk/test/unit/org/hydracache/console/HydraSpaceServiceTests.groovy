@@ -17,7 +17,7 @@ class HydraSpaceServiceTests extends GriffonTestCase {
     }
 
     void testSuccessfulConnection() {
-        def stubAdminClient = [listNodes: {[new Identity(80)]}] as HydraCacheAdminClient
+        def stubAdminClient = [listNodes: {[new Identity(80)]}, getStorageInfo:{[:]}] as HydraCacheAdminClient
 
         service.hydraCacheClientFactory = [createAdminClient: {stubAdminClient}, createClient: {stubAdminClient}]
 

@@ -14,7 +14,7 @@ class NavigationPaneController {
     }
     */
 
-    def onHydraSpaceConnected = {nodes ->
+    def onHydraSpaceConnected = {nodes, storageInfo ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
         doLater {

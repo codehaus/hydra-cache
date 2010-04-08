@@ -28,7 +28,7 @@ class AddressBarController {
         }
     }
 
-    def onHydraSpaceConnected = {nodes ->
+    def onHydraSpaceConnected = {nodes, storageInfo ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
         doLater {
@@ -36,7 +36,7 @@ class AddressBarController {
         }
     }
 
-    def onHydraSpaceDisConnected = {nodes ->
+    def onHydraSpaceDisConnected = {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
         doLater {

@@ -9,9 +9,7 @@ class SpaceDashboardController {
     void mvcGroupInit(Map args) {
         model.serverNodes = args.nodes
 
-        // Use passed in hydraSpaceService instance since Griffon inject
-        // fails when mvcGroupInit is called in a app event thread with doLater{}
-        model.storageInfo = args.hydraSpaceService.queryStorageInfo()
+        model.storageInfo = args.storageInfo
 
         model.updateOverview()
     }

@@ -23,7 +23,10 @@ class HydraSpaceService {
             if (!nodes)
                 return false
 
-            app.event(HYDRA_SPACE_CONNECTED_EVENT, nodes)
+            def storageInfo = queryStorageInfo()
+
+            app.event(HYDRA_SPACE_CONNECTED_EVENT, [nodes, storageInfo])
+            
             log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
             return true
