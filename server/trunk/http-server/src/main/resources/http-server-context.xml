@@ -35,6 +35,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="printStorageInfoAction"
         class="org.hydracache.server.httpd.handler.PrintStorageInfoAction">
         <constructor-arg ref="internalDataBank" />
+        <property name="hopN" value="${hop.N}" />
+        <property name="hopW" value="${hop.W}" />
+        <property name="hopR" value="${hop.R}" />
     </bean>
 
     <bean id="storageDumpAction" class="org.hydracache.server.httpd.handler.DumpAction">

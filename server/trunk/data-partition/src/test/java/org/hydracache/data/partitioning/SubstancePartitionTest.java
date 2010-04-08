@@ -57,13 +57,13 @@ public class SubstancePartitionTest {
         assertEquals("Node A id should be returned", nodeA, partition
                 .get(nodeA.toString()));
 
-        assertEquals("Node B id should be returned", nodeC, partition
+        assertEquals("Node B id should be returned", nodeB, partition
                 .next(nodeA));
 
-        assertEquals("Node C id should be returned", nodeA, partition
+        assertEquals("Node C id should be returned", nodeC, partition
                 .next(nodeB));
 
-        assertEquals("Node A id should be returned", nodeB, partition
+        assertEquals("Node A id should be returned", nodeA, partition
                 .next(nodeC));
     }
 }
