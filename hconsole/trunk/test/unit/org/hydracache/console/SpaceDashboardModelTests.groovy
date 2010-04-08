@@ -19,11 +19,11 @@ class SpaceDashboardModelTests extends GriffonTestCase {
         def model = new SpaceDashboardModel()
 
         model.serverNodes = [1, 2, 3]
-        model.storageInfo = ['maxMemory': '247 MB']
+        model.storageInfo = ['maxMemory': 259522560, 'N': 2]
 
         model.updateOverview()
 
-        assertEquals 247 * 3, model.totalMemory
+        assertEquals '371 MB', model.totalMemory
     }
 
 }

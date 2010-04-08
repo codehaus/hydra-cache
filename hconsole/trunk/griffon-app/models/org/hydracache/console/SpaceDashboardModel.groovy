@@ -2,13 +2,14 @@ package org.hydracache.console
 
 import groovy.beans.Bindable
 import org.hydracache.server.Identity
+import org.apache.commons.io.FileUtils
 
 class SpaceDashboardModel {
     def serverNodes
     def storageInfo
 
     @Bindable int numberOfNodes
-    @Bindable long totalMemory
+    @Bindable String totalMemory
 
     def updateOverview() {
         if (serverNodes) {
@@ -19,8 +20,10 @@ class SpaceDashboardModel {
         }
 
         if (storageInfo) {
-            def serverMemory = storageInfo.maxMemory.replace('MB', '').trim()
-            totalMemory = Long.parseLong(serverMemory) * numberOfNodes
+            long serverMemory = storageInfo.maxMemory
+            long totalPhysicalMem = serverMemory * numberOfNodes
+            int n = storageInfo.N
+            totalMemory = FileUtils.byteCountToDisplaySize((long) (totalPhysicalMem / n))
         }
     }
 }
