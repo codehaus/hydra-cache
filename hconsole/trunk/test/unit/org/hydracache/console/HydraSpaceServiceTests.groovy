@@ -61,7 +61,8 @@ class HydraSpaceServiceTests extends GriffonTestCase {
     }
 
     void testQueryServerDetails(){
-        def adminClient = [getStorageInfo:{['maxMemory': '250 MB']}]
+        def shutdown = false
+        def adminClient = [getStorageInfo:{['maxMemory': '250 MB']}, shutdown:{shutdown=true}]
         def clientFactory = [createAdminClient:{id->adminClient}]
         
         service.hydraCacheClientFactory = clientFactory
@@ -69,5 +70,22 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         def info = service.queryServerDetails(new Identity(80))
 
         assertEquals "Server info is incorrect", '250 MB', info.maxMemory
+        assertTrue 'Client should be shutdown once its done', shutdown
+    }
+
+    void testQueryServerDetailsWithException(){
+        def shutdown = false
+        def adminClient = [getStorageInfo:{throw new RuntimeException()}, shutdown:{shutdown=true}]
+        def clientFactory = [createAdminClient:{id->adminClient}]
+
+        service.hydraCacheClientFactory = clientFactory
+
+        try {
+            service.queryServerDetails(new Identity(80))
+        } catch (Exception ex) {
+            // ignore
+        }
+
+        assertTrue 'Client should be shutdown once its done', shutdown
     }
 }

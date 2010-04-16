@@ -73,7 +73,11 @@ class HydraSpaceService {
                 [serverIdentity]
         )
 
-        return queryStorageInfo(adminClient)
+        try {
+            return queryStorageInfo(adminClient)
+        } finally {
+            adminClient.shutdown()
+        }
     }
 
 }
