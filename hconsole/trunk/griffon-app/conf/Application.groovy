@@ -9,6 +9,13 @@ application {
     //frameClass = 'javax.swing.JFrame'
 }
 mvcGroups {
+    // MVC Group for "org.hydracache.console.NodeDetailPane"
+    'NodeDetailPane' {
+        model = 'org.hydracache.console.NodeDetailPaneModel'
+        controller = 'org.hydracache.console.NodeDetailPaneController'
+        view = 'org.hydracache.console.NodeDetailPaneView'
+    }
+
     // MVC Group for "org.hydracache.console.SpaceDashboard"
     'SpaceDashboard' {
         model = 'org.hydracache.console.SpaceDashboardModel'
@@ -38,3 +45,5 @@ mvcGroups {
     }
 
 }
+
+

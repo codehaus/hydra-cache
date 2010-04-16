@@ -1,5 +1,7 @@
 package org.hydracache.console
 
 scrollPane(navigationPane) {
-    list(model: model.serverListModel)
+    list(id:'nodeList', model: model.serverListModel)
 }
+
+nodeList.mousePressed = controller.openNodeDetailPane

@@ -22,4 +22,10 @@ class NavigationPaneController {
             model.updateServerList(nodes)
         }
     }
+
+    def openNodeDetailPane = {evt = null ->
+        doLater{
+            createMVCGroup('NodeDetailPane', 'nodeDetailPane')
+        }
+    }
 }

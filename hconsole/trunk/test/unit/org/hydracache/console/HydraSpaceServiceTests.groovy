@@ -54,10 +54,20 @@ class HydraSpaceServiceTests extends GriffonTestCase {
 
     void testQueryStorageInfo() {
         def data = ['maxMemroy': '250 MB']
-        service.hydraCacheAdminClient = [getStorageInfo: {data}]
 
-        def info = service.queryStorageInfo()
+        def info = service.queryStorageInfo([getStorageInfo: {data}])
 
         assertEquals "Result is incorrect", data, info
+    }
+
+    void testQueryServerDetails(){
+        def adminClient = [getStorageInfo:{['maxMemory': '250 MB']}]
+        def clientFactory = [createAdminClient:{id->adminClient}]
+        
+        service.hydraCacheClientFactory = clientFactory
+
+        def info = service.queryServerDetails(new Identity(80))
+
+        assertEquals "Server info is incorrect", '250 MB', info.maxMemory
     }
 }

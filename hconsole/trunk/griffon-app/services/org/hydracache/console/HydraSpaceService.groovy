@@ -18,15 +18,17 @@ class HydraSpaceService {
         log.debug "Connecting to ${server}:${port} ..."
 
         try {
-            List<Identity> nodes = connectToHydraSpace(server, port)
+            connectToHydraSpace(server, port)
+
+            List<Identity> nodes = listAllNodesInSpace(hydraCacheAdminClient)
 
             if (!nodes)
                 return false
 
-            def storageInfo = queryStorageInfo()
+            def storageInfo = queryStorageInfo(hydraCacheAdminClient)
 
             app.event(HYDRA_SPACE_CONNECTED_EVENT, [nodes, storageInfo])
-            
+
             log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
             return true
@@ -36,7 +38,12 @@ class HydraSpaceService {
         }
     }
 
-    private List<Identity> connectToHydraSpace(server, port) {
+    private List<Identity> listAllNodesInSpace(hydraCacheAdminClient) {
+        List<Identity> nodes = hydraCacheAdminClient.listNodes()
+        return nodes
+    }
+
+    private void connectToHydraSpace(server, port) {
         def serverAddress = Inet4Address.getByName(server)
 
         hydraCacheClient = hydraCacheClientFactory.createClient(
@@ -46,23 +53,27 @@ class HydraSpaceService {
         hydraCacheAdminClient = hydraCacheClientFactory.createAdminClient(
                 [new Identity(serverAddress, port)]
         )
-
-        def nodes = hydraCacheAdminClient.listNodes()
-
-        return nodes
     }
 
     def disConnect() {
         hydraCacheClient?.shutdown()
         hydraCacheAdminClient?.shutdown()
-        
+
         app.event(HYDRA_SPACE_DISCONNECTED_EVENT)
 
         log.debug "[${HYDRA_SPACE_DISCONNECTED_EVENT}] event sent"
     }
 
-    def queryStorageInfo(){
-        return hydraCacheAdminClient?.getStorageInfo()
+    def queryStorageInfo(adminClient) {
+        return adminClient?.getStorageInfo()
+    }
+
+    def queryServerDetails(serverIdentity) {
+        def adminClient = hydraCacheClientFactory.createAdminClient(
+                [serverIdentity]
+        )
+
+        return queryStorageInfo(adminClient)
     }
 
 }
