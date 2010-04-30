@@ -20,10 +20,18 @@ class HconsoleController {
             log.debug "Creating SpaceDashboard ..."
             
             createMVCGroup('SpaceDashboard',
-                    'spaceDashboard',
+                    'SpaceDashboard',
                     [tabGroup: view.tabGroup])
 
-            app.controllers.spaceDashboard.update(nodes, storageInfo)
+            app.controllers['SpaceDashboard'].update(nodes, storageInfo)
+        }
+    }
+
+    def onHydraSpaceDisConnected = {
+        log.debug "Event [HydraSpaceDisConnected] received ..."
+
+        doLater {
+            view.tabGroup.removeAll()
         }
     }
 

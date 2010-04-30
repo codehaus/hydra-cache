@@ -10,11 +10,6 @@ class NavigationPaneController {
         // this method is called after model and view are injected
     }
 
-    /*
-    def action = { evt = null ->
-    }
-    */
-
     def onHydraSpaceConnected = {nodes, storageInfo ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
@@ -31,6 +26,14 @@ class NavigationPaneController {
 
         doLater{
             createMVCGroup('NodeDetailPane', 'nodeDetailPane', [tabGroup:app.views['Hconsole'].tabGroup, storageInfo: info, server: nodeId])
+        }
+    }
+
+    def onHydraSpaceDisConnected = {
+        log.debug "Event [HydraSpaceDisConnected] received ..."
+
+        doLater {
+            model.updateServerList([])
         }
     }
 }
