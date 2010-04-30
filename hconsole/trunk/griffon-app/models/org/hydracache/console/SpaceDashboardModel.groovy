@@ -9,15 +9,17 @@ class SpaceDashboardModel {
     def storageInfo
 
     @Bindable int numberOfNodes
-    @Bindable String totalMemory
-    @Bindable String usedMemory
+    @Bindable long totalMemory
+    @Bindable long usedMemory
 
     def updateOverview() {
+        log.debug "Updating SpaceDashboardModel ..."
+
         if (serverNodes) {
             if (serverNodes instanceof Identity)
-                numberOfNodes = 1
+                setNumberOfNodes(1)
             else
-                numberOfNodes = serverNodes.size()
+                setNumberOfNodes(serverNodes.size())
         }
 
         if (storageInfo) {
@@ -25,11 +27,11 @@ class SpaceDashboardModel {
 
             long serverMemory = Long.parseLong(storageInfo.maxMemory)
             long totalPhysicalMem = serverMemory * numberOfNodes
-            totalMemory = FileUtils.byteCountToDisplaySize((long) (totalPhysicalMem / n))
+            setTotalMemory((long) (totalPhysicalMem / n))
 
             long serverHeapMemory = Long.parseLong(storageInfo.totalMemory)
             long serverFreeHeapMemory = Long.parseLong(storageInfo.freeMemory)
-            usedMemory =  FileUtils.byteCountToDisplaySize((long) ((serverHeapMemory - serverFreeHeapMemory) / n))
+            setUsedMemory((long) ((serverHeapMemory - serverFreeHeapMemory) / n))
         }
     }
 }

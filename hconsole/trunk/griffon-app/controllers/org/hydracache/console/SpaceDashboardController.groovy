@@ -7,12 +7,15 @@ class SpaceDashboardController {
     def hydraSpaceService
 
     void mvcGroupInit(Map args) {
-        model.serverNodes = args.nodes
+        log.debug "Initializing SpaceDashboard MVC ..."
+    }
 
-        model.storageInfo = args.storageInfo
+    def update(nodes, storageInfo) {
+        log.debug "Updating SpaceDashboard ..."
 
-        doLater {
-            model.updateOverview()
-        }
+        model.serverNodes = nodes
+        model.storageInfo = storageInfo
+
+        model.updateOverview()
     }
 }

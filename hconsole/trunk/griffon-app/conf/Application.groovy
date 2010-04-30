@@ -19,8 +19,8 @@ mvcGroups {
     // MVC Group for "org.hydracache.console.SpaceDashboard"
     'SpaceDashboard' {
         model = 'org.hydracache.console.SpaceDashboardModel'
-        controller = 'org.hydracache.console.SpaceDashboardController'
         view = 'org.hydracache.console.SpaceDashboardView'
+        controller = 'org.hydracache.console.SpaceDashboardController'
     }
 
     // MVC Group for "org.hydracache.console.AddressBar"

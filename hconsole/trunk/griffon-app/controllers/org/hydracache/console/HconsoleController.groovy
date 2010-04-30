@@ -18,9 +18,12 @@ class HconsoleController {
         
         doLater {
             log.debug "Creating SpaceDashboard ..."
+            
             createMVCGroup('SpaceDashboard',
                     'spaceDashboard',
-                    [tabGroup: view.tabGroup, nodes: nodes, storageInfo: storageInfo])
+                    [tabGroup: view.tabGroup])
+
+            app.controllers.spaceDashboard.update(nodes, storageInfo)
         }
     }
 
