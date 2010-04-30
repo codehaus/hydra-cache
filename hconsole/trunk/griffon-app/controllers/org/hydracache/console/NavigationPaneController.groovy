@@ -2,6 +2,7 @@ package org.hydracache.console
 
 class NavigationPaneController {
     // these will be injected by Griffon
+    HydraSpaceService hydraSpaceService
     def model
     def view
 
@@ -24,8 +25,12 @@ class NavigationPaneController {
     }
 
     def openNodeDetailPane = {evt = null ->
+        def nodeId = view.nodeList.getSelectedValue()
+
+        def info = hydraSpaceService.queryServerDetails(nodeId)
+
         doLater{
-            createMVCGroup('NodeDetailPane', 'nodeDetailPane')
+            createMVCGroup('NodeDetailPane', 'nodeDetailPane', [tabGroup:app.views['Hconsole'].tabGroup, storageInfo: info, server: nodeId])
         }
     }
 }

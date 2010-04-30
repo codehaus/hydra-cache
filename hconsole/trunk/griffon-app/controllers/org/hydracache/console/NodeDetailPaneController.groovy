@@ -7,6 +7,7 @@ class NodeDetailPaneController {
 
     void mvcGroupInit(Map args) {
         model.storageInfo = args.storageInfo
+        model.server = args.server
 
         doLater {
             model.updateDetails()
