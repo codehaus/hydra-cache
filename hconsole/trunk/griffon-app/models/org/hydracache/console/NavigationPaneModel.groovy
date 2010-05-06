@@ -7,7 +7,7 @@ import javax.swing.DefaultListModel
 
 class NavigationPaneModel {
 
-    ListModel serverListModel = new DefaultListModel()
+    DefaultListModel serverListModel = new DefaultListModel()
 
     def updateServerList(nodes) {
         serverListModel.removeAllElements()
@@ -15,6 +15,12 @@ class NavigationPaneModel {
         nodes.each{
             serverListModel.addElement(it)
         }
+    }
+
+    def listServers(){
+        def servers = serverListModel.toArray()
+
+        return Arrays.asList(servers)
     }
 
 }

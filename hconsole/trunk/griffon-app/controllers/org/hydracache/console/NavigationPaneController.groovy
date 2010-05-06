@@ -24,8 +24,16 @@ class NavigationPaneController {
 
         def info = hydraSpaceService.queryServerDetails(nodeId)
 
-        doLater{
-            createMVCGroup('NodeDetailPane', 'nodeDetailPane', [tabGroup:app.views['Hconsole'].tabGroup, storageInfo: info, server: nodeId])
+        def mvcId = "$nodeId"
+        def nodeDetailView = app.views[mvcId]
+        def tabbedPane = app.views['Hconsole'].tabGroup
+
+        if (nodeDetailView) {
+            tabbedPane.selectedComponent = nodeDetailView.tab
+        } else {
+            doLater {
+                createMVCGroup('NodeDetailPane', mvcId, [tabGroup: tabbedPane, storageInfo: info, server: nodeId])
+            }
         }
     }
 
@@ -33,6 +41,14 @@ class NavigationPaneController {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
         doLater {
+            def servers = model.listServers()
+
+            servers.each{nodeId->
+                log.debug "Removing view $nodeId ..."
+                def view = app.views.remove("$nodeId".toString())
+                log.debug "$view has been removed"
+            }
+
             model.updateServerList([])
         }
     }
