@@ -2,6 +2,7 @@ package org.hydracache.console
 
 import org.hydracache.client.HydraCacheAdminClient
 import org.hydracache.server.Identity
+import org.hydracache.client.HydraCacheClient
 
 class HydraSpaceServiceTests extends GriffonTestCase {
     HydraSpaceService service = new HydraSpaceService()
@@ -17,7 +18,7 @@ class HydraSpaceServiceTests extends GriffonTestCase {
     }
 
     void testSuccessfulConnection() {
-        def stubAdminClient = [listNodes: {[new Identity(80)]}, getStorageInfo:{[:]}] as HydraCacheAdminClient
+        def stubAdminClient = [listNodes: {[new Identity(80)]}, getStorageInfo: {[:]}] as HydraCacheAdminClient
 
         service.hydraCacheClientFactory = [createAdminClient: {stubAdminClient}, createClient: {stubAdminClient}]
 
@@ -46,7 +47,7 @@ class HydraSpaceServiceTests extends GriffonTestCase {
 
         service.hydraCacheClient = [shutdown: {shutdown = true}]
 
-        service.disConnect()
+        service.disconnect()
 
         assertTrue "Client should have been stoppped", shutdown
         assertTrue "Event ${HydraSpaceService.HYDRA_SPACE_DISCONNECTED_EVENT} should be sent", appEvents.containsKey(HydraSpaceService.HYDRA_SPACE_DISCONNECTED_EVENT)
@@ -60,11 +61,11 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         assertEquals "Result is incorrect", data, info
     }
 
-    void testQueryServerDetails(){
+    void testQueryServerDetails() {
         def shutdown = false
-        def adminClient = [getStorageInfo:{['maxMemory': '250 MB']}, shutdown:{shutdown=true}]
-        def clientFactory = [createAdminClient:{id->adminClient}]
-        
+        def adminClient = [getStorageInfo: {['maxMemory': '250 MB']}, shutdown: {shutdown = true}]
+        def clientFactory = [createAdminClient: {id -> adminClient}]
+
         service.hydraCacheClientFactory = clientFactory
 
         def info = service.queryServerDetails(new Identity(80))
@@ -73,10 +74,10 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         assertTrue 'Client should be shutdown once its done', shutdown
     }
 
-    void testQueryServerDetailsWithException(){
+    void testQueryServerDetailsWithException() {
         def shutdown = false
-        def adminClient = [getStorageInfo:{throw new RuntimeException()}, shutdown:{shutdown=true}]
-        def clientFactory = [createAdminClient:{id->adminClient}]
+        def adminClient = [getStorageInfo: {throw new RuntimeException()}, shutdown: {shutdown = true}]
+        def clientFactory = [createAdminClient: {id -> adminClient}]
 
         service.hydraCacheClientFactory = clientFactory
 
@@ -87,5 +88,17 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         }
 
         assertTrue 'Client should be shutdown once its done', shutdown
+    }
+
+    void testGet() {
+        def stubClient = [get: {ctx, key -> "result"}] as HydraCacheClient
+
+        service.hydraCacheClient = stubClient
+
+        assertEquals "Get result is incorrect", "result", service.get("context", "something")
+    }
+
+    void testGetWithNoClient(){
+        assertNull "Get result is incorrect", service.get("context", "something")        
     }
 }

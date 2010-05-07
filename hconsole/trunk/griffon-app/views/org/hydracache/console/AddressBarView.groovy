@@ -12,7 +12,7 @@ actions {
             closure: controller.connect)
     action(id: "disconnectAction",
             name: messageSource.getMessage('''addressBar.disconnectAction.caption'''),
-            closure: controller.disConnect)
+            closure: controller.disconnect)
 }
 
 panel(addressBar) {

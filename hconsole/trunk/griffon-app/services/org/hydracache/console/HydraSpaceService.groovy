@@ -55,7 +55,7 @@ class HydraSpaceService {
         )
     }
 
-    def disConnect() {
+    def disconnect() {
         hydraCacheClient?.shutdown()
         hydraCacheAdminClient?.shutdown()
 
@@ -78,6 +78,13 @@ class HydraSpaceService {
         } finally {
             adminClient.shutdown()
         }
+    }
+
+    def get(context, key) {
+        if (!hydraCacheClient)
+            return null
+
+        return hydraCacheClient.get(context, key)
     }
 
 }
