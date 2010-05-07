@@ -98,7 +98,22 @@ class HydraSpaceServiceTests extends GriffonTestCase {
         assertEquals "Get result is incorrect", "result", service.get("context", "something")
     }
 
-    void testGetWithNoClient(){
-        assertNull "Get result is incorrect", service.get("context", "something")        
+    void testGetWithNoClient() {
+        assertNull "Get result is incorrect", service.get("context", "something")
+    }
+
+    void testPut() {
+        def value
+        def stubClient = [get: {ctx, key -> value}, put: {ctx, key, v -> value = v}] as HydraCacheClient
+
+        service.hydraCacheClient = stubClient
+
+        service.put("context", "key", "something")
+
+        assertEquals "Value is not put correctly", "something", service.get("context", "key")
+    }
+
+    void testPutWithNoClient() {
+        service.put("context", "key", "something")
     }
 }

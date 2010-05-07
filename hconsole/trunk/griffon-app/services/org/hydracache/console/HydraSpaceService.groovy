@@ -87,4 +87,9 @@ class HydraSpaceService {
         return hydraCacheClient.get(context, key)
     }
 
+    def put(context, key, value) {
+        if (hydraCacheClient)
+            hydraCacheClient.put(context, key, value)
+    }
+
 }
