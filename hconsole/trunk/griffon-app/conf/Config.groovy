@@ -13,6 +13,7 @@ log4j {
         StackTrace='error,errors'
         org {
             codehaus.griffon.commons='info' // core / classloading
+            codehaus.hydracache='debug'
         }
     }
     additivity.StackTrace=false
