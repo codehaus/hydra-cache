@@ -1,6 +1,6 @@
 package org.hydracache.console
 
-import static javax.swing.JSplitPane.HORIZONTAL_SPLIT
+import static javax.swing.JSplitPane.*
 import java.awt.Dimension
 
 actions {
@@ -25,11 +25,19 @@ mainWindow = application(title: 'hconsole',
         }
     }
     borderLayout()
-    panel(id:'addressBar', constraints: NORTH)
-    splitPane(id: 'splitPane', resizeWeight: 0.45f, dividerLocation: 200,
+    panel(id: 'addressBar', constraints: NORTH)
+
+    splitPane(id: 'splitPane', resizeWeight: 0.75f,
             oneTouchExpandable: true, constraints: CENTER,
-            orientation: HORIZONTAL_SPLIT) {
-         scrollPane(id:'navigationPane')
-         tabbedPane(id: "tabGroup")
+            orientation: VERTICAL_SPLIT) {
+        splitPane(id: 'splitPaneInner', resizeWeight: 0.45f, dividerLocation: 200,
+                oneTouchExpandable: true,
+                orientation: HORIZONTAL_SPLIT) {
+            scrollPane(id: 'navigationPane')
+            tabbedPane(id: "tabGroup")
+        }
+        panel(id: 'playgroundPane')
     }
+
+
 }

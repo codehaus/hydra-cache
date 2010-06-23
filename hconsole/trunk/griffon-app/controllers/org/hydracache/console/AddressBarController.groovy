@@ -33,7 +33,7 @@ class AddressBarController {
         }
     }
 
-    def disConnect = {evt = null ->
+    def disconnect = {evt = null ->
         doOutside {
             hydraSpaceService.disconnect()
         }

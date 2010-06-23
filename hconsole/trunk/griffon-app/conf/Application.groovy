@@ -9,6 +9,13 @@ application {
     //frameClass = 'javax.swing.JFrame'
 }
 mvcGroups {
+    // MVC Group for "org.hydracache.console.PlayGround"
+    'PlayGround' {
+        model = 'org.hydracache.console.PlayGroundModel'
+        controller = 'org.hydracache.console.PlayGroundController'
+        view = 'org.hydracache.console.PlayGroundView'
+    }
+
     // MVC Group for "org.hydracache.console.NodeDetailPane"
     'NodeDetailPane' {
         model = 'org.hydracache.console.NodeDetailPaneModel'

@@ -6,6 +6,7 @@ tabbedPane(tabGroup, selectedIndex: tabGroup.tabCount) {
     panel(id: "tab", title: "$model.server") {
         borderLayout()
         panel(constraints: CENTER) {
+            gridLayout(columns: 2, rows: 4)
             label(text:messageSource.getMessage('nodePane.maxMemory.label'))
             label(text: bind{FileUtils.byteCountToDisplaySize(model.maxMemory)})
             label(text:messageSource.getMessage('nodePane.heapMemory.label'))
