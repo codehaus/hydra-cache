@@ -6,10 +6,12 @@ class PlayGroundModel {
     @Bindable String storageContextToPut
     @Bindable String storageKeyToPut
     @Bindable String storageValueToPut
+    @Bindable String sourceFile
 
     @Bindable String storageContextToGet
     @Bindable String storageKeyToGet
     @Bindable String retrievedStorageValue
+    @Bindable String targetFile
 
     static def constraints = {
         storageContextToPut(nullable: false, blank: true, maxSize: 32)

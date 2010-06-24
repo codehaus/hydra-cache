@@ -27,7 +27,7 @@ mainWindow = application(title: 'hconsole',
     borderLayout()
     panel(id: 'addressBar', constraints: NORTH)
 
-    splitPane(id: 'splitPane', resizeWeight: 0.75f,
+    splitPane(id: 'splitPane', resizeWeight: 0.70f,
             oneTouchExpandable: true, constraints: CENTER,
             orientation: VERTICAL_SPLIT) {
         splitPane(id: 'splitPaneInner', resizeWeight: 0.45f, dividerLocation: 200,
