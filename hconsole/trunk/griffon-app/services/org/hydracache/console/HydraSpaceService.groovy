@@ -87,6 +87,7 @@ class HydraSpaceService {
     def disconnect() {
         hydraCacheClient?.shutdown()
         hydraCacheAdminClient?.shutdown()
+        spaceUpdater?.cancel()
 
         app.event(HYDRA_SPACE_DISCONNECTED_EVENT)
 
