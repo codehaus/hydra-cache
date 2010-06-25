@@ -1,5 +1,10 @@
 package org.hydracache.console
+
+import org.hydracache.console.util.ClosureTimerTask
+
 class HconsoleController {
+    static final String SPACE_DASHBOARD = "SpaceDashboard"
+
     def model
     def view
     def hydraSpaceService
@@ -16,16 +21,18 @@ class HconsoleController {
 
     def onHydraSpaceConnected = {nodes, storageInfo ->
         log.debug "Event [HydraSpaceConnected] received ..."
-        
+
         doLater {
             log.debug "Creating SpaceDashboard ..."
-            
-            createMVCGroup('SpaceDashboard',
-                    'SpaceDashboard',
-                    [tabGroup: view.tabGroup])
 
-            app.controllers['SpaceDashboard'].update(nodes, storageInfo)
+            createMVCGroup(SPACE_DASHBOARD,
+                    SPACE_DASHBOARD,
+                    ['tabGroup': view.tabGroup])
+
+            app.controllers[SPACE_DASHBOARD].update(nodes, storageInfo)
         }
+
+        log.debug "Event [HydraSpaceConnected] processd"
     }
 
     def onHydraSpaceDisConnected = {
@@ -34,6 +41,8 @@ class HconsoleController {
         doLater {
             view.tabGroup.removeAll()
         }
+
+        log.debug "Event [HydraSpaceDisConnected] processd"
     }
 
 }

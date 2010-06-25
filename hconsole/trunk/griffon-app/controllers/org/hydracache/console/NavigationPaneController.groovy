@@ -14,9 +14,22 @@ class NavigationPaneController {
         log.debug "Event [HydraSpaceConnected] received ..."
 
         doLater {
+            log.debug "Setting up navigation pane"
+            model.updateServerList(nodes)
+        }
+
+        log.debug "Event [HydraSpaceConnected] processed"
+    }
+
+    def onHydraSpaceUpdated = {nodes, storageInfo ->
+        log.debug "Event [HydraSpaceUpdated] received ..."
+
+        doLater {
             log.debug "Refreshing navigation pane"
             model.updateServerList(nodes)
         }
+
+        log.debug "Event [HydraSpaceUpdated] processed"
     }
 
     def openNodeDetailPane = {evt = null ->
@@ -51,5 +64,7 @@ class NavigationPaneController {
 
             model.updateServerList([])
         }
+
+        log.debug "Event [HydraSpaceDisConnected] processed"
     }
 }

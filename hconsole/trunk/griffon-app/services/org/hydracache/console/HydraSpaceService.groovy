@@ -2,14 +2,22 @@ package org.hydracache.console
 
 import org.hydracache.client.HydraCacheClientFactory
 import org.hydracache.server.Identity
+import org.hydracache.console.util.ClosureTimerTask
 
 class HydraSpaceService {
     public static final String HYDRA_SPACE_CONNECTED_EVENT = "HydraSpaceConnected"
     public static final String HYDRA_SPACE_DISCONNECTED_EVENT = "HydraSpaceDisConnected"
+    public static final String HYDRA_SPACE_UPDATED_EVENT = "HydraSpaceUpdated"
+
+
+    static final long UPDATER_INIT_DELAY = 5000
+    static final long UPDATER_INTERVAL = 10000
 
     def hydraCacheClientFactory = new HydraCacheClientFactory()
     def hydraCacheAdminClient
     def hydraCacheClient
+
+    def spaceUpdater = new Timer()
 
     def connect(server, port) {
         if (!server)
@@ -31,6 +39,19 @@ class HydraSpaceService {
 
             log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
+            log.debug "Creating space updater timer"
+
+            spaceUpdater.schedule(new ClosureTimerTask(closure: {
+                log.debug "Updating space overview..."
+
+                def nds = listAllNodesInSpace()
+                def sinfo = queryStorageInfo()
+
+                app.event(HYDRA_SPACE_UPDATED_EVENT, [nds, sinfo])
+
+                log.debug "Space overview updated"
+            }), UPDATER_INIT_DELAY, UPDATER_INTERVAL)
+
             return true
         } catch (UnknownHostException ex) {
             log.debug("Unknown host", ex)
@@ -43,6 +64,10 @@ class HydraSpaceService {
         return nodes
     }
 
+    def listAllNodesInSpace() {
+        return listAllNodesInSpace(hydraCacheAdminClient)
+    }
+
     private void connectToHydraSpace(server, port) {
         def serverAddress = Inet4Address.getByName(server)
 
@@ -53,6 +78,10 @@ class HydraSpaceService {
         hydraCacheAdminClient = hydraCacheClientFactory.createAdminClient(
                 [new Identity(serverAddress, port)]
         )
+    }
+
+    def queryStorageInfo() {
+        return queryStorageInfo(hydraCacheAdminClient)
     }
 
     def disconnect() {

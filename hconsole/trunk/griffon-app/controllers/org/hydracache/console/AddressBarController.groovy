@@ -19,7 +19,7 @@ class AddressBarController {
             view.errorMessagePanel.errors = null
             model.connectionState = CONNECTING
 
-            doOutside {
+            doLater {
                 try {
                     hydraSpaceService.connect(model.server, model.port)
                 } catch (Exception ex) {

@@ -11,11 +11,21 @@ class SpaceDashboardController {
     }
 
     def update(nodes, storageInfo) {
-        log.debug "Updating SpaceDashboard ..."
+        doLater {
+            log.debug "Updating SpaceDashboard ..."
 
-        model.serverNodes = nodes
-        model.storageInfo = storageInfo
+            model.serverNodes = nodes
+            model.storageInfo = storageInfo
 
-        model.updateOverview()
+            model.updateOverview()
+        }
+    }
+
+    def onHydraSpaceUpdated = { nodes, storageInfo ->
+        log.debug "Event [HydraSpaceUpdated] received ..."
+
+        update(nodes, storageInfo)
+
+        log.debug "Event [HydraSpaceUpdated] processd"
     }
 }
