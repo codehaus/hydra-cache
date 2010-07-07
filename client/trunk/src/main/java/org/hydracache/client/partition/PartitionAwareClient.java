@@ -57,7 +57,7 @@ import org.json.JSONObject;
  * Manages a partition of nodes and uses an implementation of HydraCacheClient
  * to execute requests against the distributed cache.
  *
- * @author Tan Quach
+ * @author Tan Quach, Nick Zhu
  * @since 1.0
  */
 public class PartitionAwareClient implements HydraCacheClient,
@@ -111,11 +111,12 @@ public class PartitionAwareClient implements HydraCacheClient,
         protocolDecoder = new DefaultProtocolDecoder(
                 createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
 
-        this.poller = poller;
-
-        poller.start();
 
         running.set(true);
+
+        // TODO: Review this threading model, a separate poller per instance might not be ideal        
+        this.poller = poller;
+        poller.start();
     }
 
     private DataMessageXmlMarshaller createXmlDataMsgMarshaller() {
@@ -365,8 +366,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         return messenger.sendMessage(identity, nodePartition, requestMessage);
     }
 
-    // FIXME: implement weak map to avoid memory leak
-
+    // FIXME: Storage context is not being recorded in this impl
     private void updateVersion(String key, DataMessage dataMessage) {
         versionMap.put(key, dataMessage.getVersion());
     }
