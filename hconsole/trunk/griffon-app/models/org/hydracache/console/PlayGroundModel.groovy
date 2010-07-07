@@ -3,23 +3,40 @@ package org.hydracache.console
 import groovy.beans.Bindable
 
 class PlayGroundModel {
-    @Bindable String storageContextToPut
-    @Bindable String storageKeyToPut
-    @Bindable String storageValueToPut
-    @Bindable String sourceFile
+    @Bindable String storageContextToPutTxt
+    @Bindable String storageKeyToPutTxt
+    @Bindable String txtToPut
 
-    @Bindable String storageContextToGet
-    @Bindable String storageKeyToGet
-    @Bindable String retrievedStorageValue
-    @Bindable String targetFile
+    @Bindable String storageContextToGetTxt
+    @Bindable String storageKeyToGetTxt
+    @Bindable String retrievedTxt
+
+
+    @Bindable String storageContextToPutBin
+    @Bindable String storageKeyToPutBin
+    @Bindable String fileToPut
+
+
+    @Bindable String storageContextToGetBin
+    @Bindable String storageKeyToGetBin
+    @Bindable String fileToWrite
 
     static def constraints = {
-        storageContextToPut(nullable: false, blank: true, maxSize: 32)
-        storageKeyToPut(blank: false, maxSize: 64)
-        storageValueToPut(blank: false, maxSize: 256)
+        storageContextToPutTxt(nullable: false, blank: true, maxSize: 32)
+        storageKeyToPutTxt(blank: false, maxSize: 64)
+        txtToPut(blank: false, maxSize: 256)
 
-        storageContextToGet(nullable: false, blank: true, maxSize: 32)
-        storageKeyToGet(blank: false, maxSize: 64)
-        retrievedStorageValue(maxSize: 256)            
+        storageContextToGetTxt(nullable: false, blank: true, maxSize: 32)
+        storageKeyToGetTxt(blank: false, maxSize: 64)
+        retrievedTxt(maxSize: 256)
+
+
+        storageContextToPutBin(nullable: false, blank: true, maxSize: 32)
+        storageKeyToPutBin(blank: false, maxSize: 64)
+        fileToPut(blank: false)
+
+        storageContextToGetBin(nullable: false, blank: true, maxSize: 32)
+        storageKeyToGetBin(blank: false, maxSize: 64)
+        fileToWrite(blank: false)
     }
 }

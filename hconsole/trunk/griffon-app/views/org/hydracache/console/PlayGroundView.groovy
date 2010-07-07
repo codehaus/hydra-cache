@@ -54,18 +54,18 @@ panel(playgroundPane, border: titledBorder(messageSource.getMessage('playGround.
 
                 label(messageSource.getMessage('playGround.storageContext.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageContextToPut'),
+                textField(text: bind(target: model, 'storageContextToPutTxt'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageKey.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageKeyToPut'),
+                textField(text: bind(target: model, 'storageKeyToPutTxt'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageValue.label') + "*",
                         constraints: labelGbc)
                 scrollPane(constraints: textAreaGbc) {
-                    textArea(text: bind(target: model, 'storageValueToPut'))
+                    textArea(text: bind(target: model, 'txtToPut'))
                 }
 
                 button(putAction,
@@ -77,18 +77,18 @@ panel(playgroundPane, border: titledBorder(messageSource.getMessage('playGround.
 
                 label(messageSource.getMessage('playGround.storageContext.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageContextToGet'),
+                textField(text: bind(target: model, 'storageContextToGetTxt'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageKey.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageKeyToGet'),
+                textField(text: bind(target: model, 'storageKeyToGetTxt'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageValue.label'),
                         constraints: labelGbc)
                 scrollPane(constraints: textAreaGbc) {
-                    textArea(text: bind(source: model, 'retrievedStorageValue'), editable: false)
+                    textArea(text: bind(source: model, 'retrievedTxt'), editable: false)
                 }
 
                 button(getAction,
@@ -104,19 +104,19 @@ panel(playgroundPane, border: titledBorder(messageSource.getMessage('playGround.
 
                 label(messageSource.getMessage('playGround.storageContext.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageContextToPut'),
+                textField(text: bind(target: model, 'storageContextToPutBin'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageKey.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageKeyToPut'),
+                textField(text: bind(target: model, 'storageKeyToPutBin'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.fileToPut.label') + "*",
                         constraints: labelGbc)
                 panel(constraints: inputGbc) {
                     gridBagLayout()
-                    textField(text: bind(source: model, 'sourceFile'),
+                    textField(text: bind(source: model, 'fileToPut'),
                             constraints: fileChooserFieldGbc)
                     button(selectSourceFileAction,
                             constraints: fileChooserBtnGbc)
@@ -131,19 +131,19 @@ panel(playgroundPane, border: titledBorder(messageSource.getMessage('playGround.
 
                 label(messageSource.getMessage('playGround.storageContext.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageContextToGet'),
+                textField(text: bind(target: model, 'storageContextToGetBin'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.storageKey.label') + "*",
                         constraints: labelGbc)
-                textField(text: bind(target: model, 'storageKeyToGet'),
+                textField(text: bind(target: model, 'storageKeyToGetBin'),
                         constraints: inputGbc)
 
                 label(messageSource.getMessage('playGround.retrievedFile.label') + "*",
                         constraints: labelGbc)
                 panel(constraints: inputGbc) {
                     gridBagLayout()
-                    textField(text: bind(source: model, 'targetFile'),
+                    textField(text: bind(source: model, 'fileToWrite'),
                             constraints: fileChooserFieldGbc)
                     button(selectTargetFileAction,
                             constraints: fileChooserBtnGbc)

@@ -16,27 +16,27 @@ class PlayGroundController {
     }
 
     def put = { evt = null ->
-        if (model.validate(['storageContextToPut', 'storageKeyToPut', 'storageValueToPut'])) {
-            hydraSpaceService.put(model.storageContextToPut, model.storageKeyToPut, model.storageValueToPut)
+        if (model.validate(['storageContextToPutTxt', 'storageKeyToPutTxt', 'txtToPut'])) {
+            hydraSpaceService.put(model.storageContextToPutTxt, model.storageKeyToPutTxt, model.txtToPut)
         }
     }
 
     def get = { evt = null ->
-        if (model.validate(['storageContextToGet', 'storageKeyToGet'])) {
-            model.retrievedStorageValue = hydraSpaceService.get(model.storageContextToGet, model.storageKeyToGet)
+        if (model.validate(['storageContextToGetTxt', 'storageKeyToGetTxt'])) {
+            model.retrievedTxt = hydraSpaceService.get(model.storageContextToGetTxt, model.storageKeyToGetTxt)
         }
     }
 
     def putFile = { evt = null ->
-        if (model.validate(['storageContextToPut', 'storageKeyToPut', 'sourceFile'])) {
-            hydraSpaceService.put(model.storageContextToPut, model.storageKeyToPut, new File(model.sourceFile).bytes)
+        if (model.validate(['storageContextToPutBin', 'storageKeyToPutBin', 'fileToPut'])) {
+            hydraSpaceService.put(model.storageContextToPutBin, model.storageKeyToPutBin, new File(model.fileToPut).bytes)
         }
     }
 
     def getFile = { evt = null ->
-        if (model.validate(['storageContextToGet', 'storageKeyToGet', 'targetFile'])) {
-            def bytes = hydraSpaceService.get(model.storageContextToGet, model.storageKeyToGet)
-            new File(model.targetFile) << bytes 
+        if (model.validate(['storageContextToGetBin', 'storageKeyToGetBin', 'fileToWrite'])) {
+            def bytes = hydraSpaceService.get(model.storageContextToGetBin, model.storageKeyToGetBin)
+            new File(model.fileToWrite) << bytes
         }
     }
 
@@ -44,8 +44,8 @@ class PlayGroundController {
         int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            model.sourceFile = fileChooser.selectedFile?.absolutePath
-            log.debug "Selected source file: ${model.sourceFile}"
+            model.fileToPut = fileChooser.selectedFile?.absolutePath
+            log.debug "Selected source file: ${model.fileToPut}"
         }
     }
 
@@ -53,8 +53,8 @@ class PlayGroundController {
         int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            model.targetFile = fileChooser.selectedFile?.absolutePath
-            log.debug "Selected target file: ${model.targetFile}"
+            model.fileToWrite = fileChooser.selectedFile?.absolutePath
+            log.debug "Selected target file: ${model.fileToWrite}"
         }
     }
 }
