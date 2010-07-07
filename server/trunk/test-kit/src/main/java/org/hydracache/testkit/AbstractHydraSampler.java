@@ -9,6 +9,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.hydracache.client.HydraCacheClient;
+import org.hydracache.client.HydraCacheClientFactory;
 import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.server.Identity;
 import org.json.JSONArray;
@@ -26,7 +28,7 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
 
     protected static final String LOCALHOST = "localhost";
 
-    protected PartitionAwareClient client;
+    protected HydraCacheClient client;
 
     private String seedServerListParam;
 
@@ -75,8 +77,8 @@ public abstract class AbstractHydraSampler extends AbstractJavaSamplerClient {
         }
     }
 
-    protected PartitionAwareClient createHydraClient() {
-        return new PartitionAwareClient(seedServerIds);
+    protected HydraCacheClient createHydraClient() {
+        return new HydraCacheClientFactory().createClient(seedServerIds);
     }
 
     @Override

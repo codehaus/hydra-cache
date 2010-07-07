@@ -24,7 +24,8 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.partition.PartitionAwareClient;
+import org.hydracache.client.HydraCacheClient;
+import org.hydracache.client.HydraCacheClientFactory;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.hydracache.server.data.versioning.VersionConflictException;
 import org.junit.Test;
@@ -70,13 +71,13 @@ public class MultiThreadedPartitionAwareClientIntegrationTest extends
     private final class TesterThread extends Thread {
         private final CountDownLatch doneLatch;
         private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
-        private PartitionAwareClient client;
+        private HydraCacheClient client;
 
         private TesterThread(CountDownLatch doneLatch) throws Exception {
             this.doneLatch = doneLatch;
 
             versionFactory.setIdentityMarshaller(new IdentityMarshaller());
-            client = new PartitionAwareClient(Arrays.asList(new Identity(
+            client = new HydraCacheClientFactory().createClient(Arrays.asList(new Identity(
                     InetAddress.getByName(SERVER_NAME), 8080),
                     new Identity(InetAddress.getByName(SERVER_NAME),
                             8081), new Identity(InetAddress

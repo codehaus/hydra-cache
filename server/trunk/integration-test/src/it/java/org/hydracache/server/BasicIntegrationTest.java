@@ -16,6 +16,7 @@
 package org.hydracache.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -24,11 +25,11 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.partition.PartitionAwareClient;
+import org.hydracache.client.HydraCacheClient;
+import org.hydracache.client.HydraCacheClientFactory;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * @author nzhu
@@ -47,7 +48,7 @@ public class BasicIntegrationTest {
 
     private Identity serverId;
 
-    private PartitionAwareClient client;
+    private HydraCacheClient client;
 
     @Before
     public void setup() throws Exception {
@@ -55,7 +56,7 @@ public class BasicIntegrationTest {
 
         serverId = new Identity(InetAddress.getByName(SERVER_NAME), PORT_NUMBER);
 
-        client = new PartitionAwareClient(Arrays.asList(serverId));
+        client = new HydraCacheClientFactory().createClient(Arrays.asList(serverId));
     }
 
     @Test

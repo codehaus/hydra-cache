@@ -28,7 +28,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.hydracache.client.partition.PartitionAwareClient;
+import org.hydracache.client.HydraCacheClient;
+import org.hydracache.client.HydraCacheClientFactory;
 import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +47,14 @@ public class PartitionAwareClientIntegrationTest extends
 
     private IncrementVersionFactory versionFactory = new IncrementVersionFactory();
 
-    private PartitionAwareClient client;
+    private HydraCacheClient client;
 
     private Map<String, String> localDataStorage;
 
     @Before
     public void setup() throws Exception {
         versionFactory.setIdentityMarshaller(new IdentityMarshaller());
-        client = new PartitionAwareClient(Arrays.asList(
+        client = new HydraCacheClientFactory().createClient(Arrays.asList(
                 new Identity(InetAddress.getByName(SERVER_NAME), 8080),
                 new Identity(InetAddress.getByName(SERVER_NAME), 8081),
                 new Identity(InetAddress.getByName(SERVER_NAME), 8082),
