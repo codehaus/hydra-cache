@@ -11,7 +11,6 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.hydracache.client.HydraCacheClient;
 import org.hydracache.client.HydraCacheClientFactory;
-import org.hydracache.client.partition.PartitionAwareClient;
 import org.hydracache.server.Identity;
 import org.json.JSONArray;
 import org.json.JSONObject;

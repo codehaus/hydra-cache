@@ -3,7 +3,6 @@ package org.hydracache.server.httpd.handler;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hydracache.server.data.storage.Data;
 import org.hydracache.server.data.storage.DataBank;
