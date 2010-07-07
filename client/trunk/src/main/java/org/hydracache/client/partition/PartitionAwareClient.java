@@ -314,7 +314,7 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         JSONObject infoJsonObj = new JSONObject(infoString);
 
-        for (Iterator it = infoJsonObj.keys(); it.hasNext();) {
+        for (Iterator<?> it = infoJsonObj.keys(); it.hasNext();) {
             String key = it.next().toString();
             infoMap.put(key, infoJsonObj.getString(key));
         }
