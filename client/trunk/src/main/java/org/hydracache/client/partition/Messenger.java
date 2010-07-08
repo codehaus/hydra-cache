@@ -24,6 +24,7 @@ import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
+import org.hydracache.server.data.versioning.VersionConflictException;
 
 public class Messenger {
     private static Logger log = Logger.getLogger(Messenger.class);
@@ -32,7 +33,7 @@ public class Messenger {
 
     public Messenger(Transport transport) {
         this.transport = transport;
-        
+
         registerDefaultHandlers();
     }
 
@@ -55,13 +56,15 @@ public class Messenger {
             ResponseMessage responseMsg = send(nodePartition, requestMessage,
                     currentTarget);
             return responseMsg;
+        } catch (VersionConflictException vce) {
+            throw vce;
         } catch (Exception ex) {
-            if(retry){
+            if (retry) {
                 currentTarget = nodePartition.next(target);
-                ResponseMessage responseMsg = send(nodePartition, requestMessage,
-                        currentTarget);
+                ResponseMessage responseMsg = send(nodePartition,
+                        requestMessage, currentTarget);
                 return responseMsg;
-            }else{
+            } else {
                 throw ex;
             }
         }
@@ -75,6 +78,8 @@ public class Messenger {
                     .getHostName(), currentTarget.getPort());
 
             return transport.sendRequest(requestMessage);
+        } catch (VersionConflictException vce) {
+            throw vce;
         } catch (Exception ex) {
             log.warn("Failed to send message to node[" + currentTarget + "]");
             deactivateNode(nodePartition, currentTarget);

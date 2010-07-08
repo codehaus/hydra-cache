@@ -17,6 +17,7 @@ package org.hydracache.client.partition;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -33,6 +34,7 @@ import org.hydracache.client.transport.Transport;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partitioning.SubstancePartition;
 import org.hydracache.server.Identity;
+import org.hydracache.server.data.versioning.VersionConflictException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -114,7 +116,8 @@ public class MessengerTest {
         ResponseMessage responseMsg = messenger.sendMessage(targetNode,
                 nodePartition, message);
 
-        assertEquals("Response message is incorrect", expectedResponseMsg, responseMsg);
+        assertEquals("Response message is incorrect", expectedResponseMsg,
+                responseMsg);
 
         assertFalse("Target node should have removed from the partition",
                 nodePartition.contains(targetNode));
@@ -128,6 +131,30 @@ public class MessengerTest {
     private void stubUnsuccessfulConnect() {
         when(transport.establishConnection(anyString(), eq(testPort)))
                 .thenThrow(new RuntimeException());
+    }
+
+    @Test(expected = VersionConflictException.class)
+    public void ensureVersionConflictDoesNotTriggerRetry() throws Exception {
+        Identity secondNode = new Identity(8008);
+
+        stubVersionConflict();
+
+        SubstancePartition nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), Arrays.asList(targetNode,
+                        secondNode));
+
+        try {
+            messenger.sendMessage(targetNode, nodePartition, message);
+        } finally {
+            verify(transport, times(1)).cleanUpConnection();    
+            assertTrue("Node should not been removed", nodePartition.contains(targetNode));
+        }
+    }
+
+    private void stubVersionConflict() throws Exception {
+        when(transport.sendRequest(message)).thenThrow(
+                new VersionConflictException());
+
     }
 
 }
