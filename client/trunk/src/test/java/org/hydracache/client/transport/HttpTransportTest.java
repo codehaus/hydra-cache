@@ -15,12 +15,19 @@
  */
 package org.hydracache.client.transport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.hydracache.client.InternalHydraException;
 import org.junit.Test;
 
 /**
@@ -28,6 +35,26 @@ import org.junit.Test;
  * 
  */
 public class HttpTransportTest {
+    
+    @Test(expected=InternalHydraException.class)
+    public void ensureInternalErrorThrowsException() throws Exception {
+        HttpTransport transport = new HttpTransport();
+        
+        transport.establishConnection("localhost", 90);
+        
+        HttpClient mockHttpClient = mock(HttpClient.class);
+        
+        when(mockHttpClient.executeMethod(any(HttpMethod.class))).thenReturn(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        
+        transport.httpClient = mockHttpClient; 
+        
+        RequestMessage requestMessage = new RequestMessage();
+        
+        requestMessage.setMethod("delete");
+        requestMessage.setPath("testPath");
+        
+        transport.sendRequest(requestMessage);
+    }
 
     @Test
     public void testDeleteRequestPathGeneration() {

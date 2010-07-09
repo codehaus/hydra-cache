@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import org.hydracache.client.InternalHydraException;
 import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
@@ -146,8 +147,9 @@ public class MessengerTest {
         try {
             messenger.sendMessage(targetNode, nodePartition, message);
         } finally {
-            verify(transport, times(1)).cleanUpConnection();    
-            assertTrue("Node should not been removed", nodePartition.contains(targetNode));
+            verify(transport, times(1)).cleanUpConnection();
+            assertTrue("Node should not been removed",
+                    nodePartition.contains(targetNode));
         }
     }
 
@@ -157,4 +159,29 @@ public class MessengerTest {
 
     }
 
+    @Test(expected = InternalHydraException.class)
+    public void ensureInternalErrorDoesNotRemoveNodeButRetry() throws Exception {
+        Identity secondNode = new Identity(8008);
+
+        stubInternalError();
+
+        SubstancePartition nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), Arrays.asList(targetNode,
+                        secondNode));
+
+        try {
+            messenger.sendMessage(targetNode, nodePartition, message);
+        } finally {
+            verify(transport, times(2)).cleanUpConnection();
+            assertTrue("Node should not been removed",
+                    nodePartition.contains(targetNode));
+        }
+    }
+
+    private void stubInternalError() throws Exception {
+        when(transport.sendRequest(message)).thenThrow(
+                new InternalHydraException());
+
+    }
+    
 }

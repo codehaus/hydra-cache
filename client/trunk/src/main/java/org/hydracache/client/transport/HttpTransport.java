@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.lang.StringUtils;
+import org.hydracache.client.InternalHydraException;
 import org.hydracache.io.Buffer;
 
 /**
@@ -41,7 +42,7 @@ import org.hydracache.io.Buffer;
  * @since 1.0
  */
 public class HttpTransport implements Transport {
-    private HttpClient httpClient;
+    HttpClient httpClient;
 
     private final Map<Integer, ResponseMessageHandler> handlers = new HashMap<Integer, ResponseMessageHandler>();
 
@@ -72,18 +73,23 @@ public class HttpTransport implements Transport {
         if (httpClient == null)
             throw new IllegalStateException("Establish connection first.");
 
-        HttpMethod getMethod = createHttpMethod(requestMessage);
+        HttpMethod httpMethod = createHttpMethod(requestMessage);
+        
         try {
-            int responseCode = httpClient.executeMethod(getMethod);
-            if (responseCode == HttpStatus.SC_NOT_FOUND)
+            int responseCode = httpClient.executeMethod(httpMethod);
+
+            if (responseCode == HttpStatus.SC_NOT_FOUND) {
                 return null;
+            } else if (responseCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                throw new InternalHydraException(httpMethod.getResponseBodyAsString());
+            } else {
+                ResponseMessageHandler handler = handlers.get(responseCode);
 
-            ResponseMessageHandler handler = handlers.get(responseCode);
-
-            return (handler == null ? null : handler.accept(responseCode,
-                    getMethod.getResponseBody()));
+                return (handler == null ? null : handler.accept(responseCode,
+                        httpMethod.getResponseBody()));
+            }
         } finally {
-            getMethod.releaseConnection();
+            httpMethod.releaseConnection();
         }
     }
 
@@ -91,10 +97,15 @@ public class HttpTransport implements Transport {
         String action = requestMessage.getMethod();
 
         HttpMethod method = null;
-        String hostURL = httpClient.getHostConfiguration().getHostURL();
-        String uri = hostURL;
+
+        String uri = "";
+
+        if (httpClient.getHostConfiguration() != null)
+            uri = httpClient.getHostConfiguration().getHostURL();
+
         if (StringUtils.isNotBlank(requestMessage.getContext()))
             uri += "/" + requestMessage.getContext();
+
         uri += "/" + requestMessage.getPath();
 
         if ("put".equalsIgnoreCase(action)) {

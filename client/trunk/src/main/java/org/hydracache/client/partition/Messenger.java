@@ -17,6 +17,7 @@ package org.hydracache.client.partition;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.log4j.Logger;
+import org.hydracache.client.InternalHydraException;
 import org.hydracache.client.transport.ConflictStatusHandler;
 import org.hydracache.client.transport.DefaultResponseMessageHandler;
 import org.hydracache.client.transport.RequestMessage;
@@ -80,6 +81,8 @@ public class Messenger {
             return transport.sendRequest(requestMessage);
         } catch (VersionConflictException vce) {
             throw vce;
+        } catch (InternalHydraException ihe) {
+            throw ihe;
         } catch (Exception ex) {
             log.warn("Failed to send message to node[" + currentTarget + "]");
             deactivateNode(nodePartition, currentTarget);
