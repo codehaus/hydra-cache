@@ -18,10 +18,7 @@ package org.hydracache.data.partitioning;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -29,7 +26,11 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partition.ConsistentHashable;
 import org.hydracache.data.partition.ConsistentHashableString;
+import org.hydracache.server.Identity;
 import org.junit.Assert;
+
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +51,17 @@ public class ConsistentHashNodePartitionTest {
     @Before
     public void setUp() {
         hashFunction = new KetamaBasedHashFunction();
+    }
+
+    @Test
+    public void ensureServerListRetrieval() {
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, Arrays.asList(A, B, C));
+
+        Collection<ServerNode> servers = circle.getServers();
+
+        assertEquals("Number of server is incorrect", 3, servers.size());
+        assertTrue("Server list should contain all servers", servers.containsAll(Arrays.asList(A, B, C)));
     }
 
     @Test

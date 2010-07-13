@@ -133,7 +133,7 @@ public class PartitionAwareClientTest {
     }
 
     private void assertRequestMsg(String method, String context, String key,
-                                  ArgumentCaptor<RequestMessage> reqMsgCaptor) {
+            ArgumentCaptor<RequestMessage> reqMsgCaptor) {
         assertEquals("Method is incorrect", method, reqMsgCaptor.getValue()
                 .getMethod());
         assertEquals("Context is incorrect", context, reqMsgCaptor.getValue()
@@ -168,8 +168,8 @@ public class PartitionAwareClientTest {
         when(mockTransport.sendRequest(any(RequestMessage.class))).thenThrow(
                 new RuntimeException());
 
-        PartitionAwareClient client = new PartitionAwareClient(Arrays
-                .asList(node), mockTransport, poller);
+        PartitionAwareClient client = new PartitionAwareClient(
+                Arrays.asList(node), mockTransport, poller);
 
         NodePartition<Identity> partition = client.getNodePartition();
 
@@ -211,13 +211,36 @@ public class PartitionAwareClientTest {
         when(
                 messenger.sendMessage(any(Identity.class),
                         any(SubstancePartition.class),
-                        any(RequestMessage.class))).thenReturn(
-                responseMsg);
+                        any(RequestMessage.class))).thenReturn(responseMsg);
 
         client.setMessager(messenger);
 
         Map<String, String> info = client.getStorageInfo();
 
-        assertEquals("Test field value is incorrect", "100", info.get("testField"));
+        assertEquals("Test field value is incorrect", "100",
+                info.get("testField"));
+    }
+
+    @Test
+    public void ensureNodeIsRemovedIfGetQueryFails() throws Exception {
+        Identity node = new Identity(8080);
+
+        when(mockTransport.sendRequest(any(RequestMessage.class))).thenThrow(
+                new RuntimeException());
+
+        PartitionAwareClient client = new PartitionAwareClient(
+                Arrays.asList(node), mockTransport, poller);
+
+        NodePartition<Identity> partition = client.getNodePartition();
+
+        assertTrue("Partition should contain the ID", partition.contains(node));
+
+        try {
+            client.put("key", "value");
+            fail("Should have thrown exception");
+        } catch (Exception e) {
+            assertFalse("Partition should not contain the ID any more",
+                    partition.contains(node));
+        }
     }
 }

@@ -298,10 +298,15 @@ public class PartitionAwareClient implements HydraCacheClient,
         return responseMessage;
     }
 
-    private Identity pickRandomServerFromRegistry() {
+    Identity pickRandomServerFromRegistry() {
+        log.debug("Picking random server in: " + seedServerIds);
+
         Random rnd = new Random();
         int nextInt = rnd.nextInt(seedServerIds.size());
         Identity identity = seedServerIds.get(nextInt);
+
+        log.debug("Server [" + identity + "] has been selected");
+
         return identity;
     }
 
@@ -334,7 +339,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     public void update(Observable o, Object arg) {
         validateRunningState();
 
-        log.info("Updating node partition");
+        log.info("Updating node partition -> " + arg);
 
         List<Identity> servers = (List<Identity>) arg;
 
@@ -367,6 +372,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     // FIXME: Storage context is not being recorded in this impl
+
     private void updateVersion(String key, DataMessage dataMessage) {
         versionMap.put(key, dataMessage.getVersion());
     }

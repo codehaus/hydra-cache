@@ -21,40 +21,40 @@ import java.util.Observable;
 import org.hydracache.server.Identity;
 
 /**
- * Observable node registry that implements Java util observable pattern
+ * Observable node nodes that implements Java util observable pattern
  * 
  * @author Nick Zhu (nzhu@jointsource.com)
  * 
  */
 public class ObservableRegistry extends Observable {
-    private List<Identity> registry;
+    private List<Identity> nodes;
 
-    public ObservableRegistry(List<Identity> registry) {
+    public ObservableRegistry(List<Identity> nodes) {
         super();
-        this.registry = registry;
+        this.nodes = nodes;
     }
 
     public synchronized void update(List<Identity> newList) {
         clearChanged();
 
-        if (registry == null) {
+        if (nodes == null) {
             setChanged();
         } else if (newList == null) {
             // do nothing
         } else if (sizeDifferenceDetected(newList)) {
             setChanged();
-        } else if (!registry.containsAll(newList)) {
+        } else if (!nodes.containsAll(newList)) {
             setChanged();
         }
 
         if (newList != null)
-            registry = newList;
+            nodes = newList;
         
-        notifyObservers(registry);
+        notifyObservers(nodes);
     }
 
     private boolean sizeDifferenceDetected(List<Identity> newList) {
-        return newList.size() != registry.size();
+        return newList.size() != nodes.size();
     }
 
 }

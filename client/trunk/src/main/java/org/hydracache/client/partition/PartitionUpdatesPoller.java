@@ -24,7 +24,7 @@ import org.hydracache.server.Identity;
 
 /**
  * Periodically polls the server for updates to the server partition nodes.
- * 
+ *
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
@@ -44,13 +44,15 @@ public class PartitionUpdatesPoller extends Thread {
         this.interval = interval;
 
         this.registry = new ObservableRegistry(seedServerIds);
+
+        super.setName("PartitionUpdatesPoller " + getName());
     }
 
     public void setAdminClient(HydraCacheAdminClient adminClient) {
         this.adminClient = adminClient;
     }
 
-    public void addListener(Observer listener){
+    public void addListener(Observer listener) {
         registry.addObserver(listener);
     }
 
@@ -59,6 +61,7 @@ public class PartitionUpdatesPoller extends Thread {
     *
     * @see java.lang.Thread#run()
     */
+
     @Override
     public void run() {
         running = true;
@@ -67,13 +70,15 @@ public class PartitionUpdatesPoller extends Thread {
 
         while (running) {
             try {
-                logger.info("Updating node list.");
+                logger.info("Retrieving space node list...");
+
                 list = adminClient.listNodes();
 
-                logger.info("Registry: " + list);
+                logger.info("Updating registry([" + registry.countObservers() + "] observers) with new node list: " + list);
+
                 registry.update(list);
             } catch (Exception e) {
-                logger.error("Failed to updated node registry", e);
+                logger.error("Failed to update node registry", e);
             } finally {
                 try {
                     Thread.sleep(interval);
