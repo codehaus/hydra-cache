@@ -58,7 +58,7 @@ public class ConsistentHashNodePartitionTest {
         ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
                 hashFunction, Arrays.asList(A, B, C));
 
-        Collection<ServerNode> servers = circle.getServers();
+        Collection<ServerNode> servers = circle.getNodes();
 
         assertEquals("Number of server is incorrect", 3, servers.size());
         assertTrue("Server list should contain all servers", servers.containsAll(Arrays.asList(A, B, C)));

@@ -15,6 +15,8 @@
  */
 package org.hydracache.data.partitioning;
 
+import java.util.List;
+
 import org.hydracache.data.partition.ConsistentHashable;
 
 /**
@@ -26,15 +28,16 @@ import org.hydracache.data.partition.ConsistentHashable;
  * 
  * <p>
  * From Tom White's blog: <blockquote>
- * <p>"The circle is represented as a sorted map of integers, which represent
- * the hash values, to caches (of type T here). When a ConsistentHash object is
+ * <p>
+ * "The circle is represented as a sorted map of integers, which represent the
+ * hash values, to caches (of type T here). When a ConsistentHash object is
  * created each node is added to the circle map a number of times (controlled by
  * numberOfReplicas). The location of each replica is chosen by hashing the
  * node's name along with a numerical suffix, and the node is stored at each of
  * these points in the map.
  * </p>
  * <p>
- *"To find a node for an object (the get method), the hash value of the object
+ * "To find a node for an object (the get method), the hash value of the object
  * is used to look in the map. Most of the time there will not be a node stored
  * at this hash value (since the hash value space is typically much larger than
  * the number of nodes, even with replicas), so the next node is found by
@@ -92,4 +95,12 @@ public interface NodePartition<T extends ConsistentHashable> {
      * @return true or false
      */
     public boolean contains(T node);
+
+    /**
+     * Get a list of non-duplicated nodes that are currently contained in the
+     * partition
+     * 
+     * @return a list of non-duplicated nodes
+     */
+    public List<T> getNodes();
 }
