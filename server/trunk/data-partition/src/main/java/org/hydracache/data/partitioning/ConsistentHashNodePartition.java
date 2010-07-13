@@ -15,14 +15,19 @@
  */
 package org.hydracache.data.partitioning;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.partition.ConsistentHashable;
 import org.hydracache.data.partition.ConsistentHashableString;
-import org.hydracache.server.Identity;
 
 /**
  * <p>
@@ -36,7 +41,7 @@ import org.hydracache.server.Identity;
  * Hashing.
  * </p>
  *
- * @author Tan Quach
+ * @author Tan Quach, Nick Zhu
  * @see <a
  *      href="http://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent
  *      Hashing</a>
@@ -176,9 +181,9 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
                 + "-" + i));
     }
 
-    public Collection<T> getServers() {
+    public List<T> getServers() {
         Set<T> servers = new HashSet<T>(circle.values());
 
-        return servers;       
+        return new ArrayList<T>(servers);       
     }
 }
