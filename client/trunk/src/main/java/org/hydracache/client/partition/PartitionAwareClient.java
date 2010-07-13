@@ -299,7 +299,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     Identity pickRandomServerFromRegistry() {
-        seedServerIds = new ArrayList<Identity>(nodePartition.getServers());
+        seedServerIds = nodePartition.getNodes();
 
         log.debug("Picking random server in: " + seedServerIds);
 
