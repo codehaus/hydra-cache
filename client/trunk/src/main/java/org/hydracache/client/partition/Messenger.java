@@ -51,20 +51,22 @@ public class Messenger {
             SubstancePartition nodePartition, RequestMessage requestMessage)
             throws Exception {
         boolean retry = true;
+
         Identity currentTarget = target;
 
         try {
+            log.debug("Sending message [" + requestMessage
+                    + "] on first attempt to [" + currentTarget + "]");
+
             ResponseMessage responseMsg = send(nodePartition, requestMessage,
                     currentTarget);
+
             return responseMsg;
         } catch (VersionConflictException vce) {
             throw vce;
         } catch (Exception ex) {
             if (retry) {
-                currentTarget = nodePartition.next(target);
-                ResponseMessage responseMsg = send(nodePartition,
-                        requestMessage, currentTarget);
-                return responseMsg;
+                return retrySend(target, nodePartition, requestMessage);
             } else {
                 throw ex;
             }
@@ -96,6 +98,21 @@ public class Messenger {
             Identity identity) {
         log.info("Removing inaccessible node[" + identity + "]");
         nodePartition.remove(identity);
+    }
+
+    private ResponseMessage retrySend(Identity target,
+            SubstancePartition nodePartition, RequestMessage requestMessage)
+            throws Exception {
+        Identity currentTarget;
+        currentTarget = nodePartition.next(target);
+
+        log.debug("Communication failed with the current target[" + target
+                + "] retrying next target[" + currentTarget + "]");
+
+        ResponseMessage responseMsg = send(nodePartition, requestMessage,
+                currentTarget);
+
+        return responseMsg;
     }
 
 }
