@@ -50,7 +50,6 @@ public class Messenger {
     public ResponseMessage sendMessage(Identity target,
             SubstancePartition nodePartition, RequestMessage requestMessage)
             throws Exception {
-        boolean retry = true;
 
         Identity currentTarget = target;
 
@@ -65,11 +64,7 @@ public class Messenger {
         } catch (VersionConflictException vce) {
             throw vce;
         } catch (Exception ex) {
-            if (retry) {
-                return retrySend(target, nodePartition, requestMessage);
-            } else {
-                throw ex;
-            }
+            return retrySend(target, nodePartition, requestMessage, ex);
         }
     }
 
@@ -101,10 +96,16 @@ public class Messenger {
     }
 
     private ResponseMessage retrySend(Identity target,
-            SubstancePartition nodePartition, RequestMessage requestMessage)
-            throws Exception {
+            SubstancePartition nodePartition, RequestMessage requestMessage,
+            Exception rootCause) throws Exception {
         Identity currentTarget;
+
         currentTarget = nodePartition.next(target);
+
+        if (currentTarget == null) {
+            log.warn("Empty space detected, no more node left in the space for retry");
+            throw rootCause;
+        }
 
         log.debug("Communication failed with the current target[" + target
                 + "] retrying next target[" + currentTarget + "]");

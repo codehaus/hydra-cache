@@ -103,6 +103,25 @@ public class MessengerTest {
     }
 
     @Test
+    public void ensureNotRetryWhenRingIsEmpty() throws Exception {
+        stubUnsuccessfulConnect();
+
+        SubstancePartition nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), Arrays.asList(targetNode));
+
+        try {
+            messenger.sendMessage(targetNode, nodePartition, message);
+            fail("Should have failed");
+        } catch (Exception ex) {
+            assertFalse("Target node should have removed from the partition",
+                    nodePartition.contains(targetNode));
+
+            verify(transport).establishConnection(anyString(), eq(testPort));
+            verify(transport, times(1)).cleanUpConnection();
+        }
+    }
+
+    @Test
     public void ensureSecondNodeIsRetriedAfterFailure() throws Exception {
         Identity secondNode = new Identity(8008);
         ResponseMessage expectedResponseMsg = new ResponseMessage(true);
@@ -183,5 +202,5 @@ public class MessengerTest {
                 new InternalHydraException());
 
     }
-    
+
 }
