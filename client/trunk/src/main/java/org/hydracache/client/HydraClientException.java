@@ -21,22 +21,22 @@ package org.hydracache.client;
  * @author Tan Quach
  * @since 1.0
  */
-public class ClientException extends RuntimeException {
+public class HydraClientException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public ClientException() {
+    public HydraClientException() {
         super();
     }
 
-    public ClientException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    public HydraClientException(String message, Throwable parentError) {
+        super(message, parentError);
     }
 
-    public ClientException(String arg0) {
-        super(arg0);
+    public HydraClientException(String message) {
+        super(message);
     }
 
-    public ClientException(Throwable arg0) {
-        super(arg0);
+    public HydraClientException(Throwable parentError) {
+        super(parentError);
     }
 }

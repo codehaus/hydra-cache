@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
-import org.hydracache.client.ClientException;
+import org.hydracache.client.HydraClientException;
 import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.HydraCacheClient;
 import org.hydracache.client.transport.HttpTransport;
@@ -148,6 +148,8 @@ public class PartitionAwareClient implements HydraCacheClient,
         validateRunningState();
 
         Identity identity = nodePartition.get(key);
+        
+        guardNullIdentity(identity);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(DELETE);
@@ -187,6 +189,8 @@ public class PartitionAwareClient implements HydraCacheClient,
         validateRunningState();
 
         Identity identity = nodePartition.get(key);
+        
+        guardNullIdentity(identity);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(GET);
@@ -196,6 +200,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         Object object = null;
+        
         if (responseMessage != null) {
             DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(new ByteArrayInputStream(
@@ -203,7 +208,14 @@ public class PartitionAwareClient implements HydraCacheClient,
             updateVersion(key, dataMessage);
             object = SerializationUtils.deserialize(dataMessage.getBlob());
         }
+        
         return object;
+    }
+
+    private void guardNullIdentity(Identity identity) {
+        if(identity == null){
+            throw new EmptySpaceException("No functional node has been detected in the Hydra space");
+        }
     }
 
     /*
@@ -230,6 +242,9 @@ public class PartitionAwareClient implements HydraCacheClient,
         validateRunningState();
 
         Identity identity = nodePartition.get(key);
+        
+        guardNullIdentity(identity);
+        
         Buffer buffer = serializeData(key, data);
 
         RequestMessage requestMessage = new RequestMessage();
@@ -293,7 +308,7 @@ public class PartitionAwareClient implements HydraCacheClient,
                 nodePartition, requestMessage);
 
         if (responseMessage == null)
-            throw new ClientException("Failed to query server with call[" + call + "].");
+            throw new HydraClientException("Failed to query server with call[" + call + "].");
 
         return responseMessage;
     }

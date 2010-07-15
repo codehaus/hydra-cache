@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +141,33 @@ public class PartitionAwareClientTest {
                 .getContext());
         assertEquals("Path is incorrect", key, reqMsgCaptor.getValue()
                 .getPath());
+    }
+    
+    @Test(expected=EmptySpaceException.class)
+    public void getShouldThrowExceptionIfPartitionIsEmpty()
+            throws Exception {
+        client = new PartitionAwareClient(new ArrayList<Identity>(),
+                nullTransport, poller);
+
+        client.get("testKey");
+    }
+    
+    @Test(expected=EmptySpaceException.class)
+    public void deleteShouldThrowExceptionIfPartitionIsEmpty()
+            throws Exception {
+        client = new PartitionAwareClient(new ArrayList<Identity>(),
+                nullTransport, poller);
+
+        client.delete("testKey");
+    }
+    
+    @Test(expected=EmptySpaceException.class)
+    public void putShouldThrowExceptionIfPartitionIsEmpty()
+            throws Exception {
+        client = new PartitionAwareClient(new ArrayList<Identity>(),
+                nullTransport, poller);
+
+        client.put("testKey", "");
     }
 
     @Test
