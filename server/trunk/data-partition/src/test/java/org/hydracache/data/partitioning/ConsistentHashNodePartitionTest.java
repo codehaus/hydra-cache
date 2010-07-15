@@ -15,10 +15,15 @@
  */
 package org.hydracache.data.partitioning;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -26,11 +31,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.data.hashing.KetamaBasedHashFunction;
 import org.hydracache.data.partition.ConsistentHashable;
 import org.hydracache.data.partition.ConsistentHashableString;
-import org.hydracache.server.Identity;
 import org.junit.Assert;
-
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +73,14 @@ public class ConsistentHashNodePartitionTest {
         ServerNode serverNode = circle.getByHash(hashFunction.hash(new ConsistentHashableString("4")));
 
         Assert.assertNull(serverNode);
+    }
+    
+    @Test
+    public void ensurePartitionIgnoresRemoveCallWithNull() {
+        ConsistentHashNodePartition<ServerNode> circle = new ConsistentHashNodePartition<ServerNode>(
+                hashFunction, new LinkedList<ServerNode>());
+
+        circle.remove(null);
     }
 
     @Test

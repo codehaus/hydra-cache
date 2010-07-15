@@ -159,6 +159,9 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
      */
     @Override
     public void remove(T node) {
+        if(node == null)
+            return;
+        
         writeLock.lock();
         try {
             if (numberOfReplicas == 0) {
