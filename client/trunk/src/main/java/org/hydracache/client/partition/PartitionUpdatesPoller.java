@@ -64,6 +64,8 @@ public class PartitionUpdatesPoller extends Thread {
 
     @Override
     public void run() {
+        logger.info("Starting partition poller thread...");
+        
         running = true;
 
         List<Identity> list;
@@ -88,7 +90,7 @@ public class PartitionUpdatesPoller extends Thread {
             }
         }
 
-        logger.info("Shutting down poller thread.");
+        logger.info("Shutting down partition poller thread.");
     }
 
     public void shutdown() {

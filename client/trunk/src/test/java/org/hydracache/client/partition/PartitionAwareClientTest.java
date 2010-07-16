@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.hydracache.client.EmptySpaceException;
 import org.hydracache.client.transport.NullTransport;
 import org.hydracache.client.transport.RequestMessage;
 import org.hydracache.client.transport.ResponseMessage;
@@ -142,28 +143,43 @@ public class PartitionAwareClientTest {
         assertEquals("Path is incorrect", key, reqMsgCaptor.getValue()
                 .getPath());
     }
-    
-    @Test(expected=EmptySpaceException.class)
-    public void getShouldThrowExceptionIfPartitionIsEmpty()
+
+    @Test(expected = EmptySpaceException.class)
+    public void listNodesShouldThrowExceptionIfPartitionIsEmpty()
             throws Exception {
+        client = new PartitionAwareClient(new ArrayList<Identity>(),
+                nullTransport, poller);
+
+        client.listNodes();
+    }
+
+    @Test(expected = EmptySpaceException.class)
+    public void getStorageInfoShouldThrowExceptionIfPartitionIsEmpty()
+            throws Exception {
+        client = new PartitionAwareClient(new ArrayList<Identity>(),
+                nullTransport, poller);
+
+        client.getStorageInfo();
+    }
+
+    @Test(expected = EmptySpaceException.class)
+    public void getShouldThrowExceptionIfPartitionIsEmpty() throws Exception {
         client = new PartitionAwareClient(new ArrayList<Identity>(),
                 nullTransport, poller);
 
         client.get("testKey");
     }
-    
-    @Test(expected=EmptySpaceException.class)
-    public void deleteShouldThrowExceptionIfPartitionIsEmpty()
-            throws Exception {
+
+    @Test(expected = EmptySpaceException.class)
+    public void deleteShouldThrowExceptionIfPartitionIsEmpty() throws Exception {
         client = new PartitionAwareClient(new ArrayList<Identity>(),
                 nullTransport, poller);
 
         client.delete("testKey");
     }
-    
-    @Test(expected=EmptySpaceException.class)
-    public void putShouldThrowExceptionIfPartitionIsEmpty()
-            throws Exception {
+
+    @Test(expected = EmptySpaceException.class)
+    public void putShouldThrowExceptionIfPartitionIsEmpty() throws Exception {
         client = new PartitionAwareClient(new ArrayList<Identity>(),
                 nullTransport, poller);
 
@@ -270,5 +286,33 @@ public class PartitionAwareClientTest {
             assertFalse("Partition should not contain the ID any more",
                     partition.contains(node));
         }
+    }
+
+    @Test
+    public void ensureGetRandomNodeUsesSeedsWhenSpaceIsEmpty() throws Exception {
+        Identity expectedNode = new Identity(8080);
+        
+        client = new PartitionAwareClient(Arrays.asList(expectedNode), nullTransport,
+                poller);
+
+        client.getNodePartition().remove(expectedNode);
+
+        Identity node = client.pickRandomServerFromRegistry();
+        
+        assertEquals("Random node is incorrect", expectedNode, node);
+    }
+    
+    @Test
+    public void ensureFindNodeByHashUsesSeedsWhenSpaceIsEmpty() throws Exception {
+        Identity expectedNode = new Identity(8080);
+        
+        client = new PartitionAwareClient(Arrays.asList(expectedNode), nullTransport,
+                poller);
+
+        client.getNodePartition().remove(expectedNode);
+
+        Identity node = client.findNodeByKey("key");
+        
+        assertEquals("Target node is incorrect", expectedNode, node);
     }
 }

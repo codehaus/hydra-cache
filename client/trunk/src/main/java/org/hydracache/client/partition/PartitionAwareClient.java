@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.log4j.Logger;
+import org.hydracache.client.EmptySpaceException;
 import org.hydracache.client.HydraClientException;
 import org.hydracache.client.HydraCacheAdminClient;
 import org.hydracache.client.HydraCacheClient;
@@ -56,7 +57,7 @@ import org.json.JSONObject;
 /**
  * Manages a partition of nodes and uses an implementation of HydraCacheClient
  * to execute requests against the distributed cache.
- *
+ * 
  * @author Tan Quach, Nick Zhu
  * @since 1.0
  */
@@ -92,17 +93,17 @@ public class PartitionAwareClient implements HydraCacheClient,
     /**
      * Construct a client instance referencing an existing {@link NodePartition}
      */
-    public PartitionAwareClient(List<Identity> seedServerIds, PartitionUpdatesPoller poller) {
+    public PartitionAwareClient(List<Identity> seedServerIds,
+            PartitionUpdatesPoller poller) {
         this(seedServerIds, new HttpTransport(), poller);
     }
 
     public PartitionAwareClient(List<Identity> seedServerIds,
-                                Transport transport, PartitionUpdatesPoller poller) {
+            Transport transport, PartitionUpdatesPoller poller) {
         this.seedServerIds = seedServerIds;
         this.messenger = new Messenger(transport);
 
-        this.nodePartition = new SubstancePartition(
-                new KetamaBasedHashFunction(), seedServerIds);
+        createNodePartition(seedServerIds);
 
         versionMap = new ConcurrentHashMap<String, Version>();
         versionFactory = new IncrementVersionFactory(new IdentityMarshaller());
@@ -111,12 +112,17 @@ public class PartitionAwareClient implements HydraCacheClient,
         protocolDecoder = new DefaultProtocolDecoder(
                 createBinaryDataMsgMarshaller(), createXmlDataMsgMarshaller());
 
-
         running.set(true);
 
-        // TODO: Review this threading model, a separate poller per instance might not be ideal        
+        // TODO: Review this threading model, a separate poller per instance
+        // might not be ideal
         this.poller = poller;
         poller.start();
+    }
+
+    private void createNodePartition(List<Identity> seedServerIds) {
+        this.nodePartition = new SubstancePartition(
+                new KetamaBasedHashFunction(), seedServerIds);
     }
 
     private DataMessageXmlMarshaller createXmlDataMsgMarshaller() {
@@ -147,9 +153,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     public boolean delete(String context, String key) throws Exception {
         validateRunningState();
 
-        Identity identity = nodePartition.get(key);
-        
-        guardNullIdentity(identity);
+        Identity identity = findNodeByKey(key);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(DELETE);
@@ -161,9 +165,25 @@ public class PartitionAwareClient implements HydraCacheClient,
         return responseMessage.isSuccessful();
     }
 
+    Identity findNodeByKey(String key) {
+        if (spaceIsEmpty(nodePartition)) {
+            if (!seedServerIds.isEmpty()) {
+                log.debug("Space is empty, fall back to recovery mode recreating space using seeds");
+                createNodePartition(seedServerIds);
+            }
+        }
+
+        Identity targetNode = nodePartition.get(key);
+        
+        guardNullIdentity(targetNode);
+        
+        return targetNode;
+    }
+
     private void validateRunningState() {
         if (!isRunning())
-            throw new IllegalStateException("Client instance has already been stopped, no operation is permitted");
+            throw new IllegalStateException(
+                    "Client instance has already been stopped, no operation is permitted");
     }
 
     /*
@@ -188,9 +208,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     public Object get(String context, String key) throws Exception {
         validateRunningState();
 
-        Identity identity = nodePartition.get(key);
-        
-        guardNullIdentity(identity);
+        Identity identity = findNodeByKey(key);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(GET);
@@ -200,7 +218,7 @@ public class PartitionAwareClient implements HydraCacheClient,
         ResponseMessage responseMessage = sendMessage(identity, requestMessage);
 
         Object object = null;
-        
+
         if (responseMessage != null) {
             DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(new ByteArrayInputStream(
@@ -208,13 +226,14 @@ public class PartitionAwareClient implements HydraCacheClient,
             updateVersion(key, dataMessage);
             object = SerializationUtils.deserialize(dataMessage.getBlob());
         }
-        
+
         return object;
     }
 
     private void guardNullIdentity(Identity identity) {
-        if(identity == null){
-            throw new EmptySpaceException("No functional node has been detected in the Hydra space");
+        if (identity == null) {
+            throw new EmptySpaceException(
+                    "No functional node has been detected in the Hydra space");
         }
     }
 
@@ -241,10 +260,8 @@ public class PartitionAwareClient implements HydraCacheClient,
             throws Exception {
         validateRunningState();
 
-        Identity identity = nodePartition.get(key);
-        
-        guardNullIdentity(identity);
-        
+        Identity identity = findNodeByKey(key);
+
         Buffer buffer = serializeData(key, data);
 
         RequestMessage requestMessage = new RequestMessage();
@@ -266,8 +283,7 @@ public class PartitionAwareClient implements HydraCacheClient,
      */
 
     @Override
-    public void put(String key, Serializable data)
-            throws Exception {
+    public void put(String key, Serializable data) throws Exception {
         put(null, key, data);
     }
 
@@ -308,23 +324,41 @@ public class PartitionAwareClient implements HydraCacheClient,
                 nodePartition, requestMessage);
 
         if (responseMessage == null)
-            throw new HydraClientException("Failed to query server with call[" + call + "].");
+            throw new HydraClientException("Failed to query server with call["
+                    + call + "].");
 
         return responseMessage;
     }
 
     Identity pickRandomServerFromRegistry() {
-        seedServerIds = nodePartition.getNodes();
+        List<Identity> targetNodes;
 
-        log.debug("Picking random server in: " + seedServerIds);
+        if (spaceIsEmpty(nodePartition)) {
+            if (seedServerIds.isEmpty()) {
+                throw new EmptySpaceException(
+                        "Empty space detected, aborting query execution");
+            } else {
+                log.debug("Space is empty, fall back to recovery mode using seed list");
+                targetNodes = seedServerIds;
+            }
+        }else{
+            targetNodes = nodePartition.getNodes();
+        }
+
+        log.debug("Picking random server in: " + targetNodes);
 
         Random rnd = new Random();
-        int nextInt = rnd.nextInt(seedServerIds.size());
-        Identity identity = seedServerIds.get(nextInt);
+        int nextInt = rnd.nextInt(targetNodes.size());
+        Identity identity = targetNodes.get(nextInt);
 
         log.debug("Server [" + identity + "] has been selected");
 
         return identity;
+    }
+
+    private boolean spaceIsEmpty(SubstancePartition nodePartition) {
+        List<Identity> targetNodes = nodePartition.getNodes();
+        return targetNodes == null || targetNodes.isEmpty();
     }
 
     @Override
@@ -346,10 +380,10 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-    */
+     * (non-Javadoc)
+     * 
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
 
     @SuppressWarnings("unchecked")
     @Override
@@ -360,11 +394,7 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         List<Identity> servers = (List<Identity>) arg;
 
-        this.seedServerIds = servers;
-
-        // Update the partition
-        this.nodePartition = new SubstancePartition(
-                new KetamaBasedHashFunction(), servers);
+        createNodePartition(servers);
     }
 
     private Buffer serializeData(String key, Serializable data)
@@ -384,7 +414,7 @@ public class PartitionAwareClient implements HydraCacheClient,
     }
 
     private ResponseMessage sendMessage(Identity identity,
-                                        RequestMessage requestMessage) throws Exception {
+            RequestMessage requestMessage) throws Exception {
         return messenger.sendMessage(identity, nodePartition, requestMessage);
     }
 
