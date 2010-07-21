@@ -54,14 +54,6 @@ class NavigationPaneController {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
         doLater {
-//            def servers = model.listServers()
-//
-//            servers.each{nodeId->
-//                log.debug "Removing view $nodeId ..."
-//                def view = app.views.remove("$nodeId".toString())
-//                log.debug "$view has been removed"
-//            }
-
             model.updateServerList([])
         }
 

@@ -25,9 +25,13 @@ class HconsoleController {
         doOutside {
             log.debug "Creating SpaceDashboard ..."
 
-            doLater {
-                def mainTabGroup = view.tabGroup
+            def mainTabGroup = view.tabGroup
 
+            if (!mainTabGroup) {
+                throw new IllegalStateException("Failed to locate main tab group")
+            }
+
+            doLater {
                 createMVCGroup(SPACE_DASHBOARD,
                         SPACE_DASHBOARD,
                         ['tabGroup': mainTabGroup])
