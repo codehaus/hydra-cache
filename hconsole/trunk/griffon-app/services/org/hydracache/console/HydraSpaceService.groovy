@@ -17,7 +17,7 @@ class HydraSpaceService {
     def hydraCacheAdminClient
     def hydraCacheClient
 
-    def spaceUpdater = new Timer()
+    def spaceUpdater
 
     def connect(server, port) {
         if (!server)
@@ -39,18 +39,7 @@ class HydraSpaceService {
 
             log.debug "[${HYDRA_SPACE_CONNECTED_EVENT}] event sent"
 
-            log.debug "Creating space updater timer"
-
-            spaceUpdater.schedule(new ClosureTimerTask(closure: {
-                log.debug "Updating space overview..."
-
-                def nds = listAllNodesInSpace()
-                def sinfo = queryStorageInfo()
-
-                app.event(HYDRA_SPACE_UPDATED_EVENT, [nds, sinfo])
-
-                log.debug "Space overview updated"
-            }), UPDATER_INIT_DELAY, UPDATER_INTERVAL)
+            createSpaceScheduledUpdater()
 
             return true
         } catch (UnknownHostException ex) {
@@ -60,8 +49,30 @@ class HydraSpaceService {
     }
 
     private List<Identity> listAllNodesInSpace(hydraCacheAdminClient) {
-        List<Identity> nodes = hydraCacheAdminClient.listNodes()
-        return nodes
+        try {
+            List<Identity> nodes = hydraCacheAdminClient.listNodes()
+            return nodes
+        } catch (Exception ex) {
+            return []
+        }
+
+    }
+
+    private def createSpaceScheduledUpdater() {
+        log.debug "Creating space updater timer"
+
+        spaceUpdater = new Timer()
+
+        spaceUpdater.schedule(new ClosureTimerTask(closure: {
+            log.debug "Updating space overview..."
+
+            def nds = listAllNodesInSpace()
+            def info = queryStorageInfo()
+
+            app.event(HYDRA_SPACE_UPDATED_EVENT, [nds, info])
+
+            log.debug "Space overview updated"
+        }), UPDATER_INIT_DELAY, UPDATER_INTERVAL)
     }
 
     def listAllNodesInSpace() {

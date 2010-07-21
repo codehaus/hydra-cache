@@ -2,7 +2,7 @@ package org.hydracache.console
 
 import org.apache.commons.io.FileUtils
 
-tabbedPane(tabGroup, selectedIndex: tabGroup.tabCount) {
+tabbedPane(tabGroup) {
     panel(title: messageSource.getMessage('spaceDashboard.title'), id: "spaceDashboardTab") {
         borderLayout()
         panel(constraints: CENTER) {

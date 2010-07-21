@@ -5,7 +5,7 @@ import org.apache.log4j.Logger
 /**
  * Created by nick.zhu
  */
-class GriffonTestCase extends GroovyTestCase {
+abstract class GriffonTestCase extends GroovyTestCase {
 
     def mockLogging(obj){
         obj.metaClass.log = Logger.getLogger(HydraSpaceService)

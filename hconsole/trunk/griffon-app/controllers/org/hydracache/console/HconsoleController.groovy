@@ -22,14 +22,18 @@ class HconsoleController {
     def onHydraSpaceConnected = {nodes, storageInfo ->
         log.debug "Event [HydraSpaceConnected] received ..."
 
-        doLater {
+        doOutside {
             log.debug "Creating SpaceDashboard ..."
 
-            createMVCGroup(SPACE_DASHBOARD,
-                    SPACE_DASHBOARD,
-                    ['tabGroup': view.tabGroup])
+            doLater {
+                def mainTabGroup = view.tabGroup
 
-            app.controllers[SPACE_DASHBOARD].update(nodes, storageInfo)
+                createMVCGroup(SPACE_DASHBOARD,
+                        SPACE_DASHBOARD,
+                        ['tabGroup': mainTabGroup])
+
+                app.controllers[SPACE_DASHBOARD].update(nodes, storageInfo)
+            }
         }
 
         log.debug "Event [HydraSpaceConnected] processd"
