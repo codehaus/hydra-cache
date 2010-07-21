@@ -26,7 +26,7 @@ import org.hydracache.server.Identity;
  * @author Tan Quach
  * @since 1.0
  */
-public interface HydraCacheAdminClient {
+public interface HydraCacheAdminClient extends HydraCacheClient {
 
     /**
      * Retrieve a list of all known nodes in the space.
@@ -43,21 +43,5 @@ public interface HydraCacheAdminClient {
      * @throws Exception
      */
     Map<String, String> getStorageInfo() throws Exception;
-
-    /**
-     * Stop this client instance and release any resource it holds. Once a
-     * client has been shutdown it can not be used again, instead a new
-     * instance should be created.
-     *
-     * @throws Exception if anything goes wrong
-     */
-    void shutdown() throws Exception;
-
-    /**
-     * Check if the client instance of a running instance or if it has
-     * already been shutdown
-     *
-     * @return if the client is running or not
-     */
-    boolean isRunning();
+    
 }

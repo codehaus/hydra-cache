@@ -24,7 +24,7 @@ import org.hydracache.server.Identity;
 
 /**
  * Periodically polls the server for updates to the server partition nodes.
- *
+ * 
  * @author Tan Quach (tquach@jointsource.com)
  * @since 1.0
  */
@@ -35,7 +35,6 @@ public class PartitionUpdatesPoller extends Thread {
     private HydraCacheAdminClient adminClient;
     private ObservableRegistry registry;
     private final long interval;
-    private boolean running;
 
     /**
      * Provide a reference to an admin client and at least one observer.
@@ -57,33 +56,36 @@ public class PartitionUpdatesPoller extends Thread {
     }
 
     /*
-    * (non-Javadoc)
-    *
-    * @see java.lang.Thread#run()
-    */
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Thread#run()
+     */
 
     @Override
     public void run() {
         logger.info("Starting partition poller thread...");
-        
-        running = true;
 
         List<Identity> list;
 
-        while (running) {
+        while (adminClient.isRunning()) {
             try {
                 logger.info("Retrieving space node list...");
 
                 list = adminClient.listNodes();
 
-                logger.info("Updating registry([" + registry.countObservers() + "] observers) with new node list: " + list);
+                logger.info("Updating registry([" + registry.countObservers()
+                        + "] observers) with new node list: " + list);
 
                 registry.update(list);
-            } catch (Exception e) {
+            } catch(IllegalStateException ise){
+                logger.warn("HydraCache client has already stopped, aborting poller thread");                
+            }catch (Exception e) {
                 logger.error("Failed to update node registry", e);
             } finally {
                 try {
-                    Thread.sleep(interval);
+                    synchronized (this) {
+                        this.wait(interval);
+                    }
                 } catch (InterruptedException iex) {
                     // do nothing
                 }
@@ -94,6 +96,8 @@ public class PartitionUpdatesPoller extends Thread {
     }
 
     public void shutdown() {
-        running = false;
+        synchronized (this) {
+           this.notifyAll();
+        }
     }
 }

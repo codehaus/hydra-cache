@@ -18,22 +18,23 @@ public class PartitionUpdatesPollerTest {
     @Test
     public void ensurePollerIsStoppable() throws InterruptedException {
         HydraCacheAdminClient adminClient = mock(HydraCacheAdminClient.class);
+        when(adminClient.isRunning()).thenReturn(true).thenReturn(false);
         Observer observer = mock(Observer.class);
 
-        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(Arrays.asList(new Identity(80)), 100);
+        PartitionUpdatesPoller poller = new PartitionUpdatesPoller(Arrays.asList(new Identity(80)), 5000);
 
         poller.setAdminClient(adminClient);
         poller.addListener(observer);
 
         poller.start();
 
-        Thread.sleep(300);
+        Thread.sleep(10);
 
         assertTrue("Should be running", poller.isAlive());
 
         poller.shutdown();
 
-        Thread.sleep(300);
+        Thread.sleep(10);
 
         assertFalse("Should not be running", poller.isAlive());
 

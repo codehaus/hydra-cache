@@ -388,8 +388,6 @@ public class PartitionAwareClient implements HydraCacheClient,
     @SuppressWarnings("unchecked")
     @Override
     public void update(Observable o, Object arg) {
-        validateRunningState();
-
         log.info("Updating node partition -> " + arg);
 
         List<Identity> servers = (List<Identity>) arg;
