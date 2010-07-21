@@ -63,6 +63,8 @@ import org.json.JSONObject;
  */
 public class PartitionAwareClient implements HydraCacheClient,
         HydraCacheAdminClient, Observer {
+    private static final String VERSION_COMPOSITE_KEY_DIVIDER = "_::_";
+
     private static Logger log = Logger.getLogger(PartitionAwareClient.class);
 
     private static final String PUT = "put";
@@ -174,9 +176,9 @@ public class PartitionAwareClient implements HydraCacheClient,
         }
 
         Identity targetNode = nodePartition.get(key);
-        
+
         guardNullIdentity(targetNode);
-        
+
         return targetNode;
     }
 
@@ -223,7 +225,7 @@ public class PartitionAwareClient implements HydraCacheClient,
             DataMessage dataMessage = protocolDecoder
                     .decode(new DataInputStream(new ByteArrayInputStream(
                             responseMessage.getResponseBody())));
-            updateVersion(key, dataMessage);
+            updateVersion(context, key, dataMessage);
             object = SerializationUtils.deserialize(dataMessage.getBlob());
         }
 
@@ -262,7 +264,7 @@ public class PartitionAwareClient implements HydraCacheClient,
 
         Identity identity = findNodeByKey(key);
 
-        Buffer buffer = serializeData(key, data);
+        Buffer buffer = serializeData(context, key, data);
 
         RequestMessage requestMessage = new RequestMessage();
         requestMessage.setMethod(PUT);
@@ -341,7 +343,7 @@ public class PartitionAwareClient implements HydraCacheClient,
                 log.debug("Space is empty, fall back to recovery mode using seed list");
                 targetNodes = seedServerIds;
             }
-        }else{
+        } else {
             targetNodes = nodePartition.getNodes();
         }
 
@@ -395,31 +397,44 @@ public class PartitionAwareClient implements HydraCacheClient,
         createNodePartition(servers);
     }
 
-    private Buffer serializeData(String key, Serializable data)
+    private Buffer serializeData(String context, String key, Serializable data)
             throws IOException {
         DataMessage dataMessage = new DataMessage();
         dataMessage.setBlob(SerializationUtils.serialize(data));
-        Version version = versionMap.get(key);
 
-        if (version == null)
-            version = versionFactory.createNull();
-
-        dataMessage.setVersion(version);
+        attachVersion(context, key, dataMessage);
 
         Buffer buffer = Buffer.allocate();
         protocolEncoder.encode(dataMessage, buffer.asDataOutpuStream());
         return buffer;
     }
 
+    void attachVersion(String context, String key, DataMessage dataMessage) {
+        String compositKey = buildCompositeVersionKey(context, key);
+
+        Version version = versionMap.get(compositKey);
+
+        if (version == null)
+            version = versionFactory.createNull();
+
+        dataMessage.setVersion(version);
+    }
+
+    void updateVersion(String context, String key, DataMessage dataMessage) {
+        String compositKey = buildCompositeVersionKey(context, key);
+        
+        versionMap.put(compositKey, dataMessage.getVersion());
+    }
+
+    private String buildCompositeVersionKey(String context, String key) {
+        String compositKey = new StringBuilder().append(context).append(VERSION_COMPOSITE_KEY_DIVIDER)
+                .append(key).toString();
+        return compositKey;
+    }
+
     private ResponseMessage sendMessage(Identity identity,
             RequestMessage requestMessage) throws Exception {
         return messenger.sendMessage(identity, nodePartition, requestMessage);
-    }
-
-    // FIXME: Storage context is not being recorded in this impl
-
-    private void updateVersion(String key, DataMessage dataMessage) {
-        versionMap.put(key, dataMessage.getVersion());
     }
 
     @Override

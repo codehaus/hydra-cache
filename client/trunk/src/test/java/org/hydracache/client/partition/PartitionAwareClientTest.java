@@ -39,7 +39,9 @@ import org.hydracache.client.transport.ResponseMessage;
 import org.hydracache.client.transport.Transport;
 import org.hydracache.data.partitioning.NodePartition;
 import org.hydracache.data.partitioning.SubstancePartition;
+import org.hydracache.protocol.data.message.DataMessage;
 import org.hydracache.server.Identity;
+import org.hydracache.server.data.versioning.IncrementVersionFactory;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -73,6 +75,31 @@ public class PartitionAwareClientTest {
         mockTransport = null;
         messenger = null;
         poller = null;
+    }
+
+    @Test
+    public void ensureVersionIsContextSensitive() {
+        client = new PartitionAwareClient(Arrays.asList(new Identity(8080)),
+                mockTransport, poller);
+
+        String context = "ctx";
+        String key = "key";
+        DataMessage dataMessage = new DataMessage();
+        dataMessage.setVersion(new IncrementVersionFactory()
+                .create(new Identity(1234)));
+        client.updateVersion(context, key, dataMessage);
+
+        DataMessage newMessage = new DataMessage();
+
+        client.attachVersion(context, key, newMessage);
+
+        assertTrue("Version should be the same", dataMessage.getVersion()
+                .equals(newMessage.getVersion()));
+
+        client.attachVersion("diffCtx", key, newMessage);
+
+        assertFalse("Version should not be the same", dataMessage.getVersion()
+                .equals(newMessage.getVersion()));
     }
 
     @Test
@@ -291,28 +318,29 @@ public class PartitionAwareClientTest {
     @Test
     public void ensureGetRandomNodeUsesSeedsWhenSpaceIsEmpty() throws Exception {
         Identity expectedNode = new Identity(8080);
-        
-        client = new PartitionAwareClient(Arrays.asList(expectedNode), nullTransport,
-                poller);
+
+        client = new PartitionAwareClient(Arrays.asList(expectedNode),
+                nullTransport, poller);
 
         client.getNodePartition().remove(expectedNode);
 
         Identity node = client.pickRandomServerFromRegistry();
-        
+
         assertEquals("Random node is incorrect", expectedNode, node);
     }
-    
+
     @Test
-    public void ensureFindNodeByHashUsesSeedsWhenSpaceIsEmpty() throws Exception {
+    public void ensureFindNodeByHashUsesSeedsWhenSpaceIsEmpty()
+            throws Exception {
         Identity expectedNode = new Identity(8080);
-        
-        client = new PartitionAwareClient(Arrays.asList(expectedNode), nullTransport,
-                poller);
+
+        client = new PartitionAwareClient(Arrays.asList(expectedNode),
+                nullTransport, poller);
 
         client.getNodePartition().remove(expectedNode);
 
         Identity node = client.findNodeByKey("key");
-        
+
         assertEquals("Target node is incorrect", expectedNode, node);
     }
 }
