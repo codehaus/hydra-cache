@@ -1,7 +1,7 @@
 package org.hydracache.console
 
 import org.hydracache.console.util.ClosureTimerTask
-import griffon.util.GriffonApplicationHelper
+import org.codehaus.griffon.runtime.util.GriffonApplicationHelper
 
 class NodeDetailPaneController {
     static final long UPDATER_INIT_DELAY = 5000
@@ -28,13 +28,15 @@ class NodeDetailPaneController {
         nodeUpdater.schedule(new ClosureTimerTask(closure: {
             log.debug "Updating node[${model.server}] detail..."
 
-            def info = hydraSpaceService.queryServerDetails(model.server)
-
-            model.storageInfo = info
-
-            updateNodeDetail()
-
-            log.debug "Node[${model.server}] detail updated"
+            try {
+                def info = hydraSpaceService.queryServerDetails(model.server)
+                model.storageInfo = info
+                updateNodeDetail()
+                log.debug "Node[${model.server}] detail updated"
+            } catch (Exception ex) {
+                log.debug "Failed to contact node[${model.server}] ...", ex
+                destroyMvcGroup()
+            }
         }), UPDATER_INIT_DELAY, UPDATER_INTERVAL)
 
         updateNodeDetail()
@@ -49,12 +51,20 @@ class NodeDetailPaneController {
     def onHydraSpaceDisConnected = {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
+        destroyMvcGroup(log, nodeUpdater)
+
+        log.debug "Event [HydraSpaceDisConnected] processed"
+    }
+
+    private def destroyMvcGroup() {
         log.debug "Destroying MVC group [${model.server}]"
 
         nodeUpdater.cancel()
-        
-        GriffonApplicationHelper.destroyMVCGroup(app, "${model.server}")
 
-        log.debug "Event [HydraSpaceDisConnected] processed"
+        doLater {
+            GriffonApplicationHelper.destroyMVCGroup(app, "${model.server}")
+
+            log.debug "MVC group [${model.server}] destroyed"
+        }
     }
 }
