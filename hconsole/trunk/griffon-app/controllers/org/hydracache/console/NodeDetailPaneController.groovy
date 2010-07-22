@@ -19,7 +19,11 @@ class NodeDetailPaneController {
         model.storageInfo = args.storageInfo
         model.server = args.server
 
-        log.debug "Creating node detail pane for ${model.server}"
+        /* TODO: sometimes log instance is not yet injected might be due to
+         some threading or timing issue in Griffon, further investigation
+         required */
+        if(metaClass.hasMetaProperty('log'))
+            log.debug "Creating node detail pane for ${model.server}"
 
         nodeUpdater.schedule(new ClosureTimerTask(closure: {
             log.debug "Updating node[${model.server}] detail..."
