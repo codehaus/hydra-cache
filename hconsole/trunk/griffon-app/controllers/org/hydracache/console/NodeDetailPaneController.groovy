@@ -51,7 +51,7 @@ class NodeDetailPaneController {
     def onHydraSpaceDisConnected = {
         log.debug "Event [HydraSpaceDisConnected] received ..."
 
-        destroyMvcGroup(log, nodeUpdater)
+        destroyMvcGroup()
 
         log.debug "Event [HydraSpaceDisConnected] processed"
     }
@@ -62,6 +62,10 @@ class NodeDetailPaneController {
         nodeUpdater.cancel()
 
         doLater {
+            final def tab = view.tab
+
+            tab.parent.remove(tab)
+
             GriffonApplicationHelper.destroyMVCGroup(app, "${model.server}")
 
             log.debug "MVC group [${model.server}] destroyed"
