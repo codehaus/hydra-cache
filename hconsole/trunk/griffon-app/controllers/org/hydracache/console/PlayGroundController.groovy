@@ -9,8 +9,6 @@ class PlayGroundController {
 
     def hydraSpaceService
 
-    def fileChooser = new JFileChooser()
-
     void mvcGroupInit(Map args) {
         // this method is called after model and view are injected
     }
@@ -41,6 +39,8 @@ class PlayGroundController {
     }
 
     def selectSourceFile = {evt = null ->
+        def fileChooser = new JFileChooser()
+
         int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -50,6 +50,8 @@ class PlayGroundController {
     }
 
     def selectTargetFile = {evt = null ->
+        def fileChooser = new JFileChooser()
+
         int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {

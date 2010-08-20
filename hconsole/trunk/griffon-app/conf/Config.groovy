@@ -18,3 +18,8 @@ log4j {
     }
     additivity.StackTrace=false
 }
+
+lookandfeel{
+    lookAndFeel='Substance'
+    theme='MistAqua'
+}
