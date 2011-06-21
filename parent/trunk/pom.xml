@@ -78,7 +78,7 @@
     <repositories>
         <repository>
             <id>jboss</id>
-            <url>http://repository.jboss.com/maven2/</url>
+            <url>http://repository.jboss.com/</url>
         </repository>
     </repositories>
 
