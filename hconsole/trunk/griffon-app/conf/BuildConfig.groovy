@@ -1,24 +1,3 @@
-// log4j configuration
-log4j {
-    appender.stdout = 'org.apache.log4j.ConsoleAppender'
-    appender.'stdout.layout'='org.apache.log4j.PatternLayout'
-    appender.'stdout.layout.ConversionPattern'='[%r] %c{2} %m%n'
-    appender.errors = 'org.apache.log4j.FileAppender'
-    appender.'errors.layout'='org.apache.log4j.PatternLayout'
-    appender.'errors.layout.ConversionPattern'='[%r] %c{2} %m%n'
-    appender.'errors.File'='stacktrace.log'
-    rootLogger='error,stdout'
-    logger {
-        griffon='error'
-        StackTrace='error,errors'
-        org {
-            codehaus.griffon.commons='info' // core / classloading
-            hydracache='debug'
-        }
-    }
-    additivity.StackTrace=false
-}
-
 // key signing information
 environments {
     development {
@@ -32,6 +11,7 @@ environments {
                 lazy      = true // only sign when unsigned
             }
         }
+
     }
     test {
         griffon {
@@ -106,6 +86,20 @@ griffon {
         html = 'applet.html'
     }
 }
+
+// required for custom environments
+signingkey {
+    params {
+        def env = griffon.util.Environment.current.name
+        sigfile = 'GRIFFON-' + env
+        keystore = "${basedir}/griffon-app/conf/keys/${env}Keystore"
+        alias = env
+        // storepass = 'BadStorePassword'
+        // keypass   = 'BadKeyPassword'
+        lazy      = true // only sign when unsigned
+    }
+}
+
 griffon.project.dependency.resolution = {
     // inherit Griffon' default dependencies
     inherits("global") {
@@ -122,13 +116,14 @@ griffon.project.dependency.resolution = {
         mavenCentral()
         mavenRepo "http://snapshots.repository.codehaus.org"
         mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.org/"
+        mavenRepo "http://download.java.net/maven/2/"
+        mavenRepo "http://repository.jboss.org/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         compile 'org.codehaus.hydra-cache:client:1.0RC1-SNAPSHOT'
+        compile 'log4j:log4j:1.2.16'
     }
 }
 

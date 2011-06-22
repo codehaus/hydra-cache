@@ -1,25 +1,31 @@
 // log4j configuration
-log4j {
-    appender.stdout = 'org.apache.log4j.ConsoleAppender'
-    appender.'stdout.layout'='org.apache.log4j.PatternLayout'
-    appender.'stdout.layout.ConversionPattern'='[%r] %c{2} %m%n'
-    appender.errors = 'org.apache.log4j.FileAppender'
-    appender.'errors.layout'='org.apache.log4j.PatternLayout'
-    appender.'errors.layout.ConversionPattern'='[%r] %c{2} %m%n'
-    appender.'errors.File'='stacktrace.log'
-    rootLogger='error,stdout'
-    logger {
-        griffon='error'
-        StackTrace='error,errors'
-        org {
-            codehaus.griffon.commons='info' // core / classloading
-            hydracache='debug'
+log4j = {
+    appenders {
+        console name: 'stdout', layout: pattern(conversionPattern: '%d [%t] %-5p %c - %m%n')
+    }
+
+    error  'org.codehaus.griffon'
+
+    error  'griffon.util',
+           'griffon.core',
+           'griffon.swing',
+           'griffon.app'
+
+    debug "org.hydracache"
+
+    environments {
+        production {
+            error "griffon"
+            error "org.hydracache"
         }
     }
-    additivity.StackTrace=false
 }
 
+
+
+// look and feel config
 lookandfeel{
     lookAndFeel='Substance'
     theme='MistAqua'
+    keystroke = 'shift meta L'
 }
