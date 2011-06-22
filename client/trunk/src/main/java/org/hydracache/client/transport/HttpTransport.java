@@ -48,8 +48,8 @@ public class HttpTransport implements Transport {
 
     public HttpTransport() {
         // FIXME Make this more IoC and configurable.
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        HttpConnectionManagerParams connectionManagerParams = new HttpConnectionManagerParams();
+        final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        final HttpConnectionManagerParams connectionManagerParams = new HttpConnectionManagerParams();
         connectionManagerParams.setDefaultMaxConnectionsPerHost(10);
         connectionManagerParams.setMaxTotalConnections(100);
         connectionManager.setParams(connectionManagerParams);
@@ -58,8 +58,8 @@ public class HttpTransport implements Transport {
     }
 
     @Override
-    public Transport establishConnection(String hostName, int port) {
-        HostConfiguration hostConfiguration = new HostConfiguration();
+    public Transport establishConnection(final String hostName, final int port) {
+        final HostConfiguration hostConfiguration = new HostConfiguration();
         hostConfiguration.setHost(hostName, port);
 
         httpClient.setHostConfiguration(hostConfiguration);
@@ -68,22 +68,22 @@ public class HttpTransport implements Transport {
     }
 
     @Override
-    public ResponseMessage sendRequest(RequestMessage requestMessage)
-            throws Exception {
-        if (httpClient == null)
+    public ResponseMessage sendRequest(final RequestMessage requestMessage) throws Exception {
+        if (httpClient == null) {
             throw new IllegalStateException("Establish connection first.");
+        }
 
-        HttpMethod httpMethod = createHttpMethod(requestMessage);
-        
+        final HttpMethod httpMethod = createHttpMethod(requestMessage);
+
         try {
-            int responseCode = httpClient.executeMethod(httpMethod);
+            final int responseCode = httpClient.executeMethod(httpMethod);
 
             if (responseCode == HttpStatus.SC_NOT_FOUND) {
                 return null;
             } else if (responseCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 throw new InternalHydraException(httpMethod.getResponseBodyAsString());
             } else {
-                ResponseMessageHandler handler = handlers.get(responseCode);
+                final ResponseMessageHandler handler = handlers.get(responseCode);
 
                 return (handler == null ? null : handler.accept(responseCode,
                         httpMethod.getResponseBody()));
@@ -93,27 +93,29 @@ public class HttpTransport implements Transport {
         }
     }
 
-    HttpMethod createHttpMethod(RequestMessage requestMessage) {
-        String action = requestMessage.getMethod();
+    HttpMethod createHttpMethod(final RequestMessage requestMessage) {
+        final String action = requestMessage.getMethod();
 
         HttpMethod method = null;
 
         String uri = "";
 
-        if (httpClient.getHostConfiguration() != null)
+        if (httpClient.getHostConfiguration() != null) {
             uri = httpClient.getHostConfiguration().getHostURL();
+        }
 
-        if (StringUtils.isNotBlank(requestMessage.getContext()))
+        if (StringUtils.isNotBlank(requestMessage.getContext())) {
             uri += "/" + requestMessage.getContext();
+        }
 
         uri += "/" + requestMessage.getPath();
 
         if ("put".equalsIgnoreCase(action)) {
             method = new PutMethod(uri);
-            Buffer buffer = (Buffer) requestMessage.getRequestData();
+            final Buffer buffer = (Buffer) requestMessage.getRequestData();
 
             if (buffer != null) {
-                RequestEntity requestEntity = new InputStreamRequestEntity(
+                final RequestEntity requestEntity = new InputStreamRequestEntity(
                         buffer.asDataInputStream());
 
                 ((PutMethod) method).setRequestEntity(requestEntity);
@@ -127,25 +129,13 @@ public class HttpTransport implements Transport {
         return method;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.ganz.wjr.external.transport.Transport#cleanUpConnections()
-     */
     @Override
     public void cleanUpConnection() {
         this.httpClient.setHostConfiguration(null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hydracache.client.transport.Transport#registerHandler(int,
-     * org.hydracache.client.transport.ConflictStatusHandler)
-     */
     @Override
-    public void registerHandler(Integer statusCode,
-            ResponseMessageHandler handler) {
+    public void registerHandler(final Integer statusCode, final ResponseMessageHandler handler) {
         handlers.put(statusCode, handler);
     }
 }
