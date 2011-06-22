@@ -42,7 +42,7 @@ rem JAVA_VM="-server"
 rem Memory and GC Tuning
 rem MEM_ARGS="-Xms512m -Xmx1g -XX:NewSize=128m -XX:MaxNewSize=128m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=70"
 
-%JAVA_HOME%/bin/java ^
+"%JAVA_HOME%/bin/java" ^
     %JAVA_VM% ^
     %MEM_ARGS% ^
     %JAVA_OPTS% ^
