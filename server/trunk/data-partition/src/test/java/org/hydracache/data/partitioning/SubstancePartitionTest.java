@@ -42,9 +42,9 @@ public class SubstancePartitionTest {
 
     @Before
     public void setup() throws Exception {
-        nodeA = new Identity(800);
-        nodeB = new Identity(810);
-        nodeC = new Identity(820);
+        nodeA = new Identity(1000);
+        nodeB = new Identity(5000);
+        nodeC = new Identity(9000);
 
         serverIds = Arrays.asList(nodeA, nodeB, nodeC);
     }
@@ -57,13 +57,13 @@ public class SubstancePartitionTest {
         assertEquals("Node A id should be returned", nodeA, partition
                 .get(nodeA.toString()));
 
+        assertEquals("Node B id should be returned", nodeB, partition
+                .next(nodeA));
+
         assertEquals("Node C id should be returned", nodeC, partition
-                .next(nodeA));
-
-        assertEquals("Node A id should be returned", nodeC, partition
-                .next(nodeA));
-
-        assertEquals("Node B id should be returned", nodeA, partition
                 .next(nodeB));
+
+        assertEquals("Node A id should be returned", nodeA, partition
+                .next(nodeC));
     }
 }

@@ -21,7 +21,7 @@ import org.hydracache.data.hashing.HashFunction;
 import org.hydracache.server.Identity;
 
 /**
- * A {@link Substance} friendly {@link NodePartition} implementation
+ * A {@link org.hydracache.server.harmony.core.Substance} friendly {@link NodePartition} implementation
  * 
  * @author nzhu
  * 
