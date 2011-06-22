@@ -2,7 +2,9 @@ package org.hydracache.console
 
 import groovy.beans.Bindable
 import static org.hydracache.console.ConnectionState.*
+import net.sourceforge.gvalidation.annotation.Validatable
 
+@Validatable
 class AddressBarModel {
     @Bindable String server
     @Bindable int port

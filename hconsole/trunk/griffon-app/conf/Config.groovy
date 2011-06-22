@@ -16,6 +16,6 @@ log4j = {
 // look and feel config
 lookandfeel{
     lookAndFeel='Substance'
-    theme='MistAqua'
+    theme='BusinessBlackSteel'
     keystroke = 'shift meta L'
 }

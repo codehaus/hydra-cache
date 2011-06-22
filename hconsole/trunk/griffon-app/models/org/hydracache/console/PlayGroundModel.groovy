@@ -1,7 +1,9 @@
 package org.hydracache.console
 
 import groovy.beans.Bindable
+import net.sourceforge.gvalidation.annotation.Validatable
 
+@Validatable
 class PlayGroundModel {
     @Bindable String storageContextToPutTxt
     @Bindable String storageKeyToPutTxt
