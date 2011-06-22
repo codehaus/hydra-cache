@@ -11,6 +11,8 @@ log4j = {
            'griffon.core',
            'griffon.swing',
            'griffon.app'
+
+    debug  'org.hydracache'
 }
 
 // look and feel config
