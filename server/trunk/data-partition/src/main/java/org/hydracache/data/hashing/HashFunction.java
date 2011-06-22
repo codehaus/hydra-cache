@@ -18,19 +18,15 @@ package org.hydracache.data.hashing;
 import org.hydracache.data.partition.ConsistentHashable;
 
 /**
- * Provides a function signature for any client that wishes to provide a custom
- * hashing function.
+ * Provides a function signature for any client that wishes to provide a custom hashing function.
  * 
  * @author Tan Quach
  * @since 1.0
  */
 public interface HashFunction {
     /**
-     * Compute the hash for a given key. The supplied key can be anything, but should be unique
-     * within the context of the application.
-     * 
-     * TODO Beef up documentation
-     * 
+     * Compute the hash for a given key. The supplied key can be anything, but should be unique within the context of
+     * the application.
      * 
      * @param obj The object to be hashed
      * @return A positive integer

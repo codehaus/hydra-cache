@@ -31,24 +31,19 @@ import org.hydracache.data.partition.ConsistentHashableString;
 
 /**
  * <p>
- * Consistent hash implementation using a supplied hashFunction. The hash
- * function can be one of the provided implementations or client provided,
- * however it must be consistent.
+ * Consistent hash implementation using a supplied hashFunction. The hash function can be one of the provided
+ * implementations or client provided, however it must be consistent.
  * </p>
  * <p/>
  * <p>
- * This implementation is loosely based on Tom White's blog on Consistent
- * Hashing.
+ * This implementation is loosely based on Tom White's blog on Consistent Hashing.
  * </p>
  * 
  * @author Tan Quach, Nick Zhu
- * @see <a
- *      href="http://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent
- *      Hashing</a>
+ * @see <a href="http://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent Hashing</a>
  * @since 1.0
  */
-public class ConsistentHashNodePartition<T extends ConsistentHashable>
-        implements NodePartition<T> {
+public class ConsistentHashNodePartition<T extends ConsistentHashable> implements NodePartition<T> {
 
     private static final int DEFAULT_NUMBER_OF_REPLICAS = 20;
 
@@ -62,14 +57,13 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
     protected final Lock readLock = readWriteLock.readLock();
     protected final Lock writeLock = readWriteLock.writeLock();
 
-    public ConsistentHashNodePartition(HashFunction hashFunction,
-            Collection<T> nodes, int numberOfReplicas) {
+    public ConsistentHashNodePartition(final HashFunction hashFunction, final Collection<T> nodes, final int numberOfReplicas) {
         this.hashFunction = hashFunction;
         this.numberOfReplicas = numberOfReplicas;
 
         writeLock.lock();
         try {
-            for (T node : nodes) {
+            for (final T node : nodes) {
                 add(node);
             }
         } finally {
@@ -77,18 +71,16 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
         }
     }
 
-    public ConsistentHashNodePartition(HashFunction hashFunction,
-            Collection<T> nodes) {
+    public ConsistentHashNodePartition(final HashFunction hashFunction, final Collection<T> nodes) {
         this(hashFunction, nodes, DEFAULT_NUMBER_OF_REPLICAS);
     }
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.hydracache.data.partitioning.NodeCircle#add(java.lang.Object)
      */
     @Override
-    public void add(T node) {
+    public void add(final T node) {
         writeLock.lock();
         try {
             if (numberOfReplicas == 0) {
@@ -106,18 +98,17 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.hydracache.data.partitioning.NodePartition#get(java.lang.String)
      */
     @Override
-    public T get(String hashKey) {
-        if (hashKey == null)
+    public T get(final String hashKey) {
+        if (hashKey == null) {
             return null;
+        }
 
         readLock.lock();
         try {
-            long hash = hashFunction
-                    .hash(new ConsistentHashableString(hashKey));
+            final long hash = hashFunction.hash(new ConsistentHashableString(hashKey));
 
             return getByHash(hash);
         } finally {
@@ -126,11 +117,12 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
     }
 
     protected T getByHash(long hash) {
-        if (circle.isEmpty())
+        if (circle.isEmpty()) {
             return null;
+        }
 
         if (!circle.containsKey(hash)) {
-            SortedMap<Long, T> tailMap = circle.tailMap(hash);
+            final SortedMap<Long, T> tailMap = circle.tailMap(hash);
             hash = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();
         }
         return circle.get(hash);
@@ -138,12 +130,10 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.hydracache.data.partitioning.NodePartition#contains(java.lang.Object)
+     * @see org.hydracache.data.partitioning.NodePartition#contains(java.lang.Object)
      */
     @Override
-    public boolean contains(T node) {
+    public boolean contains(final T node) {
         readLock.lock();
         try {
             return circle.containsValue(node);
@@ -154,14 +144,14 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.hydracache.data.partitioning.NodeCircle#remove(java.lang.Object)
      */
     @Override
-    public void remove(T node) {
-        if(node == null)
+    public void remove(final T node) {
+        if (node == null) {
             return;
-        
+        }
+
         writeLock.lock();
         try {
             if (numberOfReplicas == 0) {
@@ -177,19 +167,17 @@ public class ConsistentHashNodePartition<T extends ConsistentHashable>
         }
     }
 
-    private long replicatedNodeHash(T node, int i) {
-        return hashFunction.hash(new ConsistentHashableString(node
-                .getConsistentValue() + "-" + i));
+    private long replicatedNodeHash(final T node, final int i) {
+        return hashFunction.hash(new ConsistentHashableString(node.getConsistentValue() + "-" + i));
     }
 
     /*
      * (non-Javadoc)
-     * 
      * @see org.hydracache.data.partitioning.NodePartition#getServers()
      */
     @Override
     public List<T> getNodes() {
-        Set<T> servers = new HashSet<T>(circle.values());
+        final Set<T> servers = new HashSet<T>(circle.values());
 
         return new ArrayList<T>(servers);
     }

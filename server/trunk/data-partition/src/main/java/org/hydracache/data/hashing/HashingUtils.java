@@ -22,8 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import org.hydracache.data.partition.ConsistentHashable;
 
 /**
- * Supporting utils for hashing. These methods are based on the Java Memcached
- * Client.
+ * Supporting utils for hashing. These methods are based on the Java Memcached Client.
  * 
  * @author Tan Quach
  * @since 1.0
@@ -33,19 +32,19 @@ public abstract class HashingUtils {
     /**
      * Get the bytes for a key.
      * 
-     * @param k
-     *            the key
+     * @param k the key
      * @return the bytes
      */
-    static byte[] getKeyBytes(ConsistentHashable k) {
+    static byte[] getKeyBytes(final ConsistentHashable k) {
         try {
             String consistentValue = k.getConsistentValue();
 
-            if (consistentValue == null)
+            if (consistentValue == null) {
                 consistentValue = "null";
+            }
 
             return consistentValue.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -53,11 +52,11 @@ public abstract class HashingUtils {
     /**
      * Get the md5 of the given key.
      */
-    public static byte[] computeMd5(ConsistentHashable k) {
+    public static byte[] computeMd5(final ConsistentHashable k) {
         MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException("MD5 not supported", e);
         }
         md5.reset();
