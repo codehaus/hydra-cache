@@ -11,6 +11,9 @@ class SpaceDashboardModel {
     @Bindable int numberOfNodes
     @Bindable long totalMemory
     @Bindable long usedMemory
+    @Bindable long freeMemory
+    @Bindable float usedMemoryPercentage
+    @Bindable float freeMemoryPercentage
 
     def updateOverview() {
         log.debug "Updating SpaceDashboardModel ..."
@@ -32,6 +35,9 @@ class SpaceDashboardModel {
             long serverHeapMemory = Long.parseLong(storageInfo.totalMemory)
             long serverFreeHeapMemory = Long.parseLong(storageInfo.freeMemory)
             setUsedMemory((long) ((serverHeapMemory - serverFreeHeapMemory) / n))
+            setUsedMemoryPercentage(usedMemory / totalMemory)
+            setFreeMemory((long) totalMemory - usedMemory)
+            setFreeMemoryPercentage(freeMemory / totalMemory)
         }
     }
 }

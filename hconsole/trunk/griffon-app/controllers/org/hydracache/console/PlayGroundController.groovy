@@ -39,24 +39,28 @@ class PlayGroundController {
     }
 
     def selectSourceFile = {evt = null ->
-        def fileChooser = new JFileChooser()
+        doLater {
+            def fileChooser = new JFileChooser()
 
-        int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
+            int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            model.fileToPut = fileChooser.selectedFile?.absolutePath
-            log.debug "Selected source file: ${model.fileToPut}"
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                model.fileToPut = fileChooser.selectedFile?.absolutePath
+                log.debug "Selected source file: ${model.fileToPut}"
+            }
         }
     }
 
     def selectTargetFile = {evt = null ->
-        def fileChooser = new JFileChooser()
+        doLater {
+            def fileChooser = new JFileChooser()
 
-        int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
+            int returnVal = fileChooser.showOpenDialog(view.playgroundPane)
 
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            model.fileToWrite = fileChooser.selectedFile?.absolutePath
-            log.debug "Selected target file: ${model.fileToWrite}"
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                model.fileToWrite = fileChooser.selectedFile?.absolutePath
+                log.debug "Selected target file: ${model.fileToWrite}"
+            }
         }
     }
 }

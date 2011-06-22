@@ -18,3 +18,5 @@ root.'LookandfeelGriffonAddon'.addon=true
 root.'griffon.builder.trident.TridentBuilder'.view = '*'
 
 root.'LookandfeelSubstanceGriffonAddon'.addon=true
+
+root.'ChartsGriffonAddon'.addon=true
