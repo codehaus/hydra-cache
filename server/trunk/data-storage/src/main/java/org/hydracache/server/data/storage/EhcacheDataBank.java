@@ -54,7 +54,7 @@ public class EhcacheDataBank implements DataBank {
 
     /**
      * By default this constructor implementation loads Ehcache manager
-     * configuration from file {@link DEFAULT_CACHE_CONF_FILE_NAME} in classpath
+     * configuration from cache.xml file in classpath
      * 
      * @param conflictResolver
      *            conflict resolver that will be used to resolve data versioning
@@ -69,7 +69,7 @@ public class EhcacheDataBank implements DataBank {
     /**
      * Create a new {@link EhcacheDataBank} instance using the given
      * {@link CacheManager} and if this given {@link CacheManager} does not
-     * contain a specific cache intance named {@link CACHE_NAME} this contructor
+     * contain a specific cache instance this constructor
      * will create one using the default configuration
      * 
      * @param conflictResolver
@@ -92,11 +92,11 @@ public class EhcacheDataBank implements DataBank {
      */
     @Override
     public Data get(String context, Long keyHash) throws IOException {
-        context = checkForEmptyContext(context);
+        String cacheName = getCacheNameFromContext(context);
 
         Validate.isTrue(keyHash != null, "Data key hash can not be null");
 
-        Cache cache = acquireCache(context);
+        Cache cache = acquireCache(cacheName);
 
         final Element element = cache.get(keyHash);
 
@@ -111,7 +111,7 @@ public class EhcacheDataBank implements DataBank {
         return (Data) data;
     }
 
-    private String checkForEmptyContext(String context) {
+    private String getCacheNameFromContext(String context) {
         if (StringUtils.isBlank(context)) {
             context = DEFAULT_CACHE_CONTEXT_NAME;
         }
@@ -163,9 +163,9 @@ public class EhcacheDataBank implements DataBank {
     @Override
     public void put(String context, Data data) throws IOException,
             VersionConflictException {
-        context = checkForEmptyContext(context);
+        String cacheName = getCacheNameFromContext(context);
 
-        Cache cache = acquireCache(context);
+        Cache cache = acquireCache(cacheName);
 
         Validate.notNull(data, "Data object can not be null");
 
@@ -216,11 +216,11 @@ public class EhcacheDataBank implements DataBank {
      */
     @Override
     public void delete(String context, Long keyHash) throws IOException {
-        context = checkForEmptyContext(context);
+        String cacheName = getCacheNameFromContext(context);
 
         Validate.isTrue(keyHash != null, "Data key hash can not be null");
 
-        Cache cache = acquireCache(context);
+        Cache cache = acquireCache(cacheName);
 
         cache.remove(keyHash);
     }

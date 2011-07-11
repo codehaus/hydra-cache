@@ -88,7 +88,7 @@ panel(playgroundPane, border: titledBorder(messageSource.getMessage('playGround.
                 label(messageSource.getMessage('playGround.storageValue.label'),
                         constraints: labelGbc)
                 scrollPane(constraints: textAreaGbc) {
-                    textArea(text: bind(source: model, 'retrievedTxt'), editable: false)
+                    textArea(text: bind(source: model, 'retrievedTxt'))
                 }
 
                 button(getAction,

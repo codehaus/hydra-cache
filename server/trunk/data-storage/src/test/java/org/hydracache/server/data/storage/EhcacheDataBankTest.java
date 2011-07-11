@@ -74,7 +74,7 @@ public class EhcacheDataBankTest {
         
         dataBank.put("", data);
 
-        final Data data2 = dataBank.get(DataBank.DEFAULT_CACHE_CONTEXT_NAME, data.getKeyHash());
+        final Data data2 = dataBank.get("", data.getKeyHash());
 
         assertEquals("Straight get after put retrieved incorrect data", data,
                 data2);

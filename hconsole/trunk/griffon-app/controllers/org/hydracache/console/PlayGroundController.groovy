@@ -34,7 +34,7 @@ class PlayGroundController {
     def getFile = { evt = null ->
         if (model.validate(['storageContextToGetBin', 'storageKeyToGetBin', 'fileToWrite'])) {
             def bytes = hydraSpaceService.get(model.storageContextToGetBin, model.storageKeyToGetBin)
-            new File(model.fileToWrite) << bytes
+            new File(model.fileToWrite) < bytes
         }
     }
 
